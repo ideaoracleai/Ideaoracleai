@@ -156,12 +156,22 @@ function MarkdownBody({ text }: { text: string }) {
   );
 }
 
+interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  url: string;       // object URL for preview
+  base64?: string;   // base64 data for sending to AI (images)
+  size: number;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
   rating?: 'good' | 'medium' | 'bad';
+  attachments?: Attachment[];
 }
 
 interface Session {
@@ -233,9 +243,77 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const [speechSupported, setSpeechSupported] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const ALLOWED_DOC_TYPES = ['application/pdf', 'text/plain', 'text/csv'];
+  const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
+
+  // Convert file to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Process files (from input or paste)
+  const processFiles = async (files: FileList | File[]) => {
+    const newAttachments: Attachment[] = [];
+    for (const file of Array.from(files)) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        showToast(`Unsupported file type: ${file.type}`, 'error');
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        showToast(`File too large: ${file.name} (max 10MB)`, 'error');
+        continue;
+      }
+      const base64 = ALLOWED_IMAGE_TYPES.includes(file.type) ? await fileToBase64(file) : undefined;
+      newAttachments.push({
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        name: file.name,
+        type: file.type,
+        url: URL.createObjectURL(file),
+        base64,
+        size: file.size,
+      });
+    }
+    setAttachments(prev => [...prev, ...newAttachments]);
+  };
+
+  // Handle Ctrl+V paste
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files: File[] = [];
+    for (const item of Array.from(items)) {
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    if (files.length > 0) {
+      e.preventDefault();
+      await processFiles(files);
+    }
+  };
+
+  // Remove attachment
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => {
+      const att = prev.find(a => a.id === id);
+      if (att) URL.revokeObjectURL(att.url);
+      return prev.filter(a => a.id !== id);
+    });
+  };
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const exportDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -567,7 +645,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       stopListening();
     }
 
-    if (!inputValue.trim() || isTyping) return;
+    if (!inputValue.trim() && attachments.length === 0) return;
+    if (isTyping) return;
 
     // Credits prüfen und abziehen BEVOR die Nachricht gesendet wird
     if (!hasEnoughCredits(CREDITS_PER_QUESTION)) {
@@ -601,12 +680,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date()
+      content: inputValue.trim() || (attachments.length > 0 ? `[${attachments.map(a => a.name).join(', ')}]` : ''),
+      timestamp: new Date(),
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
     };
 
     const userInput = inputValue.trim();
+    const currentAttachments = [...attachments];
     setInputValue('');
+    setAttachments([]);
 
     // Add user message immediately
     setSessions(prevSessions => prevSessions.map(session => {
@@ -637,10 +719,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         content: m.content
       })) || [];
 
-      // Generate AI response (removed i18n.language parameter - now handled internally)
+      // Generate AI response — include image data if present
+      const imageAttachments = currentAttachments
+        .filter(a => ALLOWED_IMAGE_TYPES.includes(a.type) && a.base64)
+        .map(a => a.base64 as string);
+
       const aiResponse = await generateDemoResponse(
-        userInput,
-        conversationHistory
+        userInput || 'Analyze the attached image(s)',
+        conversationHistory,
+        imageAttachments.length > 0 ? imageAttachments : undefined
       );
 
       // Add AI message
@@ -1130,6 +1217,21 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                       : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
                       } px-5 py-4`}
                   >
+                    {/* Show attachments */}
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {message.attachments.map(att => (
+                          ALLOWED_IMAGE_TYPES.includes(att.type) ? (
+                            <img key={att.id} src={att.url || att.base64} alt={att.name} className="max-w-[200px] max-h-[200px] rounded-lg object-cover border border-black/20" />
+                          ) : (
+                            <div key={att.id} className="flex items-center gap-2 px-3 py-2 bg-black/10 rounded-lg">
+                              <i className="ri-file-text-line" />
+                              <span className="text-xs font-medium">{att.name}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
                     <div className="text-sm leading-relaxed">
                       {message.role === 'assistant' ? (
                         /* Check if this is the newest assistant message — animate it */
@@ -1239,11 +1341,47 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
               ? 'border-red-500/30 opacity-50'
               : 'border-[#3D3428]/30 focus-within:border-[#C9A961]/30'
               }`}>
+
+              {/* Attachment Previews */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3 pb-3 border-b border-[#3D3428]/30">
+                  {attachments.map(att => (
+                    <div key={att.id} className="relative group">
+                      {ALLOWED_IMAGE_TYPES.includes(att.type) ? (
+                        <img src={att.url} alt={att.name} className="w-16 h-16 rounded-lg object-cover border border-[#3D3428]/50" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg border border-[#3D3428]/50 bg-[#1A1F26] flex flex-col items-center justify-center">
+                          <i className="ri-file-text-line text-[#C9A961] text-lg"></i>
+                          <span className="text-[10px] text-gray-400 mt-0.5 truncate w-14 text-center">{att.name.split('.').pop()}</span>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => removeAttachment(att.id)}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
+                      >
+                        <i className="ri-close-line text-xs"></i>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/gif,image/webp,.pdf,.txt,.csv"
+                className="hidden"
+                onChange={(e) => { if (e.target.files) processFiles(e.target.files); e.target.value = ''; }}
+              />
+
               <textarea
                 ref={textareaRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={isListening ? t('chat.listeningPlaceholder', 'Ich höre zu... Sprechen Sie jetzt.') : t('chat.inputPlaceholder')}
                 rows={1}
                 disabled={isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
@@ -1252,6 +1390,17 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
               />
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3D3428]/30">
                 <div className="flex items-center gap-2">
+                  {/* File upload button */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-[#1A1F26] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={t('chat.attachFile', 'Attach file')}
+                  >
+                    <i className="ri-attachment-2 text-lg"></i>
+                  </button>
+                  {/* Mic button */}
                   <button
                     type="button"
                     onClick={startListening}
@@ -1272,7 +1421,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 </div>
                 <button
                   onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
+                  disabled={(!inputValue.trim() && attachments.length === 0) || isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
                   className="px-4 py-2 bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#C9A961]/20 transition-all cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span>{t('chat.send')}</span>

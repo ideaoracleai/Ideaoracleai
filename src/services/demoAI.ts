@@ -12,7 +12,8 @@ export interface AIResponse {
  */
 export async function generateDemoResponse(
   userMessage: string,
-  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+  images?: string[]  // base64 data URLs for vision
 ): Promise<AIResponse> {
   const language = i18n.language.split('-')[0]; // 'en-US' -> 'en'
 
@@ -40,7 +41,7 @@ export async function generateDemoResponse(
         'Authorization': `Bearer ${accessToken}`,
         'apikey': supabaseAnonKey,
       },
-      body: JSON.stringify({ messages, language }),
+      body: JSON.stringify({ messages, language, images }),
     });
 
     if (!response.ok) {
