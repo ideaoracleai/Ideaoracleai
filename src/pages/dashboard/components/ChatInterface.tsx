@@ -1,57 +1,153 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { generateDemoResponse, getRatingEmoji, getRatingLabel } from '../../../services/demoAI';
 import { useSubscription } from '../../../hooks/useSubscription';
 
-/* ── Typewriter component: animates markdown text character by character ── */
-function TypewriterMarkdown({ content, speed = 8, onDone }: { content: string; speed?: number; onDone?: () => void }) {
-  const [displayed, setDisplayed] = useState('');
-  const idx = useRef(0);
+/**
+ * Split markdown into logical blocks (paragraphs, headings, tables, lists etc.)
+ * so typewriter reveals full blocks at a time instead of character-by-character.
+ */
+function splitIntoBlocks(text: string): string[] {
+  const blocks: string[] = [];
+  const lines = text.split('\n');
+  let current = '';
+  let inTable = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Detect table rows
+    const isTableRow = /^\|.*\|$/.test(trimmed);
+    const isSeparator = /^\|[\s\-:|]+\|$/.test(trimmed);
+
+    if (isTableRow || isSeparator) {
+      if (!inTable && current.trim()) {
+        blocks.push(current.trim());
+        current = '';
+      }
+      inTable = true;
+      current += line + '\n';
+      continue;
+    }
+
+    if (inTable) {
+      // End of table
+      blocks.push(current.trim());
+      current = '';
+      inTable = false;
+    }
+
+    // Empty line = block separator
+    if (trimmed === '') {
+      if (current.trim()) {
+        blocks.push(current.trim());
+        current = '';
+      }
+      continue;
+    }
+
+    // Headings get their own block
+    if (trimmed.startsWith('#')) {
+      if (current.trim()) {
+        blocks.push(current.trim());
+        current = '';
+      }
+      blocks.push(trimmed);
+      continue;
+    }
+
+    // Horizontal rules
+    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+      if (current.trim()) {
+        blocks.push(current.trim());
+        current = '';
+      }
+      blocks.push(trimmed);
+      continue;
+    }
+
+    current += line + '\n';
+  }
+
+  if (current.trim()) {
+    blocks.push(current.trim());
+  }
+
+  return blocks;
+}
+
+/* ── Typewriter: reveals content block by block with fade-in ── */
+function TypewriterMarkdown({ content, speed = 120, onDone }: { content: string; speed?: number; onDone?: () => void }) {
+  const blocks = useRef(splitIntoBlocks(content));
+  const [visibleCount, setVisibleCount] = useState(1);
 
   useEffect(() => {
-    idx.current = 0;
-    setDisplayed('');
+    blocks.current = splitIntoBlocks(content);
+    setVisibleCount(1);
+
+    if (blocks.current.length <= 1) {
+      onDone?.();
+      return;
+    }
+
     const timer = setInterval(() => {
-      idx.current += 2; // 2 chars at a time for speed
-      if (idx.current >= content.length) {
-        setDisplayed(content);
-        clearInterval(timer);
-        onDone?.();
-      } else {
-        setDisplayed(content.slice(0, idx.current));
-      }
+      setVisibleCount(prev => {
+        const next = prev + 1;
+        if (next >= blocks.current.length) {
+          clearInterval(timer);
+          onDone?.();
+          return blocks.current.length;
+        }
+        return next;
+      });
     }, speed);
+
     return () => clearInterval(timer);
   }, [content, speed]);
 
-  return <MarkdownBody text={displayed} />;
+  const visibleText = blocks.current.slice(0, visibleCount).join('\n\n');
+  return <MarkdownBody text={visibleText} />;
 }
 
-/* ── Shared markdown renderer with styled components ── */
+/* ── Shared markdown renderer with styled components + GFM (tables) ── */
 function MarkdownBody({ text }: { text: string }) {
   return (
     <div className="prose-ai">
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
-          h1: ({ children }) => <h1 className="text-xl font-bold text-white mt-4 mb-2">{children}</h1>,
+          h1: ({ children }) => <h1 className="text-xl font-bold text-white mt-5 mb-2">{children}</h1>,
           h2: ({ children }) => <h2 className="text-lg font-bold text-white mt-4 mb-2">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-base font-bold text-[#C9A961] mt-3 mb-1.5">{children}</h3>,
-          h4: ({ children }) => <h4 className="text-sm font-bold text-[#C9A961] mt-2 mb-1">{children}</h4>,
-          p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
-          strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+          h3: ({ children }) => <h3 className="text-base font-semibold text-[#C9A961] mt-4 mb-1.5">{children}</h3>,
+          h4: ({ children }) => <h4 className="text-sm font-semibold text-[#C9A961] mt-3 mb-1">{children}</h4>,
+          p: ({ children }) => <p className="mb-3 leading-relaxed text-gray-200">{children}</p>,
+          strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
           em: ({ children }) => <em className="italic text-gray-300">{children}</em>,
-          ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
-          li: ({ children }) => <li className="text-gray-300">{children}</li>,
-          hr: () => <hr className="border-[#3D3428]/50 my-3" />,
-          table: ({ children }) => <div className="overflow-x-auto my-2"><table className="w-full text-sm border-collapse">{children}</table></div>,
-          thead: ({ children }) => <thead className="bg-[#0F1419]">{children}</thead>,
-          th: ({ children }) => <th className="px-3 py-2 text-left text-[#C9A961] font-semibold border-b border-[#3D3428]/50">{children}</th>,
-          td: ({ children }) => <td className="px-3 py-2 text-gray-300 border-b border-[#3D3428]/30">{children}</td>,
+          ul: ({ children }) => <ul className="mb-3 ml-1 space-y-1.5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1.5">{children}</ol>,
+          li: ({ children }) => (
+            <li className="text-gray-300 flex items-start gap-2">
+              <span className="text-[#C9A961] mt-1.5 text-[6px]">●</span>
+              <span className="flex-1">{children}</span>
+            </li>
+          ),
+          hr: () => <hr className="border-[#3D3428]/50 my-4" />,
+          table: ({ children }) => (
+            <div className="overflow-x-auto my-3 rounded-lg border border-[#3D3428]/40">
+              <table className="w-full text-sm">{children}</table>
+            </div>
+          ),
+          thead: ({ children }) => <thead className="bg-[#1a2030]">{children}</thead>,
+          tbody: ({ children }) => <tbody className="divide-y divide-[#3D3428]/30">{children}</tbody>,
+          tr: ({ children }) => <tr className="hover:bg-[#0F1419]/50 transition-colors">{children}</tr>,
+          th: ({ children }) => <th className="px-4 py-2.5 text-left text-[#C9A961] font-semibold text-xs uppercase tracking-wider">{children}</th>,
+          td: ({ children }) => <td className="px-4 py-2.5 text-gray-300">{children}</td>,
           code: ({ children }) => <code className="bg-[#0F1419] text-[#C9A961] px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>,
-          blockquote: ({ children }) => <blockquote className="border-l-2 border-[#C9A961] pl-3 my-2 text-gray-400 italic">{children}</blockquote>,
-          a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#C9A961] underline hover:text-amber-300">{children}</a>,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-[#C9A961] pl-4 my-3 text-gray-400 italic">{children}</blockquote>,
+          a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#C9A961] underline hover:text-amber-300 transition-colors">{children}</a>,
         }}
       >
         {text}
@@ -781,8 +877,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                       <div
                         key={session.id}
                         className={`relative group rounded-lg transition-all ${currentSessionId === session.id
-                            ? 'bg-[#3D3428]/30'
-                            : 'hover:bg-[#0F1419]'
+                          ? 'bg-[#3D3428]/30'
+                          : 'hover:bg-[#0F1419]'
                           }`}
                       >
                         <button
@@ -927,10 +1023,10 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
             {/* Credits Anzeige */}
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${subscription.isUnlimited
-                ? 'bg-amber-500/10 border border-amber-500/30'
-                : subscription.credits < 100
-                  ? 'bg-red-500/10 border border-red-500/30'
-                  : 'bg-[#0F1419] border border-[#3D3428]/30'
+              ? 'bg-amber-500/10 border border-amber-500/30'
+              : subscription.credits < 100
+                ? 'bg-red-500/10 border border-red-500/30'
+                : 'bg-[#0F1419] border border-[#3D3428]/30'
               }`}>
               <i className={`ri-coins-line ${subscription.isUnlimited ? 'text-amber-400' : subscription.credits < 100 ? 'text-red-400' : 'text-[#C9A961]'
                 }`}></i>
@@ -1030,8 +1126,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   )}
                   <div
                     className={`max-w-3xl ${message.role === 'user'
-                        ? 'bg-[#C9A961] text-[#0F1419] rounded-2xl rounded-tr-sm'
-                        : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
+                      ? 'bg-[#C9A961] text-[#0F1419] rounded-2xl rounded-tr-sm'
+                      : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
                       } px-5 py-4`}
                   >
                     <div className="text-sm leading-relaxed">
@@ -1140,8 +1236,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
             )}
 
             <div className={`bg-[#0F1419] border rounded-xl p-3 transition-colors ${!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION
-                ? 'border-red-500/30 opacity-50'
-                : 'border-[#3D3428]/30 focus-within:border-[#C9A961]/30'
+              ? 'border-red-500/30 opacity-50'
+              : 'border-[#3D3428]/30 focus-within:border-[#C9A961]/30'
               }`}>
               <textarea
                 ref={textareaRef}
@@ -1161,8 +1257,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     onClick={startListening}
                     disabled={!speechSupported || isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
-                        ? 'bg-red-500 text-white animate-pulse'
-                        : 'text-gray-400 hover:text-white hover:bg-[#1A1F26]'
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'text-gray-400 hover:text-white hover:bg-[#1A1F26]'
                       }`}
                     title={isListening ? t('chat.stopListening', 'Aufnahme stoppen') : t('chat.voice', 'Sprechen')}
                   >
