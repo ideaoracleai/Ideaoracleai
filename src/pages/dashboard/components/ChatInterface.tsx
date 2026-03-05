@@ -1,7 +1,64 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
 import { generateDemoResponse, getRatingEmoji, getRatingLabel } from '../../../services/demoAI';
 import { useSubscription } from '../../../hooks/useSubscription';
+
+/* ── Typewriter component: animates markdown text character by character ── */
+function TypewriterMarkdown({ content, speed = 8, onDone }: { content: string; speed?: number; onDone?: () => void }) {
+  const [displayed, setDisplayed] = useState('');
+  const idx = useRef(0);
+
+  useEffect(() => {
+    idx.current = 0;
+    setDisplayed('');
+    const timer = setInterval(() => {
+      idx.current += 2; // 2 chars at a time for speed
+      if (idx.current >= content.length) {
+        setDisplayed(content);
+        clearInterval(timer);
+        onDone?.();
+      } else {
+        setDisplayed(content.slice(0, idx.current));
+      }
+    }, speed);
+    return () => clearInterval(timer);
+  }, [content, speed]);
+
+  return <MarkdownBody text={displayed} />;
+}
+
+/* ── Shared markdown renderer with styled components ── */
+function MarkdownBody({ text }: { text: string }) {
+  return (
+    <div className="prose-ai">
+      <ReactMarkdown
+        components={{
+          h1: ({ children }) => <h1 className="text-xl font-bold text-white mt-4 mb-2">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-lg font-bold text-white mt-4 mb-2">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-base font-bold text-[#C9A961] mt-3 mb-1.5">{children}</h3>,
+          h4: ({ children }) => <h4 className="text-sm font-bold text-[#C9A961] mt-2 mb-1">{children}</h4>,
+          p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+          strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+          em: ({ children }) => <em className="italic text-gray-300">{children}</em>,
+          ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+          li: ({ children }) => <li className="text-gray-300">{children}</li>,
+          hr: () => <hr className="border-[#3D3428]/50 my-3" />,
+          table: ({ children }) => <div className="overflow-x-auto my-2"><table className="w-full text-sm border-collapse">{children}</table></div>,
+          thead: ({ children }) => <thead className="bg-[#0F1419]">{children}</thead>,
+          th: ({ children }) => <th className="px-3 py-2 text-left text-[#C9A961] font-semibold border-b border-[#3D3428]/50">{children}</th>,
+          td: ({ children }) => <td className="px-3 py-2 text-gray-300 border-b border-[#3D3428]/30">{children}</td>,
+          code: ({ children }) => <code className="bg-[#0F1419] text-[#C9A961] px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-[#C9A961] pl-3 my-2 text-gray-400 italic">{children}</blockquote>,
+          a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#C9A961] underline hover:text-amber-300">{children}</a>,
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 interface Message {
   id: string;
@@ -58,10 +115,10 @@ const getRecognitionLanguage = (lang: string): string => {
 
 export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const { t, i18n } = useTranslation();
-  
+
   // Subscription Hook verwenden
   const { subscription, deductCredits, hasEnoughCredits } = useSubscription();
-  
+
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -80,7 +137,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const [speechSupported, setSpeechSupported] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -107,7 +164,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         rating: m.rating
       }))
     };
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -127,7 +184,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     content += `${t('chat.createdAt', 'Erstellt')}: ${new Date(session.createdAt).toLocaleString()}\n`;
     content += `${t('chat.updatedAt', 'Aktualisiert')}: ${new Date(session.updatedAt).toLocaleString()}\n`;
     content += `${'='.repeat(50)}\n\n`;
-    
+
     session.messages.forEach(m => {
       const role = m.role === 'user' ? t('chat.you', 'Du') : 'KI';
       const time = new Date(m.timestamp).toLocaleTimeString();
@@ -137,7 +194,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       }
       content += '\n';
     });
-    
+
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -156,7 +213,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       showToast(t('chat.noSessionsToExport', 'Keine Chats zum Exportieren'), 'error');
       return;
     }
-    
+
     const exportData = sessions.map(session => ({
       title: session.title,
       createdAt: session.createdAt,
@@ -169,7 +226,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         rating: m.rating
       }))
     }));
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -189,12 +246,12 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       showToast(t('chat.noSessionsToExport', 'Keine Chats zum Exportieren'), 'error');
       return;
     }
-    
+
     let content = `${t('chat.allChats', 'Alle Chat-Verläufe')}\n`;
     content += `${t('chat.exportedOn', 'Exportiert am')}: ${new Date().toLocaleString()}\n`;
     content += `${t('chat.totalChats', 'Anzahl Chats')}: ${sessions.length}\n`;
     content += `${'='.repeat(60)}\n\n`;
-    
+
     sessions.forEach((session, index) => {
       content += `\n${'#'.repeat(60)}\n`;
       content += `${t('chat.chat', 'Chat')} ${index + 1}: ${session.title}\n`;
@@ -202,7 +259,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       content += `${t('chat.createdAt', 'Erstellt')}: ${new Date(session.createdAt).toLocaleString()}\n`;
       content += `${t('chat.messagesCount', 'Nachrichten')}: ${session.messages.length}\n`;
       content += `${'-'.repeat(40)}\n\n`;
-      
+
       session.messages.forEach(m => {
         const role = m.role === 'user' ? t('chat.you', 'Du') : 'KI';
         const time = new Date(m.timestamp).toLocaleTimeString();
@@ -213,7 +270,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         content += '\n';
       });
     });
-    
+
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -245,7 +302,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       }
       setShowSessionExportDropdown(null);
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -261,7 +318,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   // Initialize Speech Recognition
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognition) {
       alert(t('chat.speechNotSupported', 'Spracherkennung wird von Ihrem Browser nicht unterstützt.'));
       return;
@@ -304,7 +361,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
-      
+
       if (event.error === 'not-allowed') {
         alert(t('chat.microphonePermissionDenied', 'Mikrofonzugriff wurde verweigert. Bitte erlauben Sie den Zugriff in Ihren Browsereinstellungen.'));
       }
@@ -413,23 +470,23 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     if (isListening) {
       stopListening();
     }
-    
+
     if (!inputValue.trim() || isTyping) return;
-    
+
     // Credits prüfen und abziehen BEVOR die Nachricht gesendet wird
     if (!hasEnoughCredits(CREDITS_PER_QUESTION)) {
       setShowNoCreditsModal(true);
       return;
     }
-    
+
     // Credits abziehen
     if (!deductCredits(CREDITS_PER_QUESTION)) {
       setShowNoCreditsModal(true);
       return;
     }
-    
+
     let sessionId = currentSessionId;
-    
+
     // Create new session if none exists
     if (!sessionId) {
       const newSession: Session = {
@@ -459,10 +516,10 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     setSessions(prevSessions => prevSessions.map(session => {
       if (session.id === sessionId) {
         const updatedMessages = [...session.messages, userMessage];
-        const updatedTitle = session.messages.length === 0 
+        const updatedTitle = session.messages.length === 0
           ? userInput.substring(0, 50) + (userInput.length > 50 ? '...' : '')
           : session.title;
-        
+
         return {
           ...session,
           title: updatedTitle,
@@ -511,7 +568,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       }));
     } catch (error) {
       console.error('AI response failed:', error);
-      
+
       // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -554,13 +611,13 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
   const handleRename = () => {
     if (!renameSessionId || !renameValue.trim()) return;
-    
-    setSessions(sessions.map(session => 
-      session.id === renameSessionId 
+
+    setSessions(sessions.map(session =>
+      session.id === renameSessionId
         ? { ...session, title: renameValue.trim(), updatedAt: new Date() }
         : session
     ));
-    
+
     setShowRenameModal(false);
     setRenameSessionId(null);
     setRenameValue('');
@@ -573,34 +630,34 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
   const handleDelete = () => {
     if (!deleteSessionId) return;
-    
+
     const updatedSessions = sessions.filter(s => s.id !== deleteSessionId);
     setSessions(updatedSessions);
-    
+
     // If deleted session was current, clear current
     if (currentSessionId === deleteSessionId) {
       setCurrentSessionId(updatedSessions.length > 0 ? updatedSessions[0].id : null);
     }
-    
+
     // Update localStorage
     if (updatedSessions.length === 0) {
       localStorage.removeItem(STORAGE_KEY);
     }
-    
+
     setShowDeleteConfirm(false);
     setDeleteSessionId(null);
     showToast(t('chat.deleted', 'Chat gelöscht'));
   };
 
   const toggleFavorite = (sessionId: string) => {
-    setSessions(sessions.map(session => 
-      session.id === sessionId 
+    setSessions(sessions.map(session =>
+      session.id === sessionId
         ? { ...session, isFavorite: !session.isFavorite, updatedAt: new Date() }
         : session
     ));
   };
 
-  const filteredSessions = sessions.filter(session => 
+  const filteredSessions = sessions.filter(session =>
     session.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -608,15 +665,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const groupedSessions = filteredSessions.reduce((acc, session) => {
     const today = new Date();
     const sessionDate = new Date(session.updatedAt);
-    
+
     let group = 'older';
     const diffDays = Math.floor((today.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) group = 'today';
     else if (diffDays === 1) group = 'yesterday';
     else if (diffDays <= 7) group = 'week';
     else if (diffDays <= 30) group = 'month';
-    
+
     if (!acc[group]) acc[group] = [];
     acc[group].push(session);
     return acc;
@@ -626,19 +683,17 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     <div className="fixed inset-0 lg:ml-64 bg-[#0F1419] flex">
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in ${
-          toast.type === 'success' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
-        }`}>
+        <div className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in ${toast.type === 'success' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
+          }`}>
           <i className={toast.type === 'success' ? 'ri-check-line' : 'ri-error-warning-line'}></i>
           <span className="text-sm font-medium">{toast.message}</span>
         </div>
       )}
 
       {/* Sidebar */}
-      <div className={`${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 fixed lg:relative inset-y-0 left-0 w-64 bg-[#1A1F26] border-r border-[#3D3428]/30 transition-transform duration-300 z-30 flex flex-col`}>
-        
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 fixed lg:relative inset-y-0 left-0 w-64 bg-[#1A1F26] border-r border-[#3D3428]/30 transition-transform duration-300 z-30 flex flex-col`}>
+
         {/* Sidebar Header */}
         <div className="p-4 border-b border-[#3D3428]/30 space-y-3">
           <button
@@ -648,7 +703,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
             <i className="ri-add-line text-lg"></i>
             {t('chat.newConversation')}
           </button>
-          
+
           {/* Search */}
           <div className="relative">
             <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
@@ -672,7 +727,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   <i className="ri-download-2-line"></i>
                   <span>{t('chat.exportAll', 'Exportieren')}</span>
                 </button>
-                
+
                 {showExportDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg shadow-xl overflow-hidden z-50">
                     <button
@@ -692,7 +747,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   </div>
                 )}
               </div>
-              
+
               <button
                 onClick={() => setShowDeleteAllConfirm(true)}
                 className="px-3 py-2 bg-[#0F1419] border border-[#3D3428]/30 rounded-lg text-sm text-gray-300 hover:text-red-400 hover:border-red-400/30 transition-all cursor-pointer flex items-center justify-center gap-2"
@@ -725,11 +780,10 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     {groupSessions.map(session => (
                       <div
                         key={session.id}
-                        className={`relative group rounded-lg transition-all ${
-                          currentSessionId === session.id
+                        className={`relative group rounded-lg transition-all ${currentSessionId === session.id
                             ? 'bg-[#3D3428]/30'
                             : 'hover:bg-[#0F1419]'
-                        }`}
+                          }`}
                       >
                         <button
                           onClick={() => setCurrentSessionId(session.id)}
@@ -738,9 +792,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                           <div className="flex items-start gap-2 pr-24">
                             <i className="ri-chat-3-line text-base mt-0.5 flex-shrink-0 text-gray-400"></i>
                             <div className="flex-1 min-w-0">
-                              <div className={`text-sm font-medium truncate ${
-                                currentSessionId === session.id ? 'text-white' : 'text-gray-300'
-                              }`}>
+                              <div className={`text-sm font-medium truncate ${currentSessionId === session.id ? 'text-white' : 'text-gray-300'
+                                }`}>
                                 {session.title}
                               </div>
                               <div className="text-xs text-gray-500 mt-0.5">
@@ -752,7 +805,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                             )}
                           </div>
                         </button>
-                        
+
                         {/* Action Buttons */}
                         <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 bg-[#1A1F26] rounded-lg p-0.5 shadow-lg">
                           <button
@@ -765,7 +818,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                           >
                             <i className={`text-sm ${session.isFavorite ? 'ri-star-fill' : 'ri-star-line'}`}></i>
                           </button>
-                          
+
                           {/* Export Dropdown for single session */}
                           <div className="relative">
                             <button
@@ -778,7 +831,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                             >
                               <i className="ri-download-2-line text-sm"></i>
                             </button>
-                            
+
                             {showSessionExportDropdown === session.id && (
                               <div className="absolute right-0 top-full mt-1 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg shadow-xl overflow-hidden z-50 min-w-[100px]">
                                 <button
@@ -806,7 +859,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                               </div>
                             )}
                           </div>
-                          
+
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -871,18 +924,16 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
               <i className="ri-subtract-line text-gray-400 text-sm"></i>
               <span className="text-xs text-gray-400">{CREDITS_PER_QUESTION} Credits/Frage</span>
             </div>
-            
+
             {/* Credits Anzeige */}
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-              subscription.isUnlimited 
-                ? 'bg-amber-500/10 border border-amber-500/30' 
-                : subscription.credits < 100 
-                  ? 'bg-red-500/10 border border-red-500/30' 
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${subscription.isUnlimited
+                ? 'bg-amber-500/10 border border-amber-500/30'
+                : subscription.credits < 100
+                  ? 'bg-red-500/10 border border-red-500/30'
                   : 'bg-[#0F1419] border border-[#3D3428]/30'
-            }`}>
-              <i className={`ri-coins-line ${
-                subscription.isUnlimited ? 'text-amber-400' : subscription.credits < 100 ? 'text-red-400' : 'text-[#C9A961]'
-              }`}></i>
+              }`}>
+              <i className={`ri-coins-line ${subscription.isUnlimited ? 'text-amber-400' : subscription.credits < 100 ? 'text-red-400' : 'text-[#C9A961]'
+                }`}></i>
               <span className="text-gray-400 text-sm">{t('chat.creditsLabel')}:</span>
               {subscription.isUnlimited ? (
                 <span className="text-amber-400 font-medium text-sm flex items-center gap-1">
@@ -913,7 +964,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 <p className="text-gray-400 mb-8">
                   {t('chat.welcomeDesc')}
                 </p>
-                
+
                 {/* Suggestion Buttons */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <button
@@ -969,9 +1020,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
               {currentSession.messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-4 ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
+                  className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
                 >
                   {message.role === 'assistant' && (
                     <div className="w-8 h-8 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center flex-shrink-0">
@@ -979,14 +1029,20 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     </div>
                   )}
                   <div
-                    className={`max-w-3xl ${
-                      message.role === 'user'
+                    className={`max-w-3xl ${message.role === 'user'
                         ? 'bg-[#C9A961] text-[#0F1419] rounded-2xl rounded-tr-sm'
                         : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
-                    } px-5 py-4`}
+                      } px-5 py-4`}
                   >
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.content}
+                    <div className="text-sm leading-relaxed">
+                      {message.role === 'assistant' ? (
+                        /* Check if this is the newest assistant message — animate it */
+                        message.id === currentSession?.messages.filter(m => m.role === 'assistant').slice(-1)[0]?.id && !isTyping
+                          ? <TypewriterMarkdown content={message.content} speed={6} />
+                          : <MarkdownBody text={message.content} />
+                      ) : (
+                        <span className="whitespace-pre-wrap">{message.content}</span>
+                      )}
                     </div>
                     {message.role === 'assistant' && message.rating && (
                       <div className="mt-3 pt-3 border-t border-[#3D3428]/30 flex items-center gap-2">
@@ -1004,7 +1060,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   )}
                 </div>
               ))}
-              
+
               {/* Typing Indicator */}
               {isTyping && (
                 <div className="flex gap-4 justify-start">
@@ -1019,34 +1075,34 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                         <span className="w-2 h-2 bg-[#C9A961] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
                       <span className="text-xs text-gray-400 ml-2">
-                        {i18n.language.startsWith('de') ? 'KI schreibt...' : 
-                         i18n.language.startsWith('en') ? 'AI is typing...' :
-                         i18n.language.startsWith('es') ? 'IA está escribiendo...' :
-                         i18n.language.startsWith('fr') ? 'IA écrit...' :
-                         i18n.language.startsWith('ru') ? 'ИИ пишет...' :
-                         i18n.language.startsWith('zh') ? 'AI 正在输入...' :
-                         i18n.language.startsWith('ja') ? 'AIが入力中...' :
-                         i18n.language.startsWith('ko') ? 'AI가 입력 중...' :
-                         i18n.language.startsWith('ar') ? 'الذكاء الاصطناعي يكتب...' :
-                         i18n.language.startsWith('tr') ? 'AI yazıyor...' :
-                         i18n.language.startsWith('hi') ? 'AI लिख रहा है...' :
-                         i18n.language.startsWith('pt') ? 'IA está digitando...' :
-                         i18n.language.startsWith('it') ? 'IA sta scrivendo...' :
-                         i18n.language.startsWith('pl') ? 'AI pisze...' :
-                         i18n.language.startsWith('nl') ? 'AI typt...' :
-                         i18n.language.startsWith('sv') ? 'AI skriver...' :
-                         i18n.language.startsWith('no') ? 'AI skriver...' :
-                         i18n.language.startsWith('vi') ? 'AI đang nhập...' :
-                         i18n.language.startsWith('th') ? 'AI กำลังพิมพ์...' :
-                         i18n.language.startsWith('id') ? 'AI sedang mengetik...' :
-                         i18n.language.startsWith('sq') ? 'AI po shkruan...' :
-                         'AI is typing...'}
+                        {i18n.language.startsWith('de') ? 'KI schreibt...' :
+                          i18n.language.startsWith('en') ? 'AI is typing...' :
+                            i18n.language.startsWith('es') ? 'IA está escribiendo...' :
+                              i18n.language.startsWith('fr') ? 'IA écrit...' :
+                                i18n.language.startsWith('ru') ? 'ИИ пишет...' :
+                                  i18n.language.startsWith('zh') ? 'AI 正在输入...' :
+                                    i18n.language.startsWith('ja') ? 'AIが入力中...' :
+                                      i18n.language.startsWith('ko') ? 'AI가 입력 중...' :
+                                        i18n.language.startsWith('ar') ? 'الذكاء الاصطناعي يكتب...' :
+                                          i18n.language.startsWith('tr') ? 'AI yazıyor...' :
+                                            i18n.language.startsWith('hi') ? 'AI लिख रहा है...' :
+                                              i18n.language.startsWith('pt') ? 'IA está digitando...' :
+                                                i18n.language.startsWith('it') ? 'IA sta scrivendo...' :
+                                                  i18n.language.startsWith('pl') ? 'AI pisze...' :
+                                                    i18n.language.startsWith('nl') ? 'AI typt...' :
+                                                      i18n.language.startsWith('sv') ? 'AI skriver...' :
+                                                        i18n.language.startsWith('no') ? 'AI skriver...' :
+                                                          i18n.language.startsWith('vi') ? 'AI đang nhập...' :
+                                                            i18n.language.startsWith('th') ? 'AI กำลังพิมพ์...' :
+                                                              i18n.language.startsWith('id') ? 'AI sedang mengetik...' :
+                                                                i18n.language.startsWith('sq') ? 'AI po shkruan...' :
+                                                                  'AI is typing...'}
                       </span>
                     </div>
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -1071,7 +1127,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 </button>
               </div>
             )}
-            
+
             {/* Warnung bei niedrigen Credits (unter 100) */}
             {!subscription.isUnlimited && subscription.credits >= CREDITS_PER_QUESTION && subscription.credits < 100 && (
               <div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-3">
@@ -1082,12 +1138,11 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 </div>
               </div>
             )}
-            
-            <div className={`bg-[#0F1419] border rounded-xl p-3 transition-colors ${
-              !subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION 
-                ? 'border-red-500/30 opacity-50' 
+
+            <div className={`bg-[#0F1419] border rounded-xl p-3 transition-colors ${!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION
+                ? 'border-red-500/30 opacity-50'
                 : 'border-[#3D3428]/30 focus-within:border-[#C9A961]/30'
-            }`}>
+              }`}>
               <textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -1105,11 +1160,10 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     type="button"
                     onClick={startListening}
                     disabled={!speechSupported || isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isListening 
-                        ? 'bg-red-500 text-white animate-pulse' 
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening
+                        ? 'bg-red-500 text-white animate-pulse'
                         : 'text-gray-400 hover:text-white hover:bg-[#1A1F26]'
-                    }`}
+                      }`}
                     title={isListening ? t('chat.stopListening', 'Aufnahme stoppen') : t('chat.voice', 'Sprechen')}
                   >
                     <i className={isListening ? 'ri-stop-fill text-lg' : 'ri-mic-line text-lg'}></i>
@@ -1276,19 +1330,19 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   Nicht genug Credits
                 </h3>
                 <p className="text-sm text-gray-400">
-                  Du benötigst mindestens <span className="text-[#C9A961] font-semibold">{CREDITS_PER_QUESTION} Credits</span> pro Frage. 
+                  Du benötigst mindestens <span className="text-[#C9A961] font-semibold">{CREDITS_PER_QUESTION} Credits</span> pro Frage.
                   Dein aktuelles Guthaben: <span className="text-red-400 font-semibold">{subscription.credits} Credits</span>
                 </p>
               </div>
             </div>
-            
+
             <div className="p-4 bg-[#0F1419] rounded-lg border border-[#3D3428]/30 mb-4">
               <p className="text-sm text-gray-400 mb-2">Aktueller Plan: <span className="text-white font-medium">{subscription.plan}</span></p>
               <p className="text-xs text-gray-500">
                 Upgrade dein Paket für mehr Credits oder warte auf die monatliche Erneuerung.
               </p>
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowNoCreditsModal(false)}
