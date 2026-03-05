@@ -254,13 +254,40 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const ALLOWED_DOC_TYPES = ['application/pdf', 'text/plain', 'text/csv'];
   const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
 
-  // Convert file to base64
+  // Convert and compress image to base64 (max 800px, JPEG 70% quality)
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      if (!file.type.startsWith('image/')) {
+        // Non-image: just read as data URL
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+        return;
+      }
+      // Image: resize and compress
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX_DIM = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          const ratio = Math.min(MAX_DIM / w, MAX_DIM / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        console.log('Compressed image:', file.name, 'original:', file.size, 'base64 len:', dataUrl.length);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = url;
     });
   };
 
@@ -721,11 +748,17 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
       // Generate AI response — include image data if present
       const imageAttachments = currentAttachments
-        .filter(a => ALLOWED_IMAGE_TYPES.includes(a.type) && a.base64)
+        .filter(a => a.type.startsWith('image/') && a.base64)
         .map(a => a.base64 as string);
 
+      console.log('Sending to AI:', {
+        textLength: (userInput || '').length,
+        imageCount: imageAttachments.length,
+        firstImagePrefix: imageAttachments[0]?.substring(0, 50)
+      });
+
       const aiResponse = await generateDemoResponse(
-        userInput || 'Analyze the attached image(s)',
+        userInput || 'Analyze this image in detail. What do you see? Provide business insights.',
         conversationHistory,
         imageAttachments.length > 0 ? imageAttachments : undefined
       );
