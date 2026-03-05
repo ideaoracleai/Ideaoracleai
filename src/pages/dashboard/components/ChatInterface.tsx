@@ -707,7 +707,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue.trim() || (attachments.length > 0 ? `[${attachments.map(a => a.name).join(', ')}]` : ''),
+      content: inputValue.trim(),
       timestamp: new Date(),
       attachments: attachments.length > 0 ? [...attachments] : undefined,
     };
@@ -1252,29 +1252,32 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   >
                     {/* Show attachments */}
                     {message.attachments && message.attachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className={`flex flex-wrap gap-2 ${message.content ? 'mb-3' : ''}`}>
                         {message.attachments.map(att => (
-                          ALLOWED_IMAGE_TYPES.includes(att.type) ? (
-                            <img key={att.id} src={att.url || att.base64} alt={att.name} className="max-w-[200px] max-h-[200px] rounded-lg object-cover border border-black/20" />
+                          att.type.startsWith('image/') ? (
+                            <img key={att.id} src={att.url || att.base64} alt="" className="max-w-[200px] max-h-[200px] rounded-lg object-cover border border-black/20" />
                           ) : (
                             <div key={att.id} className="flex items-center gap-2 px-3 py-2 bg-black/10 rounded-lg">
                               <i className="ri-file-text-line" />
-                              <span className="text-xs font-medium">{att.name}</span>
+                              <span className="text-xs font-medium">{att.name.split('.').pop()?.toUpperCase()}</span>
                             </div>
                           )
                         ))}
                       </div>
                     )}
-                    <div className="text-sm leading-relaxed">
-                      {message.role === 'assistant' ? (
-                        /* Check if this is the newest assistant message — animate it */
-                        message.id === currentSession?.messages.filter(m => m.role === 'assistant').slice(-1)[0]?.id && !isTyping
-                          ? <TypewriterMarkdown content={message.content} speed={6} />
-                          : <MarkdownBody text={message.content} />
-                      ) : (
-                        <span className="whitespace-pre-wrap">{message.content}</span>
-                      )}
-                    </div>
+                    {/* Only show text content if there is text */}
+                    {message.content && (
+                      <div className="text-sm leading-relaxed">
+                        {message.role === 'assistant' ? (
+                          /* Check if this is the newest assistant message — animate it */
+                          message.id === currentSession?.messages.filter(m => m.role === 'assistant').slice(-1)[0]?.id && !isTyping
+                            ? <TypewriterMarkdown content={message.content} speed={6} />
+                            : <MarkdownBody text={message.content} />
+                        ) : (
+                          <span className="whitespace-pre-wrap">{message.content}</span>
+                        )}
+                      </div>
+                    )}
                     {message.role === 'assistant' && message.rating && (
                       <div className="mt-3 pt-3 border-t border-[#3D3428]/30 flex items-center gap-2">
                         <span className="text-lg">{getRatingEmoji(message.rating)}</span>
