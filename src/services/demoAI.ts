@@ -26,14 +26,30 @@ export async function generateDemoResponse(
   ];
 
   try {
-    const { data, error } = await supabase.functions.invoke('chat-ai', {
-      body: { messages, language },
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+    // Get current user session token for auth
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token || supabaseAnonKey;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/chat-ai`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'apikey': supabaseAnonKey,
+      },
+      body: JSON.stringify({ messages, language }),
     });
 
-    if (error) {
-      console.error('Edge function error:', error);
-      throw new Error(error.message || 'AI service error');
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Edge function HTTP error:', response.status, errText);
+      throw new Error(`HTTP ${response.status}: ${errText}`);
     }
+
+    const data = await response.json();
 
     return {
       content: data.content || 'No response generated.',
