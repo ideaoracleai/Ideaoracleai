@@ -54,7 +54,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSupabaseUser(user);
 
             if (user) {
-                getUserDocument(user.id).then((doc) => {
+                getUserDocument(user.id).then(async (doc) => {
+                    if (!doc) {
+                        const { createUserDocument } = await import('./database');
+                        const { getPlanCredits } = await import('./auth');
+                        const defaultPlan = 'Starter';
+                        await createUserDocument(user.id, {
+                            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                            email: user.email || '',
+                            plan: defaultPlan,
+                            credits: getPlanCredits(defaultPlan),
+                            maxCredits: getPlanCredits(defaultPlan),
+                            createdAt: new Date().toISOString(),
+                            isEmailVerified: user.email_confirmed_at != null,
+                            couponUsed: null
+                        });
+                        doc = await getUserDocument(user.id);
+                    }
                     setUserDoc(doc);
                     applyUserLanguage(doc); // ← apply saved language on login
                     setIsLoading(false);
@@ -70,7 +86,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSupabaseUser(user);
 
             if (user) {
-                const doc = await getUserDocument(user.id);
+                let doc = await getUserDocument(user.id);
+                if (!doc) {
+                    // Auto-create missing profile (e.g. from Google login or missing trigger)
+                    const { createUserDocument } = await import('./database');
+                    const { getPlanCredits } = await import('./auth');
+                    const defaultPlan = 'Starter';
+                    await createUserDocument(user.id, {
+                        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                        email: user.email || '',
+                        plan: defaultPlan,
+                        credits: getPlanCredits(defaultPlan),
+                        maxCredits: getPlanCredits(defaultPlan),
+                        createdAt: new Date().toISOString(),
+                        isEmailVerified: user.email_confirmed_at != null,
+                        couponUsed: null
+                    });
+                    doc = await getUserDocument(user.id);
+                }
                 setUserDoc(doc);
                 applyUserLanguage(doc); // ← apply saved language on session restore
             } else {
