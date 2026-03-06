@@ -159,7 +159,8 @@ export async function uploadAvatar(uid: string, file: File): Promise<string> {
         .from('avatars')
         .getPublicUrl(filePath);
 
-    const publicUrl = urlData.publicUrl;
+    // Cache busting: append timestamp so the browser instantly loads the new image instead of caching the old one
+    const publicUrl = `${urlData.publicUrl}?t=${new Date().getTime()}`;
 
     // Save to user profile
     await updateUserDocument(uid, { avatarUrl: publicUrl });
