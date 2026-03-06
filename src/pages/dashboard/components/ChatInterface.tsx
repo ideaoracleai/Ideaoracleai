@@ -897,6 +897,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
   return (
     <div className="h-full w-full bg-[#0F1419] flex relative">
+      {/* Hide global support widget on mobile when carefully in AI Chat */}
+      <style>{`
+        @media (max-width: 768px) {
+          #vapi-widget-floating-button, [class*="vapi-widget"] {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       {/* Toast Notification */}
       {toast && (
         <div className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in ${toast.type === 'success' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
