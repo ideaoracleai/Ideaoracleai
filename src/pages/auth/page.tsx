@@ -500,7 +500,7 @@ export default function AuthPage() {
 
   // Email Verification View
   const renderVerificationView = () => (
-    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32 my-auto">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-mail-check-line text-[#C9A961] text-4xl"></i>
@@ -614,7 +614,7 @@ export default function AuthPage() {
 
   // Forgot Password View
   const renderForgotView = () => (
-    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32 my-auto">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-lock-unlock-line text-[#C9A961] text-4xl"></i>
@@ -717,7 +717,7 @@ export default function AuthPage() {
 
   // Reset Password View
   const renderResetView = () => (
-    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32 my-auto">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-key-2-line text-[#C9A961] text-4xl"></i>
@@ -988,7 +988,7 @@ export default function AuthPage() {
         </div>
 
         {/* Form Container - SCROLLABLE, INDEPENDENT */}
-        <div className="flex-1 overflow-y-auto px-6 py-8">
+        <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
           {mode === 'verify' ? (
             renderVerificationView()
           ) : mode === 'forgot' ? (
@@ -996,7 +996,7 @@ export default function AuthPage() {
           ) : mode === 'reset' ? (
             renderResetView()
           ) : (
-            <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
+            <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32 my-auto">
               {/* Mode Toggle */}
               <div className="flex bg-[#1A1F26] rounded-xl p-1 mb-8">
                 <button
