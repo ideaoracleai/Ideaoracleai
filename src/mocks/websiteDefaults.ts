@@ -32,9 +32,18 @@ export const defaultPricingData = {
         "Vollständig mehrsprachig",
         "Credit-basierte Nutzung",
         "Monatlicher Reset",
-        "Keine Entwickler-Briefings"
+        "Marktanalyse",
+        "Zusammenfassung",
+        "Stärken",
+        "Schwächen",
+        "Chancen",
+        "Risiken",
+        "Empfehlungen",
+        "PDF Herunterladen",
+        "Keine Entwickler-Briefings",
+        "Strukturierte Zusammenfassung"
       ],
-      negativeFeatures: [7],
+      negativeFeatures: [15, 16],
       highlighted: false
     },
     {
@@ -51,9 +60,18 @@ export const defaultPricingData = {
         "Vollständig mehrsprachig",
         "Credit-basierte Nutzung",
         "Monatlicher Reset",
-        "Keine Entwickler-Briefings"
+        "Marktanalyse",
+        "Zusammenfassung",
+        "Stärken",
+        "Schwächen",
+        "Chancen",
+        "Risiken",
+        "Empfehlungen",
+        "PDF Herunterladen",
+        "Keine Entwickler-Briefings",
+        "Strukturierte Zusammenfassung"
       ],
-      negativeFeatures: [7],
+      negativeFeatures: [15, 16],
       highlighted: true
     },
     {
@@ -68,57 +86,66 @@ export const defaultPricingData = {
         "Persistenter Chat-Verlauf",
         "Mehrere parallele Chat-Sessions",
         "Vollständig mehrsprachig",
+        "Credit-basierte Nutzung",
+        "Monatlicher Reset",
+        "Marktanalyse",
+        "Zusammenfassung",
+        "Stärken",
+        "Schwächen",
+        "Chancen",
+        "Risiken",
+        "Empfehlungen",
+        "PDF Herunterladen",
         "Builder-Modus: Entwickler-Briefings",
-        "Strukturierte Zusammenfassung",
-        "Fair-Use-Limit"
+        "Strukturierte Zusammenfassung"
       ],
       negativeFeatures: [],
-      specialFeatures: [5, 6],
+      specialFeatures: [15, 16],
       highlighted: false
     }
   ]
 };
 
 export const defaultFaqData = [
-  { 
-    question: "Was macht IdeaOracle genau?", 
-    answer: "IdeaOracle validiert deine Geschäftsidee. Keine Inspiration. Keine Motivation. Nur eine ehrliche Einschätzung, ob deine Idee Potenzial hat oder nicht." 
+  {
+    question: "Was macht IdeaOracle genau?",
+    answer: "IdeaOracle validiert deine Geschäftsidee. Keine Inspiration. Keine Motivation. Nur eine ehrliche Einschätzung, ob deine Idee Potenzial hat oder nicht."
   },
-  { 
-    question: "Ist das besser als ChatGPT?", 
-    answer: "Ja. ChatGPT ist darauf trainiert, nett zu sein. IdeaOracle ist darauf trainiert, ehrlich zu sein. Große Unterschied." 
+  {
+    question: "Ist das besser als ChatGPT?",
+    answer: "Ja. ChatGPT ist darauf trainiert, nett zu sein. IdeaOracle ist darauf trainiert, ehrlich zu sein. Große Unterschied."
   },
-  { 
-    question: "Redet die KI meine Idee schön?", 
-    answer: "Nein. Wenn deine Idee schlecht ist, sagen wir das. Wenn sie gut ist, auch. Ohne Filter." 
+  {
+    question: "Redet die KI meine Idee schön?",
+    answer: "Nein. Wenn deine Idee schlecht ist, sagen wir das. Wenn sie gut ist, auch. Ohne Filter."
   },
-  { 
-    question: "Gibt es eine Erfolgsgarantie?", 
-    answer: "Nein. Wir garantieren nur eins: Klarheit. Was du daraus machst, liegt bei dir." 
+  {
+    question: "Gibt es eine Erfolgsgarantie?",
+    answer: "Nein. Wir garantieren nur eins: Klarheit. Was du daraus machst, liegt bei dir."
   },
-  { 
-    question: "Sind meine Ideen privat?", 
-    answer: "Ja. Vollständig. Wir speichern nichts für Training, teilen nichts mit Dritten. Deine Ideen gehören dir." 
+  {
+    question: "Sind meine Ideen privat?",
+    answer: "Ja. Vollständig. Wir speichern nichts für Training, teilen nichts mit Dritten. Deine Ideen gehören dir."
   },
-  { 
-    question: "Warum kostet jede Frage 30 Credits?", 
-    answer: "Weil gute Analysen Ressourcen kosten. Und weil Denken wertvoll ist. Billig gibt's woanders." 
+  {
+    question: "Warum kostet jede Frage 30 Credits?",
+    answer: "Weil gute Analysen Ressourcen kosten. Und weil Denken wertvoll ist. Billig gibt's woanders."
   },
-  { 
-    question: "Was unterscheidet euch von anderen Tools?", 
-    answer: "Wir verkaufen keine Hoffnung. Wir liefern Fakten. Andere Tools wollen, dass du dich gut fühlst. Wir wollen, dass du kluge Entscheidungen triffst." 
+  {
+    question: "Was unterscheidet euch von anderen Tools?",
+    answer: "Wir verkaufen keine Hoffnung. Wir liefern Fakten. Andere Tools wollen, dass du dich gut fühlst. Wir wollen, dass du kluge Entscheidungen triffst."
   },
-  { 
-    question: "Kann ich mein Abo jederzeit kündigen?", 
-    answer: "Ja. Keine Tricks, keine versteckten Klauseln. Kündigen zum Monatsende – fertig." 
+  {
+    question: "Kann ich mein Abo jederzeit kündigen?",
+    answer: "Ja. Keine Tricks, keine versteckten Klauseln. Kündigen zum Monatsende – fertig."
   },
-  { 
-    question: "Was ist der Builder-Modus?", 
-    answer: "Im Builder-Paket bekommst du strukturierte Entwickler-Briefings. Perfekt, wenn du deine validierte Idee direkt umsetzen willst." 
+  {
+    question: "Was ist der Builder-Modus?",
+    answer: "Im Builder-Paket bekommst du strukturierte Entwickler-Briefings. Perfekt, wenn du deine validierte Idee direkt umsetzen willst."
   },
-  { 
-    question: "Gibt es eine Geld-zurück-Garantie?", 
-    answer: "Nein. Aber du kannst kostenlos testen, bevor du zahlst. Wenn dir nicht gefällt, was du siehst – kauf einfach nicht." 
+  {
+    question: "Gibt es eine Geld-zurück-Garantie?",
+    answer: "Nein. Aber du kannst kostenlos testen, bevor du zahlst. Wenn dir nicht gefällt, was du siehst – kauf einfach nicht."
   }
 ];
 

@@ -272,6 +272,7 @@ export default function Pricing() {
 
                   <div className="space-y-1.5 pt-4">
                     {plan.features.map((feature, idx) => {
+                      if (!feature || feature.trim() === '') return null;
                       const isNeg = (plan.negativeFeatures || []).includes(idx);
                       const isSpec = (plan.specialFeatures || []).includes(idx);
                       return (
