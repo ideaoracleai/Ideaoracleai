@@ -1121,7 +1121,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="h-16 border-b border-[#3D3428]/30 flex items-center justify-between px-6 bg-[#1A1F26]">
+        <div className="h-14 sm:h-16 border-b border-[#3D3428]/30 flex items-center justify-between px-3 sm:px-6 bg-[#1A1F26]">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -1129,9 +1129,9 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
             >
               <i className="ri-menu-line text-xl"></i>
             </button>
-            <div>
-              <h2 className="text-white font-semibold">{t('chat.title')}</h2>
-              <p className="text-xs text-gray-400">{t('chat.subtitle')}</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-semibold text-white truncate">{t('chat.title')}</h2>
+              <p className="text-[10px] sm:text-xs text-gray-400 truncate hidden md:block">{t('chat.subtitle')}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -1169,15 +1169,15 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         <div className="flex-1 overflow-y-auto">
           {!currentSession || currentSession.messages.length === 0 ? (
             /* Welcome Screen */
-            <div className="h-full flex items-center justify-center p-6">
+            <div className="h-full flex items-center justify-center p-4 sm:p-6">
               <div className="max-w-2xl w-full text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <i className="ri-sparkling-2-fill text-3xl text-[#0F1419]"></i>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                  <i className="ri-sparkling-2-fill text-2xl sm:text-3xl text-[#0F1419]"></i>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">
+                <h3 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3">
                   {t('chat.welcomeTitle')}
                 </h3>
-                <p className="text-gray-400 mb-8">
+                <p className="text-gray-400 text-sm sm:text-base mb-5 sm:mb-8 px-2">
                   {t('chat.welcomeDesc')}
                 </p>
 
@@ -1185,7 +1185,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <button
                     onClick={() => setInputValue(t('chat.suggestion1'))}
-                    className="p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
+                    className="p-3 sm:p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
                       <i className="ri-search-line text-[#C9A961] text-xl mt-0.5"></i>
@@ -1196,7 +1196,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   </button>
                   <button
                     onClick={() => setInputValue(t('chat.suggestion2'))}
-                    className="p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
+                    className="p-3 sm:p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
                       <i className="ri-lightbulb-line text-[#C9A961] text-xl mt-0.5"></i>
@@ -1207,7 +1207,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   </button>
                   <button
                     onClick={() => setInputValue(t('chat.suggestion3'))}
-                    className="p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
+                    className="p-3 sm:p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
                       <i className="ri-line-chart-line text-[#C9A961] text-xl mt-0.5"></i>
@@ -1218,7 +1218,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                   </button>
                   <button
                     onClick={() => setInputValue(t('chat.suggestion4'))}
-                    className="p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
+                    className="p-3 sm:p-4 bg-[#1A1F26] border border-[#3D3428]/30 rounded-lg text-left hover:border-[#C9A961]/30 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start gap-3">
                       <i className="ri-focus-3-line text-[#C9A961] text-xl mt-0.5"></i>
@@ -1232,30 +1232,30 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
             </div>
           ) : (
             /* Messages */
-            <div className="p-6 space-y-6">
+            <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
               {currentSession.messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                  className={`flex gap-2 sm:gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center flex-shrink-0 hidden sm:flex">
                       <i className="ri-sparkling-2-fill text-[#0F1419]"></i>
                     </div>
                   )}
                   <div
-                    className={`max-w-3xl ${message.role === 'user'
+                    className={`max-w-[85vw] sm:max-w-3xl ${message.role === 'user'
                       ? 'bg-[#C9A961] text-[#0F1419] rounded-2xl rounded-tr-sm'
                       : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
-                      } px-5 py-4`}
+                      } px-3 py-3 sm:px-5 sm:py-4`}
                   >
                     {/* Show attachments */}
                     {message.attachments && message.attachments.length > 0 && (
                       <div className={`flex flex-wrap gap-2 ${message.content ? 'mb-3' : ''}`}>
                         {message.attachments.map(att => (
                           att.type.startsWith('image/') ? (
-                            <img key={att.id} src={att.url || att.base64} alt="" className="max-w-[200px] max-h-[200px] rounded-lg object-cover border border-black/20" />
+                            <img key={att.id} src={att.url || att.base64} alt="" className="max-w-[150px] sm:max-w-[200px] max-h-[150px] sm:max-h-[200px] rounded-lg object-cover border border-black/20" />
                           ) : (
                             <div key={att.id} className="flex items-center gap-2 px-3 py-2 bg-black/10 rounded-lg">
                               <i className="ri-file-text-line" />
@@ -1267,7 +1267,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     )}
                     {/* Only show text content if there is text */}
                     {message.content && (
-                      <div className="text-sm leading-relaxed">
+                      <div className="text-xs sm:text-sm leading-relaxed break-words overflow-hidden">
                         {message.role === 'assistant' ? (
                           /* Check if this is the newest assistant message — animate it */
                           message.id === currentSession?.messages.filter(m => m.role === 'assistant').slice(-1)[0]?.id && !isTyping
@@ -1288,8 +1288,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                     )}
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-8 h-8 bg-[#3D3428] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="ri-user-3-fill text-white"></i>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#3D3428] rounded-lg items-center justify-center flex-shrink-0 hidden sm:flex">
+                      <i className="ri-user-3-fill text-white text-sm"></i>
                     </div>
                   )}
                 </div>
@@ -1297,11 +1297,11 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
               {/* Typing Indicator */}
               {isTyping && (
-                <div className="flex gap-4 justify-start">
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="flex gap-2 sm:gap-4 justify-start">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center flex-shrink-0 hidden sm:flex">
                     <i className="ri-sparkling-2-fill text-[#0F1419]"></i>
                   </div>
-                  <div className="max-w-3xl bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm px-5 py-4">
+                  <div className="max-w-[85vw] sm:max-w-3xl bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm px-3 py-3 sm:px-5 sm:py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
                         <span className="w-2 h-2 bg-[#C9A961] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
@@ -1343,7 +1343,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-[#3D3428]/30 p-4 bg-[#1A1F26]">
+        <div className="border-t border-[#3D3428]/30 p-2 sm:p-4 bg-[#1A1F26]">
           <div className="max-w-4xl mx-auto">
             {/* Warnung bei niedrigen Credits */}
             {!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION && (
@@ -1458,18 +1458,18 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 <button
                   onClick={handleSendMessage}
                   disabled={(!inputValue.trim() && attachments.length === 0) || isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
-                  className="px-4 py-2 bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#C9A961]/20 transition-all cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-3 sm:px-4 py-2 bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] rounded-lg font-semibold hover:shadow-lg hover:shadow-[#C9A961]/20 transition-all cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  <span>{t('chat.send')}</span>
+                  <span className="hidden sm:inline">{t('chat.send')}</span>
                   <i className="ri-send-plane-fill"></i>
                 </button>
               </div>
             </div>
-            <p className="text-xs text-gray-500 text-center mt-2">
+            <p className="text-[10px] sm:text-xs text-gray-500 text-center mt-1 sm:mt-2 truncate">
               {!subscription.isUnlimited && subscription.credits >= CREDITS_PER_QUESTION && (
                 <span className="text-[#C9A961]">-{CREDITS_PER_QUESTION} Credits • </span>
               )}
-              {t('chat.inputPlaceholder')}
+              <span className="hidden sm:inline">{t('chat.inputPlaceholder')}</span>
             </p>
           </div>
         </div>
