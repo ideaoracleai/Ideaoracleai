@@ -16,8 +16,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
 
-  const [activeView, setActiveView] = useState<'dashboard' | 'history' | 'credits' | 'settings' | 'subscription'>('dashboard');
-  const [chatView, setChatView] = useState<'overview' | 'chat' | 'history' | 'credits' | 'settings'>('overview');
+  const [activeView, setActiveView] = useState<'dashboard' | 'chat' | 'history' | 'credits' | 'settings' | 'subscription'>('dashboard');
 
   // Sidebar responsive state — lifted up so layout knows about it
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -30,11 +29,29 @@ export default function Dashboard() {
     }
   }, [isLoggedIn, authLoading, navigate]);
 
+  // Check URL params for view
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    if (view === 'chat') setActiveView('chat');
+    else if (view === 'credits') setActiveView('credits');
+    else if (view === 'history') setActiveView('history');
+    else if (view === 'settings') setActiveView('settings');
+    else if (view === 'subscription') setActiveView('subscription');
+  }, []);
+
   const handleHeaderNavigate = (section: string) => {
     if (section === 'settings') setActiveView('settings');
     else if (section === 'credits') setActiveView('credits');
     else if (section === 'history') setActiveView('history');
+    else if (section === 'chat') setActiveView('chat');
     else setActiveView('dashboard');
+  };
+
+  const handleQuickAction = (action: string) => {
+    if (action === 'chat') {
+      setActiveView('chat');
+    }
   };
 
   // Show loading spinner while checking auth
@@ -61,40 +78,48 @@ export default function Dashboard() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header
-          onNavigate={handleHeaderNavigate}
-          onMobileMenuToggle={() => setMobileMenuOpen(prev => !prev)}
-        />
+        {/* Only show header when NOT in chat view — chat has its own header */}
+        {activeView !== 'chat' && (
+          <Header
+            onNavigate={handleHeaderNavigate}
+            onMobileMenuToggle={() => setMobileMenuOpen(prev => !prev)}
+          />
+        )}
 
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
-          {activeView === 'dashboard' && (
-            <>
-              <StatsCards />
-              <QuickActions onViewChange={setChatView} />
-              <ChatInterface />
-              <Overview />
-            </>
-          )}
+        {activeView === 'chat' ? (
+          /* Chat takes full height with no padding */
+          <div className="flex-1 overflow-hidden">
+            <ChatInterface
+              onBack={() => setActiveView('dashboard')}
+            />
+          </div>
+        ) : (
+          <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+            {activeView === 'dashboard' && (
+              <>
+                <StatsCards />
+                <QuickActions onNavigateChat={() => setActiveView('chat')} />
+                <Overview />
+              </>
+            )}
 
-          {activeView === 'history' && <IdeaHistory />}
-          {activeView === 'credits' && <CreditUsage fullView />}
-          {activeView === 'settings' && (
-            <Settings
-              onBack={() => setActiveView('dashboard')}
-              onNavigateSubscription={() => setActiveView('subscription')}
-            />
-          )}
-          {activeView === 'subscription' && (
-            <Subscription
-              onBack={() => setActiveView('dashboard')}
-              onNavigateSettings={() => setActiveView('settings')}
-            />
-          )}
-        </main>
+            {activeView === 'history' && <IdeaHistory />}
+            {activeView === 'credits' && <CreditUsage fullView />}
+            {activeView === 'settings' && (
+              <Settings
+                onBack={() => setActiveView('dashboard')}
+                onNavigateSubscription={() => setActiveView('subscription')}
+              />
+            )}
+            {activeView === 'subscription' && (
+              <Subscription
+                onBack={() => setActiveView('dashboard')}
+                onNavigateSettings={() => setActiveView('settings')}
+              />
+            )}
+          </main>
+        )}
       </div>
     </div>
   );
-
-  // suppress unused warning
-  void chatView;
 }

@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface QuickActionsProps {
-  onViewChange: (view: 'overview' | 'chat' | 'history' | 'credits' | 'settings') => void;
+  onNavigateChat: () => void;
 }
 
-export default function QuickActions({ onViewChange }: QuickActionsProps) {
+export default function QuickActions({ onNavigateChat }: QuickActionsProps) {
   const { t } = useTranslation();
   const [userPlan, setUserPlan] = useState('Starter');
 
@@ -25,7 +25,7 @@ export default function QuickActions({ onViewChange }: QuickActionsProps) {
       title: t('dashboard.quickActions.checkNewIdea'),
       description: t('dashboard.quickActions.checkNewIdeaDesc'),
       color: 'from-[#C9A961] to-[#A08748]',
-      onClick: () => onViewChange('chat'),
+      onClick: () => onNavigateChat(),
       disabled: false,
     },
     {
@@ -33,7 +33,7 @@ export default function QuickActions({ onViewChange }: QuickActionsProps) {
       title: t('dashboard.quickActions.generateIdea'),
       description: t('dashboard.quickActions.generateIdeaDesc'),
       color: 'from-emerald-500 to-emerald-600',
-      onClick: () => onViewChange('chat'),
+      onClick: () => onNavigateChat(),
       disabled: false,
     },
     {
@@ -41,7 +41,7 @@ export default function QuickActions({ onViewChange }: QuickActionsProps) {
       title: t('dashboard.quickActions.builderBriefing'),
       description: t('dashboard.quickActions.builderBriefingDesc'),
       color: 'from-amber-500 to-amber-600',
-      onClick: () => onViewChange('chat'),
+      onClick: () => onNavigateChat(),
       disabled: !isBuilder,
       badge: !isBuilder ? t('dashboard.quickActions.premiumOnly') : null,
     },
@@ -60,8 +60,8 @@ export default function QuickActions({ onViewChange }: QuickActionsProps) {
               onClick={action.onClick}
               disabled={action.disabled}
               className={`relative p-3 sm:p-5 bg-[#1A1F26] border border-[#3D3428]/30 rounded-xl text-left transition-all group w-full h-full flex flex-col ${action.disabled
-                  ? 'opacity-60 cursor-not-allowed'
-                  : 'hover:border-[#C9A961]/30 hover:shadow-lg cursor-pointer'
+                ? 'opacity-60 cursor-not-allowed'
+                : 'hover:border-[#C9A961]/30 hover:shadow-lg cursor-pointer'
                 }`}
               style={{ minHeight: '120px' }}
             >

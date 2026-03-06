@@ -5,7 +5,7 @@ import { useAuth } from '../../../supabase';
 
 interface SidebarProps {
   activeView: string;
-  onViewChange: (view: 'dashboard' | 'history' | 'credits' | 'settings' | 'subscription') => void;
+  onViewChange: (view: 'dashboard' | 'chat' | 'history' | 'credits' | 'settings' | 'subscription') => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   isMobileOpen: boolean;
@@ -31,6 +31,7 @@ export default function Sidebar({
 
   const menuItems = [
     { id: 'dashboard', icon: 'ri-dashboard-line', label: t('dashboard.sidebar.overview') },
+    { id: 'chat', icon: 'ri-chat-smile-ai-line', label: t('dashboard.sidebar.aiChat', 'AI Assistant') },
     { id: 'history', icon: 'ri-history-line', label: t('dashboard.sidebar.history') },
     { id: 'credits', icon: 'ri-coin-line', label: t('dashboard.sidebar.credits') },
     { id: 'subscription', icon: 'ri-bank-card-line', label: t('settings.subscriptionLink') },
@@ -160,8 +161,8 @@ export default function Sidebar({
                     <button
                       onClick={() => handleNavClick(item.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all cursor-pointer ${activeView === item.id
-                          ? 'bg-[#C9A961]/20 text-[#C9A961] border border-[#C9A961]/30'
-                          : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
+                        ? 'bg-[#C9A961]/20 text-[#C9A961] border border-[#C9A961]/30'
+                        : 'text-gray-400 hover:text-white hover:bg-white/[0.04]'
                         }`}
                     >
                       <i className={`${item.icon} text-lg`}></i>
