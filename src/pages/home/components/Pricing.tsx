@@ -96,7 +96,8 @@ export default function Pricing() {
         { key: 'pricing.starter.feature14', isCommon: true },
         { key: 'pricing.starter.feature15', isCommon: true },
         { key: 'pricing.starter.feature16', isCommon: true },
-        { key: 'pricing.starter.feature8', isCommon: true, isNegative: true },
+        { key: 'pricing.builder.feature6', isCommon: true, isNegative: true },
+        { key: 'pricing.builder.feature7', isCommon: true, isNegative: true },
       ],
       highlighted: false,
       isBuilder: false,
@@ -125,7 +126,8 @@ export default function Pricing() {
         { key: 'pricing.pro.feature14', isCommon: true },
         { key: 'pricing.pro.feature15', isCommon: true },
         { key: 'pricing.pro.feature16', isCommon: true },
-        { key: 'pricing.pro.feature8', isCommon: true, isNegative: true },
+        { key: 'pricing.builder.feature6', isCommon: true, isNegative: true },
+        { key: 'pricing.builder.feature7', isCommon: true, isNegative: true },
       ],
       highlighted: false,
       isBuilder: false,
@@ -144,6 +146,8 @@ export default function Pricing() {
         { key: 'pricing.builder.feature3', isCommon: true },
         { key: 'pricing.builder.feature4', isCommon: true },
         { key: 'pricing.builder.feature5', isCommon: true },
+        { key: 'pricing.starter.feature6', isCommon: true },
+        { key: 'pricing.starter.feature7', isCommon: true },
         { key: 'pricing.builder.feature9', isCommon: true },
         { key: 'pricing.builder.feature10', isCommon: true },
         { key: 'pricing.builder.feature11', isCommon: true },
@@ -194,14 +198,12 @@ export default function Pricing() {
               </span>
               <button
                 onClick={() => setIsYearly(!isYearly)}
-                className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
-                  isYearly ? 'bg-[#C9A961]' : 'bg-[#3D3428]'
-                }`}
+                className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${isYearly ? 'bg-[#C9A961]' : 'bg-[#3D3428]'
+                  }`}
               >
                 <div
-                  className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                    isYearly ? 'translate-x-8' : 'translate-x-1'
-                  }`}
+                  className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-1'
+                    }`}
                 />
               </button>
               <div className="flex items-center space-x-2">
@@ -219,11 +221,10 @@ export default function Pricing() {
             {customData.plans.map((plan, index) => (
               <div
                 key={index}
-                className={`relative bg-gradient-to-br from-[#1A1F26] to-[#151A20] rounded-3xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer ${
-                  plan.highlighted
-                    ? 'border-[#C9A961] shadow-xl shadow-[#C9A961]/20 scale-105'
-                    : 'border-[#3D3428]/30 hover:border-[#C9A961]/50'
-                }`}
+                className={`relative bg-gradient-to-br from-[#1A1F26] to-[#151A20] rounded-3xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer ${plan.highlighted
+                  ? 'border-[#C9A961] shadow-xl shadow-[#C9A961]/20 scale-105'
+                  : 'border-[#3D3428]/30 hover:border-[#C9A961]/50'
+                  }`}
               >
                 {plan.highlighted && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -248,11 +249,10 @@ export default function Pricing() {
                   </div>
 
                   <div
-                    className={`px-4 py-3 rounded-lg border ${
-                      plan.id === 'builder'
-                        ? 'bg-gradient-to-r from-[#C9A961]/20 to-[#A08748]/20 border-[#C9A961]/40'
-                        : 'bg-[#3D3428]/20 border-[#3D3428]/30'
-                    }`}
+                    className={`px-4 py-3 rounded-lg border ${plan.id === 'builder'
+                      ? 'bg-gradient-to-r from-[#C9A961]/20 to-[#A08748]/20 border-[#C9A961]/40'
+                      : 'bg-[#3D3428]/20 border-[#3D3428]/30'
+                      }`}
                   >
                     <div className="font-bold text-sm text-[#C9A961]">{plan.credits}</div>
                     <div className="text-gray-400 text-xs mt-1">
@@ -262,16 +262,15 @@ export default function Pricing() {
 
                   <button
                     onClick={() => handleSelectPlan(plan.name)}
-                    className={`w-full py-4 rounded-xl text-base font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
-                      plan.highlighted
-                        ? 'bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] hover:shadow-lg hover:shadow-[#C9A961]/30'
-                        : 'bg-[#3D3428]/30 text-white hover:bg-[#3D3428]/50 border border-[#3D3428]'
-                    }`}
+                    className={`w-full py-4 rounded-xl text-base font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${plan.highlighted
+                      ? 'bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] hover:shadow-lg hover:shadow-[#C9A961]/30'
+                      : 'bg-[#3D3428]/30 text-white hover:bg-[#3D3428]/50 border border-[#3D3428]'
+                      }`}
                   >
                     {t('pricing.selectPlan')}
                   </button>
 
-                  <div className="space-y-3 pt-4">
+                  <div className="space-y-1.5 pt-4">
                     {plan.features.map((feature, idx) => {
                       const isNeg = (plan.negativeFeatures || []).includes(idx);
                       const isSpec = (plan.specialFeatures || []).includes(idx);
@@ -287,13 +286,12 @@ export default function Pricing() {
                             )}
                           </div>
                           <span
-                            className={`text-sm leading-relaxed ${
-                              isNeg
-                                ? 'text-gray-500 line-through'
-                                : isSpec
+                            className={`text-sm leading-relaxed ${isNeg
+                              ? 'text-gray-500 line-through'
+                              : isSpec
                                 ? 'text-[#C9A961] font-semibold'
                                 : 'text-gray-300'
-                            }`}
+                              }`}
                           >
                             {feature}
                           </span>
@@ -356,12 +354,12 @@ export default function Pricing() {
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">{t('pricing.title')}</h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">{t('pricing.subtitle')}</p>
-          
+
           {/* Währungs-Auswahl & Billing Toggle */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             {/* Currency Selector */}
             <CurrencySelector variant="compact" />
-            
+
             {/* Billing Toggle */}
             <div className="inline-flex items-center space-x-4 bg-[#1A1F26] px-6 py-3 rounded-full border border-[#3D3428]/30">
               <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-white' : 'text-gray-500'}`}>
@@ -369,14 +367,12 @@ export default function Pricing() {
               </span>
               <button
                 onClick={() => setIsYearly(!isYearly)}
-                className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
-                  isYearly ? 'bg-[#C9A961]' : 'bg-[#3D3428]'
-                }`}
+                className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${isYearly ? 'bg-[#C9A961]' : 'bg-[#3D3428]'
+                  }`}
               >
                 <div
-                  className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                    isYearly ? 'translate-x-8' : 'translate-x-1'
-                  }`}
+                  className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-1'
+                    }`}
                 />
               </button>
               <div className="flex items-center space-x-2">
@@ -408,15 +404,14 @@ export default function Pricing() {
             const basePriceCHF = isYearly && plan.hasDiscount ? plan.yearlyPrice : plan.price;
             const originalPriceCHF = plan.price;
             const showDiscount = isYearly && plan.hasDiscount;
-            
+
             return (
               <div
                 key={index}
-                className={`relative bg-gradient-to-br from-[#1A1F26] to-[#151A20] rounded-3xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer ${
-                  plan.highlighted
-                    ? 'border-[#C9A961] shadow-xl shadow-[#C9A961]/20 scale-105'
-                    : 'border-[#3D3428]/30 hover:border-[#C9A961]/50'
-                }`}
+                className={`relative bg-gradient-to-br from-[#1A1F26] to-[#151A20] rounded-3xl border-2 transition-all duration-300 hover:shadow-2xl cursor-pointer ${plan.highlighted
+                  ? 'border-[#C9A961] shadow-xl shadow-[#C9A961]/20 scale-105'
+                  : 'border-[#3D3428]/30 hover:border-[#C9A961]/50'
+                  }`}
               >
                 {plan.highlighted && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -465,11 +460,10 @@ export default function Pricing() {
                   </div>
 
                   <div
-                    className={`px-4 py-3 rounded-lg border ${
-                      plan.isBuilder
-                        ? 'bg-gradient-to-r from-[#C9A961]/20 to-[#A08748]/20 border-[#C9A961]/40'
-                        : 'bg-[#3D3428]/20 border-[#3D3428]/30'
-                    }`}
+                    className={`px-4 py-3 rounded-lg border ${plan.isBuilder
+                      ? 'bg-gradient-to-r from-[#C9A961]/20 to-[#A08748]/20 border-[#C9A961]/40'
+                      : 'bg-[#3D3428]/20 border-[#3D3428]/30'
+                      }`}
                   >
                     <div className="font-bold text-sm text-[#C9A961]">{t(plan.creditsKey)}</div>
                     <div className="text-gray-400 text-xs mt-1">
@@ -479,16 +473,15 @@ export default function Pricing() {
 
                   <button
                     onClick={() => handleSelectPlan(plan.id)}
-                    className={`w-full py-4 rounded-xl text-base font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${
-                      plan.highlighted
-                        ? 'bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] hover:shadow-lg hover:shadow-[#C9A961]/30'
-                        : 'bg-[#3D3428]/30 text-white hover:bg-[#3D3428]/50 border border-[#3D3428]'
-                    }`}
+                    className={`w-full py-4 rounded-xl text-base font-bold transition-all duration-300 cursor-pointer whitespace-nowrap ${plan.highlighted
+                      ? 'bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] hover:shadow-lg hover:shadow-[#C9A961]/30'
+                      : 'bg-[#3D3428]/30 text-white hover:bg-[#3D3428]/50 border border-[#3D3428]'
+                      }`}
                   >
                     {t('pricing.selectPlan')}
                   </button>
 
-                  <div className="space-y-3 pt-4">
+                  <div className="space-y-1.5 pt-4">
                     {plan.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start space-x-3">
                         <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -501,13 +494,12 @@ export default function Pricing() {
                           )}
                         </div>
                         <span
-                          className={`text-sm leading-relaxed ${
-                            feature.isNegative
-                              ? 'text-red-500 line-through'
-                              : feature.isSpecial
+                          className={`text-sm leading-relaxed ${feature.isNegative
+                            ? 'text-red-500 line-through'
+                            : feature.isSpecial
                               ? 'text-[#C9A961] font-semibold'
                               : 'text-gray-300'
-                          }`}
+                            }`}
                         >
                           {t(feature.key)}
                         </span>
