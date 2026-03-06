@@ -209,6 +209,7 @@ export const common = {
   'dashboard.header.aiAssistant': 'Dein KI-Assistent',
   'header.logout': 'Abmelden',
   'dashboard.sidebar.overview': 'Übersicht',
+  'dashboard.sidebar.aiChat': 'KI-Assistent',
   'dashboard.sidebar.newAnalysis': 'KI-Assistent',
   'dashboard.sidebar.history': 'Verlauf',
   'dashboard.sidebar.credits': 'Credits',

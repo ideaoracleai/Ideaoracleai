@@ -195,6 +195,7 @@ export const common = {
   'dashboard.header.aiAssistant': 'Your AI Assistant',
   'header.logout': 'Sign Out',
   'dashboard.sidebar.overview': 'Overview',
+  'dashboard.sidebar.aiChat': 'AI Assistant',
   'dashboard.sidebar.newAnalysis': 'AI Assistant',
   'dashboard.sidebar.history': 'History',
   'dashboard.sidebar.credits': 'Credits',
