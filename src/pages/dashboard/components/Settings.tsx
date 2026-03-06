@@ -204,13 +204,16 @@ export default function Settings({ onBack, onNavigateSubscription }: SettingsPro
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#3D3428]/30">
-          <div className="flex gap-1 p-2">
+        <div className="border-b border-[#3D3428]/30 overflow-x-auto relative" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`
+            .overflow-x-auto::-webkit-scrollbar { display: none; }
+          `}</style>
+          <div className="flex gap-2 p-2 items-center w-max min-w-full">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === tab.id
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${activeTab === tab.id
                   ? 'bg-[#C9A961]/20 text-[#C9A961] border border-[#C9A961]/30'
                   : 'text-gray-400 hover:text-white hover:bg-white/[0.02]'
                   }`}
