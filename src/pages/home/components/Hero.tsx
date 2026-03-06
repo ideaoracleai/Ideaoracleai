@@ -292,7 +292,7 @@ export default function Hero() {
                 )}
               </div>
 
-              <form onSubmit={handleCouponSubmit} className="flex gap-3">
+              <form onSubmit={handleCouponSubmit} className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   value={couponCode}
@@ -301,17 +301,16 @@ export default function Hero() {
                     setError('');
                   }}
                   placeholder="z.B. NF-7X3K9M"
-                  className={`flex-1 bg-[#0F1419] border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors text-sm font-mono ${
-                    error
+                  className={`flex-1 bg-[#0F1419] border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors text-sm font-mono ${error
                       ? 'border-red-500 focus:border-red-500'
                       : 'border-[#3D3428]/50 focus:border-[#C9A961]'
-                  }`}
+                    }`}
                   disabled={isValidating}
                 />
                 <button
                   type="submit"
                   disabled={isValidating}
-                  className="bg-[#3D3428] hover:bg-[#4D4438] text-white px-5 py-3 rounded-lg font-medium transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto bg-[#3D3428] hover:bg-[#4D4438] text-white px-5 py-3 rounded-lg font-medium transition-all duration-300 cursor-pointer whitespace-nowrap flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isValidating ? (
                     <>
