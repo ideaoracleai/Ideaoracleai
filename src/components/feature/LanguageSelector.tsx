@@ -9,10 +9,28 @@ interface LanguageOption {
   nativeName: string;
 }
 
-// Only English and German supported
-const SUPPORTED_LANGUAGES: LanguageOption[] = [
+export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
+  { code: 'sq', name: 'Albanian', nativeName: 'Shqip' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
+  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
+  { code: 'sv', name: 'Swedish', nativeName: 'Svenska' },
+  { code: 'no', name: 'Norwegian', nativeName: 'Norsk' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어' },
+  { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt' },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย' },
 ];
 
 export default function LanguageSelector() {
@@ -67,7 +85,7 @@ export default function LanguageSelector() {
           <div className="px-4 py-3 border-b border-gray-700">
             <h3 className="font-semibold text-white text-sm">{t('settings.preferences.chooseLanguage')}</h3>
           </div>
-          <div className="p-2">
+          <div className="p-2 max-h-[300px] overflow-y-auto style-scroll">
             {SUPPORTED_LANGUAGES.map((language) => (
               <button
                 key={language.code}
@@ -78,7 +96,6 @@ export default function LanguageSelector() {
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-lg">{language.code === 'en' ? '🇬🇧' : '🇩🇪'}</span>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-medium">{language.nativeName}</span>
                     <span className="text-xs text-gray-500">{language.name}</span>

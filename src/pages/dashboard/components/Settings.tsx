@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { currentSubscription } from '../../../mocks/subscriptionData';
 import { useAuth } from '../../../supabase';
 import { uploadAvatar, updateUserDocument } from '../../../supabase/database';
+import { SUPPORTED_LANGUAGES } from '../../../components/feature/LanguageSelector';
 
 interface SettingsProps {
   onBack: () => void;
@@ -354,8 +355,11 @@ export default function Settings({ onBack, onNavigateSubscription }: SettingsPro
                   }}
                   className="w-full px-4 py-3 bg-[#0F1419] border border-[#3D3428]/30 rounded-lg text-white focus:outline-none focus:border-[#C9A961]/30 text-sm cursor-pointer"
                 >
-                  <option value="de">🇩🇪 Deutsch</option>
-                  <option value="en">🇬🇧 English</option>
+                  {SUPPORTED_LANGUAGES.map(lang => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.nativeName} ({lang.name})
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
