@@ -207,7 +207,7 @@ const Overview = () => {
               <p className="text-xs sm:text-sm text-gray-400 mt-1">
                 {subscription.credits === -1
                   ? t('overview.unlimitedCredits', 'Unlimited credits available')
-                  : t('overview.creditsAvailable', '{{count}} credits available', { count: subscription.credits.toLocaleString() })}
+                  : `${subscription.credits.toLocaleString()} ${t('overview.creditsAvailable', 'credits available')}`}
               </p>
             </div>
           </div>
