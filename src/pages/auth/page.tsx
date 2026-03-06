@@ -500,7 +500,7 @@ export default function AuthPage() {
 
   // Email Verification View
   const renderVerificationView = () => (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-mail-check-line text-[#C9A961] text-4xl"></i>
@@ -614,7 +614,7 @@ export default function AuthPage() {
 
   // Forgot Password View
   const renderForgotView = () => (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-lock-unlock-line text-[#C9A961] text-4xl"></i>
@@ -717,7 +717,7 @@ export default function AuthPage() {
 
   // Reset Password View
   const renderResetView = () => (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-[#3D3428]/30 to-[#C9A961]/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <i className="ri-key-2-line text-[#C9A961] text-4xl"></i>
@@ -887,8 +887,8 @@ export default function AuthPage() {
         </div>
 
         {/* FIXED: Content ist jetzt immer zentriert, unabhängig vom rechten Formular */}
-        <div className="relative z-10 w-full h-full flex items-center justify-center px-12 xl:px-20">
-          <div className="w-full max-w-xl">
+        <div className="relative z-10 w-full h-full flex items-center justify-center lg:justify-end px-12 lg:px-0 lg:pr-12 xl:pr-32">
+          <div className="w-full max-w-xl lg:max-w-md xl:max-w-xl">
             {/* Logo */}
             <a href="/" className="flex items-center space-x-3 cursor-pointer group mb-8">
               <div className="relative w-12 h-12 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-xl flex items-center justify-center shadow-lg shadow-[#C9A961]/20 group-hover:shadow-[#C9A961]/40 transition-all duration-300">
@@ -996,7 +996,7 @@ export default function AuthPage() {
           ) : mode === 'reset' ? (
             renderResetView()
           ) : (
-            <div className="w-full max-w-md mx-auto">
+            <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-12 xl:ml-32">
               {/* Mode Toggle */}
               <div className="flex bg-[#1A1F26] rounded-xl p-1 mb-8">
                 <button
