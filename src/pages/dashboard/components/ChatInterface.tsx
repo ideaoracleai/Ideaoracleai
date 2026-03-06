@@ -1430,7 +1430,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                 placeholder={isListening ? t('chat.listeningPlaceholder', 'Ich höre zu... Sprechen Sie jetzt.') : t('chat.inputPlaceholder')}
                 rows={1}
                 disabled={isTyping || (!subscription.isUnlimited && subscription.credits < CREDITS_PER_QUESTION)}
-                className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none text-sm max-h-32 overflow-y-auto disabled:opacity-50"
+                className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none text-base md:text-sm max-h-32 overflow-y-auto disabled:opacity-50"
                 style={{ minHeight: '24px' }}
               />
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3D3428]/30">

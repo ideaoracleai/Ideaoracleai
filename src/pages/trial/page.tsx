@@ -613,11 +613,10 @@ export default function TrialPage() {
                     </div>
                   )}
                   <div
-                    className={`max-w-3xl ${
-                      message.role === 'user'
+                    className={`max-w-3xl ${message.role === 'user'
                         ? 'bg-[#C9A961] text-[#0F1419] rounded-2xl rounded-tr-sm'
                         : 'bg-[#1A1F26] text-white rounded-2xl rounded-tl-sm'
-                    } px-5 py-4`}
+                      } px-5 py-4`}
                   >
                     <div className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</div>
                     {message.role === 'assistant' && message.rating && (
@@ -651,24 +650,24 @@ export default function TrialPage() {
                         {i18n.language.startsWith('de')
                           ? 'KI schreibt...'
                           : i18n.language.startsWith('en')
-                          ? 'AI is typing...'
-                          : i18n.language.startsWith('es')
-                          ? 'IA está escribiendo...'
-                          : i18n.language.startsWith('fr')
-                          ? 'IA écrit...'
-                          : i18n.language.startsWith('ru')
-                          ? 'ИИ пишет...'
-                          : i18n.language.startsWith('zh')
-                          ? 'AI 正在输入...'
-                          : i18n.language.startsWith('ja')
-                          ? 'AIが入力中...'
-                          : i18n.language.startsWith('ko')
-                          ? 'AI가 입력 중...'
-                          : i18n.language.startsWith('ar')
-                          ? 'الذكاء الاصطناعي يكتب...'
-                          : i18n.language.startsWith('tr')
-                          ? 'AI yazıyor...'
-                          : 'AI is typing...'}
+                            ? 'AI is typing...'
+                            : i18n.language.startsWith('es')
+                              ? 'IA está escribiendo...'
+                              : i18n.language.startsWith('fr')
+                                ? 'IA écrit...'
+                                : i18n.language.startsWith('ru')
+                                  ? 'ИИ пишет...'
+                                  : i18n.language.startsWith('zh')
+                                    ? 'AI 正在输入...'
+                                    : i18n.language.startsWith('ja')
+                                      ? 'AIが入力中...'
+                                      : i18n.language.startsWith('ko')
+                                        ? 'AI가 입력 중...'
+                                        : i18n.language.startsWith('ar')
+                                          ? 'الذكاء الاصطناعي يكتب...'
+                                          : i18n.language.startsWith('tr')
+                                            ? 'AI yazıyor...'
+                                            : 'AI is typing...'}
                       </span>
                     </div>
                   </div>
@@ -732,12 +731,12 @@ export default function TrialPage() {
                   credits <= 0
                     ? 'Keine Credits mehr verfügbar...'
                     : isListening
-                    ? t('chat.listeningPlaceholder', 'Ich höre zu... Sprechen Sie jetzt.')
-                    : t('chat.inputPlaceholder')
+                      ? t('chat.listeningPlaceholder', 'Ich höre zu... Sprechen Sie jetzt.')
+                      : t('chat.inputPlaceholder')
                 }
                 rows={1}
                 disabled={isTyping || credits <= 0}
-                className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none text-sm max-h-32 overflow-y-auto disabled:opacity-50"
+                className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none text-base md:text-sm max-h-32 overflow-y-auto disabled:opacity-50"
                 style={{ minHeight: '24px' }}
               />
               <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#3D3428]/30">
@@ -746,9 +745,8 @@ export default function TrialPage() {
                     type="button"
                     onClick={startListening}
                     disabled={!speechSupported || isTyping || credits <= 0}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-white hover:bg-[#1A1F26]'
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-white hover:bg-[#1A1F26]'
+                      }`}
                     title={isListening ? t('chat.stopListening', 'Aufnahme stoppen') : t('chat.voice', 'Sprechen')}
                   >
                     <i className={isListening ? 'ri-stop-fill text-lg' : 'ri-mic-line text-lg'}></i>

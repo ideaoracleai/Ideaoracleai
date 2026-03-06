@@ -99,11 +99,10 @@ export default function AIAssistant() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.role === 'user'
                       ? 'bg-[#C9A961] text-[#0F1419]'
                       : 'bg-white text-gray-800 shadow-sm border border-gray-100'
-                  }`}
+                    }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
@@ -131,7 +130,7 @@ export default function AIAssistant() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={t('aiAssistant.placeholder')}
-                className="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C9A961] focus:border-transparent text-sm max-h-32"
+                className="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C9A961] focus:border-transparent text-base md:text-sm max-h-32"
                 rows={1}
               />
               <button
