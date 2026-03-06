@@ -67,7 +67,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1419] flex overflow-hidden">
+    <div className="h-screen bg-[#0F1419] flex overflow-hidden">
       <Sidebar
         activeView={activeView}
         onViewChange={setActiveView}

@@ -31,7 +31,7 @@ export default function Sidebar({
 
   const menuItems = [
     { id: 'dashboard', icon: 'ri-dashboard-line', label: t('dashboard.sidebar.overview') },
-    { id: 'chat', icon: 'ri-chat-smile-ai-line', label: t('dashboard.sidebar.aiChat', 'AI Assistant') },
+    { id: 'chat', icon: 'ri-robot-line', label: t('dashboard.sidebar.aiChat', 'AI Assistant') },
     { id: 'history', icon: 'ri-history-line', label: t('dashboard.sidebar.history') },
     { id: 'credits', icon: 'ri-coin-line', label: t('dashboard.sidebar.credits') },
     { id: 'subscription', icon: 'ri-bank-card-line', label: t('settings.subscriptionLink') },
@@ -50,8 +50,8 @@ export default function Sidebar({
         className={`
           hidden md:flex flex-col flex-shrink-0
           bg-[#1A1F26] border-r border-[#3D3428]/30
-          h-screen sticky top-0
-          transition-all duration-300 ease-in-out
+          h-screen sticky top-0 overflow-hidden
+          transition-all duration-300 ease-in-out z-20
           ${isCollapsed ? 'w-[72px]' : 'w-60'}
         `}
       >
