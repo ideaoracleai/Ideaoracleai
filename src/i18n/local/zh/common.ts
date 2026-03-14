@@ -308,6 +308,20 @@ export const common = {
   'auth.or': '或继续使用',
   'auth.social.google': '使用Google继续',
   'auth.social.apple': '使用Apple继续',
+
+  'admin.title': '管理面板',
+  'admin.subtitle': '控制中心',
+  'admin.superAdmin': '超级管理员',
+  'admin.logout': '退出登录',
+  'admin.tabs.users': '用户管理',
+  'admin.tabs.downgrades': '降级',
+  'admin.tabs.tips': '每日提示',
+  'admin.tabs.coupons': '优惠券代码',
+  'admin.tabs.website': '网站编辑器',
+  'admin.tabs.ai': 'AI设置',
+  'admin.tabs.transactions': '交易日志',
+  'admin.tabs.stats': '统计数据',
+
 };
 
 export default common;

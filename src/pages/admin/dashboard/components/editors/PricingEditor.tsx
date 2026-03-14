@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { defaultPricingData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Plan {
   id: string;
@@ -34,11 +35,9 @@ export default function PricingEditor({ onSave }: Props) {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('website_pricing', JSON.stringify(data));
-      // Dispatch custom event for same-tab updates
-      window.dispatchEvent(new Event('website_data_updated'));
+      await saveEditorData('website_pricing', data);
       onSave();
     } catch (e) {
       console.error('Failed to save pricing data:', e);

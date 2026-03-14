@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultNavbarData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface NavLink {
   label: string;
@@ -32,9 +33,8 @@ export default function NavbarEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_navbar', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_navbar', data);
     alert('Navigation gespeichert!');
   };
 

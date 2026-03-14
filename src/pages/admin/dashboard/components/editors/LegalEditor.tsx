@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { defaultLegalData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface LegalSection {
   title: string;
@@ -30,9 +31,9 @@ export default function LegalEditor({ onSave }: Props) {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('website_legal', JSON.stringify(data));
+      await saveEditorData('website_legal', data);
       onSave();
     } catch (e) {
       console.error('Failed to save legal data:', e);

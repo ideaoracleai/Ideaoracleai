@@ -321,6 +321,20 @@ export const common = {
   'auth.or': 'ose vazhdoni me',
   'auth.social.google': 'Vazhdoni me Google',
   'auth.social.apple': 'Vazhdoni me Apple',
+
+  'admin.title': 'Paneli Admin',
+  'admin.subtitle': 'Qendra e Kontrollit',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Dil',
+  'admin.tabs.users': 'Menaxhimi i Përdoruesve',
+  'admin.tabs.downgrades': 'Degradime',
+  'admin.tabs.tips': 'Këshilla e Ditës',
+  'admin.tabs.coupons': 'Kode Kuponi',
+  'admin.tabs.website': 'Editor i Faqes',
+  'admin.tabs.ai': 'Cilësimet AI',
+  'admin.tabs.transactions': 'Regjistri i Transaksioneve',
+  'admin.tabs.stats': 'Statistika',
+
 };
 
 export default common;

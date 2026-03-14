@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
+import { saveEditorData } from '../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../supabase/database';
 
 interface AIPreset {
   id: string;
@@ -30,6 +32,55 @@ interface PresetWeight {
 }
 
 const STORAGE_KEY = 'admin_ai_settings';
+
+// ─── IdeaOracle AI Models (branded) ─────────────────────────────────
+interface ModelOption {
+  id: string;
+  name: string;
+  subtitle: string;
+  icon: string;
+  description: string;
+  badge?: string;
+  gradient: string;
+  iconBg: string;
+  features: string[];
+}
+
+const modelOptions: ModelOption[] = [
+  {
+    id: 'ideaoracle-standard',
+    name: 'IdeaOracle AI',
+    subtitle: 'Standard',
+    icon: 'ri-compass-3-line',
+    description: 'Ausgewogene Analyse mit hoher Qualität. Die beste Wahl für die meisten Nischen-Bewertungen und Ideen-Validierungen.',
+    badge: 'STANDARD',
+    gradient: 'from-[#C9A961] to-[#A08748]',
+    iconBg: 'bg-[#C9A961]/20 text-[#C9A961]',
+    features: ['Präzise Analysen', 'Beste Balance', 'Empfohlen'],
+  },
+  {
+    id: 'ideaoracle-fast',
+    name: 'IdeaOracle AI',
+    subtitle: 'Fast',
+    icon: 'ri-flashlight-line',
+    description: 'Blitzschnelle Antworten für schnelle Nischen-Checks, Brainstorming und erste Einschätzungen. Ideal wenn Geschwindigkeit zählt.',
+    badge: 'SCHNELL',
+    gradient: 'from-blue-500 to-cyan-400',
+    iconBg: 'bg-blue-500/20 text-blue-400',
+    features: ['Schnellste Antworten', 'Quick-Checks', 'Brainstorming'],
+  },
+  {
+    id: 'ideaoracle-thinking',
+    name: 'IdeaOracle AI',
+    subtitle: 'Thinking',
+    icon: 'ri-brain-line',
+    description: 'Tiefgehende Analyse mit erweitertem logischen Denken. Für komplexe Marktanalysen, kritische Bewertungen und strategische Planung.',
+    badge: 'PREMIUM',
+    gradient: 'from-purple-500 to-violet-400',
+    iconBg: 'bg-purple-500/20 text-purple-400',
+    features: ['Tiefste Analyse', 'Logisches Denken', 'Strategie'],
+  },
+];
 
 const exampleQuestions = [
   { id: 'niche', question: 'Welche profitable Nische empfiehlst du mir?', icon: 'ri-search-line' },
@@ -368,6 +419,7 @@ function mergePresetSettings(
 export default function AISettingsEditor() {
   const [activePresets, setActivePresets] = useState<string[]>(['balanced']);
   const [presetWeights, setPresetWeights] = useState<PresetWeight[]>([{ id: 'balanced', weight: 100 }]);
+  const [selectedModel, setSelectedModel] = useState<string>('ideaoracle-standard');
   const [useManualWeights, setUseManualWeights] = useState(false);
   const [customInstructions, setCustomInstructions] = useState('');
   const [manualOverrides, setManualOverrides] = useState<Partial<AISettings>>({});
@@ -398,38 +450,31 @@ export default function AISettingsEditor() {
     };
   }, [activePresets, customInstructions, manualOverrides, autoRating, showSources, presetWeights]);
 
+  const applyParsed = (parsed: Record<string, unknown>) => {
+    if (parsed.model) setSelectedModel(parsed.model as string);
+    if (Array.isArray(parsed.activePresets)) setActivePresets(parsed.activePresets as string[]);
+    else if (parsed.activePreset) setActivePresets([parsed.activePreset as string]);
+    if (parsed.presetWeights) setPresetWeights(parsed.presetWeights as PresetWeight[]);
+    if (typeof parsed.useManualWeights === 'boolean') setUseManualWeights(parsed.useManualWeights);
+    if (parsed.customInstructions) setCustomInstructions(parsed.customInstructions as string);
+    if (parsed.manualOverrides) setManualOverrides(parsed.manualOverrides as Partial<AISettings>);
+    if (typeof parsed.autoRating === 'boolean') setAutoRating(parsed.autoRating);
+    if (typeof parsed.showSources === 'boolean') setShowSources(parsed.showSources);
+  };
+
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.activePresets && Array.isArray(parsed.activePresets)) {
-          setActivePresets(parsed.activePresets);
-        } else if (parsed.activePreset) {
-          setActivePresets([parsed.activePreset]);
-        }
-        if (parsed.presetWeights) {
-          setPresetWeights(parsed.presetWeights);
-        }
-        if (typeof parsed.useManualWeights === 'boolean') {
-          setUseManualWeights(parsed.useManualWeights);
-        }
-        if (parsed.customInstructions) {
-          setCustomInstructions(parsed.customInstructions);
-        }
-        if (parsed.manualOverrides) {
-          setManualOverrides(parsed.manualOverrides);
-        }
-        if (typeof parsed.autoRating === 'boolean') {
-          setAutoRating(parsed.autoRating);
-        }
-        if (typeof parsed.showSources === 'boolean') {
-          setShowSources(parsed.showSources);
-        }
-      } catch (e) {
-        console.error('Failed to load AI settings:', e);
-      }
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) applyParsed(JSON.parse(stored));
+    } catch (e) {
+      console.error('Failed to load AI settings from localStorage:', e);
     }
+    getWebsiteSettings(STORAGE_KEY).then(value => {
+      if (value && typeof value === 'object') {
+        applyParsed(value as Record<string, unknown>);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+      }
+    });
   }, []);
 
   const togglePreset = (presetId: string) => {
@@ -487,22 +532,21 @@ export default function AISettingsEditor() {
     updateManualOverride('focusAreas', newAreas);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    const payload = {
+      settings: mergedSettings,
+      activePresets,
+      presetWeights,
+      useManualWeights,
+      customInstructions,
+      manualOverrides,
+      autoRating,
+      showSources,
+      model: selectedModel,
+      isCustom: Object.keys(manualOverrides).length > 0,
+    };
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          settings: mergedSettings,
-          activePresets,
-          presetWeights,
-          useManualWeights,
-          customInstructions,
-          manualOverrides,
-          autoRating,
-          showSources,
-          isCustom: Object.keys(manualOverrides).length > 0,
-        })
-      );
+      await saveEditorData(STORAGE_KEY, payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
@@ -512,6 +556,7 @@ export default function AISettingsEditor() {
 
   const handleReset = () => {
     setActivePresets(['balanced']);
+    setSelectedModel('ideaoracle-standard');
     setPresetWeights([{ id: 'balanced', weight: 100 }]);
     setUseManualWeights(false);
     setCustomInstructions('');
@@ -841,6 +886,116 @@ export default function AISettingsEditor() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* ─── KI-Modell Auswahl ─── */}
+      <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-5">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#C9A961] to-[#A08748] rounded-lg flex items-center justify-center shadow-lg shadow-[#C9A961]/20">
+            <i className="ri-compass-3-line text-[#0F1419] text-xl"></i>
+          </div>
+          <div>
+            <h4 className="text-base font-bold text-white">IdeaOracle AI Modell</h4>
+            <p className="text-xs text-slate-400">Wähle die KI-Engine für alle Nutzer-Analysen</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {modelOptions.map((model) => {
+            const isSelected = selectedModel === model.id;
+            return (
+              <button
+                key={model.id}
+                onClick={() => setSelectedModel(model.id)}
+                className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 cursor-pointer group overflow-hidden ${
+                  isSelected
+                    ? `border-transparent bg-gradient-to-br ${model.gradient} shadow-xl`
+                    : 'border-slate-700 bg-slate-900/60 hover:border-slate-500 hover:bg-slate-800/80'
+                }`}
+              >
+                {/* Subtle glow effect when selected */}
+                {isSelected && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl"></div>
+                )}
+
+                {/* Badge */}
+                {model.badge && (
+                  <span className={`relative z-10 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold mb-3 ${
+                    isSelected
+                      ? 'bg-white/20 text-white'
+                      : model.badge === 'PREMIUM' ? 'bg-purple-500/15 text-purple-400'
+                      : model.badge === 'SCHNELL' ? 'bg-blue-500/15 text-blue-400'
+                      : 'bg-[#C9A961]/15 text-[#C9A961]'
+                  }`}>
+                    {model.badge === 'STANDARD' && <><i className="ri-star-fill mr-1 text-[8px]"></i>{model.badge}</>}
+                    {model.badge === 'SCHNELL' && <><i className="ri-flashlight-fill mr-1 text-[8px]"></i>{model.badge}</>}
+                    {model.badge === 'PREMIUM' && <><i className="ri-vip-crown-2-fill mr-1 text-[8px]"></i>{model.badge}</>}
+                  </span>
+                )}
+
+                {/* Icon + Title */}
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                    isSelected ? 'bg-white/20' : model.iconBg
+                  }`}>
+                    <i className={`${model.icon} text-2xl ${isSelected ? 'text-white' : ''}`}></i>
+                  </div>
+                  <div>
+                    <span className={`text-sm font-bold block ${isSelected ? 'text-white' : 'text-white'}`}>
+                      {model.name}
+                    </span>
+                    <span className={`text-base font-extrabold block leading-tight ${
+                      isSelected ? 'text-white/90' : model.iconBg.includes('C9A961') ? 'text-[#C9A961]' : model.iconBg.includes('blue') ? 'text-blue-400' : 'text-purple-400'
+                    }`}>
+                      {model.subtitle}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className={`relative z-10 text-xs leading-relaxed mb-3 ${
+                  isSelected ? 'text-white/80' : 'text-slate-400'
+                }`}>{model.description}</p>
+
+                {/* Feature chips */}
+                <div className="relative z-10 flex flex-wrap gap-1.5">
+                  {model.features.map((feature) => (
+                    <span key={feature} className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      isSelected ? 'bg-white/15 text-white/90' : 'bg-slate-800 text-slate-500'
+                    }`}>
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Selection check */}
+                <div
+                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all z-10 ${
+                    isSelected ? 'bg-white/25 ring-2 ring-white/40' : 'border-2 border-slate-600 group-hover:border-slate-500'
+                  }`}
+                >
+                  {isSelected && <i className="ri-check-line text-white text-sm font-bold"></i>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active model info */}
+        {(() => {
+          const active = modelOptions.find(m => m.id === selectedModel);
+          return active ? (
+            <div className="mt-4 flex items-center gap-2.5 px-3 py-2.5 bg-slate-900/60 rounded-lg border border-slate-700/50">
+              <div className={`w-6 h-6 rounded-md flex items-center justify-center bg-gradient-to-br ${active.gradient}`}>
+                <i className={`${active.icon} text-white text-xs`}></i>
+              </div>
+              <span className="text-xs text-slate-400">
+                Aktives Modell: <strong className="text-white">{active.name} {active.subtitle}</strong>
+                {' '}— Alle Nutzer erhalten Antworten von diesem Modell.
+              </span>
+            </div>
+          ) : null;
+        })()}
       </div>
 
       {/* Empfehlungen für optimale Ergebnisse */}

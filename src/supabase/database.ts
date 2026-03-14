@@ -340,38 +340,221 @@ export async function deleteIdeaRecord(uid: string, ideaId: string): Promise<voi
 
 // ─── Admin: All Users ─────────────────────────────────────────────────────────
 
-/** Get all users (Admin only — only works with service key) */
-export async function getAllUsers(): Promise<(UserDocument & { uid: string })[]> {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) throw error;
-    return (data ?? []).map((row) => ({
-        uid: row.id,
-        ...rowToUserDoc(row as Record<string, unknown>),
-    }));
+export interface AdminUser {
+    uid: string;
+    name: string;
+    email: string;
+    plan: string;
+    credits: number;
+    maxCredits: number;
+    joinDate: string;
+    totalSpent: number;
+    isBlocked: boolean;
+    subscriptionStatus: 'active' | 'cancelled' | 'overdue';
+    cancelledAt: string | null;
+    cancelledEffectiveDate: string | null;
+    cancellationReason: string | null;
 }
 
-/** Get users by plan (Admin only) */
-export async function getUsersByPlan(
-    plan: string
-): Promise<(UserDocument & { uid: string })[]> {
-    const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('plan', plan);
+function rowToAdminUser(row: Record<string, unknown>): AdminUser {
+    return {
+        uid: row.id as string,
+        name: (row.name as string) ?? '',
+        email: (row.email as string) ?? '',
+        plan: (row.plan as string) ?? 'Starter',
+        credits: (row.credits as number) ?? 0,
+        maxCredits: (row.max_credits as number) ?? 0,
+        joinDate: (row.created_at as string) ?? new Date().toISOString(),
+        totalSpent: (row.total_spent as number) ?? 0,
+        isBlocked: (row.is_blocked as boolean) ?? false,
+        subscriptionStatus: ((row.subscription_status as string) ?? 'active') as AdminUser['subscriptionStatus'],
+        cancelledAt: (row.cancelled_at as string) ?? null,
+        cancelledEffectiveDate: (row.cancelled_effective_date as string) ?? null,
+        cancellationReason: (row.cancellation_reason as string) ?? null,
+    };
+}
+
+/** Get all users for admin panel */
+export async function getAllUsers(): Promise<AdminUser[]> {
+    const { data, error } = await supabase.rpc('get_all_users_admin');
     if (error) throw error;
-    return (data ?? []).map((row) => ({
-        uid: row.id,
-        ...rowToUserDoc(row as Record<string, unknown>),
-    }));
+    return (data ?? []).map((row: Record<string, unknown>) => rowToAdminUser(row));
+}
+
+/** Block or unblock a user */
+export async function adminSetUserBlocked(uid: string, blocked: boolean): Promise<void> {
+    const { error } = await supabase.rpc('update_user_admin', {
+        p_user_id: uid, p_updates: { is_blocked: blocked },
+    });
+    if (error) throw error;
+}
+
+/** Cancel user subscription */
+export async function adminCancelSubscription(
+    uid: string,
+    reason: string,
+    effectiveDate: string
+): Promise<void> {
+    const { error } = await supabase.rpc('update_user_admin', {
+        p_user_id: uid,
+        p_updates: {
+            subscription_status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancelled_effective_date: effectiveDate,
+            cancellation_reason: reason,
+        },
+    });
+    if (error) throw error;
+}
+
+/** Reactivate user subscription */
+export async function adminReactivateSubscription(uid: string): Promise<void> {
+    const { error } = await supabase.rpc('update_user_admin', {
+        p_user_id: uid,
+        p_updates: {
+            subscription_status: 'active',
+            cancelled_at: null,
+            cancelled_effective_date: null,
+            cancellation_reason: null,
+        },
+    });
+    if (error) throw error;
 }
 
 /** Update user plan (Admin only) */
-export async function adminUpdateUserPlan(
-    uid: string,
-    plan: string,
-    credits: number
-): Promise<void> {
-    await updateUserDocument(uid, { plan, credits, maxCredits: credits });
+export async function adminUpdateUserPlan(uid: string, plan: string, credits: number): Promise<void> {
+    const planCredits: Record<string, number> = { Starter: 0, Pro: 5000, Builder: 999999 };
+    const maxCred = planCredits[plan] ?? credits;
+    const { error } = await supabase.rpc('update_user_admin', {
+        p_user_id: uid,
+        p_updates: { plan, credits, max_credits: maxCred },
+    });
+    if (error) throw error;
+}
+
+/** Add free credits to user */
+export async function adminAddCredits(uid: string, credits: number): Promise<void> {
+    const users = await getAllUsers();
+    const current = users.find(u => u.uid === uid)?.credits ?? 0;
+    const { error } = await supabase.rpc('update_user_admin', {
+        p_user_id: uid,
+        p_updates: { credits: current + credits },
+    });
+    if (error) throw error;
+}
+
+/** Get admin statistics from real Supabase data */
+export async function getAdminStats(): Promise<{
+    totalUsers: number;
+    activeSubscriptions: number;
+    planDistribution: Record<string, number>;
+    totalRevenue: number;
+    blockedUsers: number;
+    cancelledUsers: number;
+}> {
+    const { data, error } = await supabase.rpc('get_admin_stats_rpc');
+    if (error) throw error;
+    const s = data as Record<string, unknown>;
+    return {
+        totalUsers: (s.total_users as number) ?? 0,
+        activeSubscriptions: (s.active_subscriptions as number) ?? 0,
+        planDistribution: (s.plan_distribution as Record<string, number>) ?? {},
+        totalRevenue: (s.total_revenue as number) ?? 0,
+        blockedUsers: 0,
+        cancelledUsers: (s.cancelled_users as number) ?? 0,
+    };
+}
+
+// ─── Admin: Coupons CRUD ───────────────────────────────────────────────────────
+
+/** Get all coupons for admin */
+export async function adminGetAllCoupons(): Promise<CouponDocument[]> {
+    const { data, error } = await supabase.rpc('get_all_coupons_admin');
+    if (error) throw error;
+    return ((data ?? []) as Record<string, unknown>[]).map(row => ({
+        id: row.id as string,
+        code: row.code as string,
+        plan: row.plan as string,
+        duration: row.duration as number,
+        durationUnit: row.duration_unit as 'days' | 'months',
+        credits: row.credits as number,
+        isActive: row.is_active as boolean,
+        usedCount: (row.used_count as number) ?? 0,
+        maxUses: (row.max_uses as number) ?? 0,
+        category: row.category as 'registration' | 'trial',
+        expiresAt: row.expires_at as string | null,
+        createdAt: row.created_at as string,
+    }));
+}
+
+/** Create a new coupon */
+export async function adminCreateCoupon(coupon: Omit<CouponDocument, 'id' | 'createdAt' | 'usedCount'>): Promise<void> {
+    const { error } = await supabase.rpc('create_coupon_admin', {
+        p_code: coupon.code.toUpperCase(),
+        p_plan: coupon.plan,
+        p_duration: coupon.duration,
+        p_duration_unit: coupon.durationUnit,
+        p_credits: coupon.credits,
+        p_is_active: coupon.isActive,
+        p_max_uses: coupon.maxUses,
+        p_category: coupon.category,
+        p_expires_at: coupon.expiresAt ?? '',
+    });
+    if (error) throw error;
+}
+
+/** Update coupon active status */
+export async function adminToggleCoupon(id: string, isActive: boolean): Promise<void> {
+    const { error } = await supabase.rpc('toggle_coupon_admin', {
+        p_coupon_id: id,
+        p_active: isActive,
+    });
+    if (error) throw error;
+}
+
+/** Delete a coupon */
+export async function adminDeleteCoupon(id: string): Promise<void> {
+    const { error } = await supabase.rpc('delete_coupon_admin', { p_coupon_id: id });
+    if (error) throw error;
+}
+
+// ─── Admin: Tips of the Day ────────────────────────────────────────────────────
+
+/** Get all tips */
+export async function adminGetTips(): Promise<unknown[]> {
+    const data = await getWebsiteSettings('admin_tips_of_day');
+    return Array.isArray(data) ? data : [];
+}
+
+/** Save all tips */
+export async function adminSaveTips(tips: unknown[]): Promise<void> {
+    await saveWebsiteSettings('admin_tips_of_day', tips);
+    localStorage.setItem('admin_tips_of_day', JSON.stringify(tips));
+}
+
+// ─── Admin: Credit History ─────────────────────────────────────────────────────
+
+/** Get recent credit history across all users (for Transaction Log) */
+export async function adminGetCreditHistory(limit = 100): Promise<{
+    id: string;
+    userId: string;
+    userEmail: string;
+    action: string;
+    change: number;
+    balance: number;
+    date: string;
+}[]> {
+    const { data, error } = await supabase.rpc('get_all_credit_history_admin', { p_limit: limit });
+    if (error) throw error;
+    return ((data ?? []) as Record<string, unknown>[]).map(row => ({
+        id: row.id as string,
+        userId: row.user_id as string,
+        userEmail: '',
+        action: row.action as string,
+        change: row.change as number,
+        balance: row.balance as number,
+        date: row.date as string,
+    }));
 }
 
 // ─── Coupons ──────────────────────────────────────────────────────────────────
@@ -428,6 +611,36 @@ export async function useCoupon(couponId: string, usedCount: number): Promise<vo
         .update(updateData)
         .eq('id', couponId);
 
+    if (error) throw error;
+}
+
+// ─── Website Settings (CMS) ───────────────────────────────────────────────────
+
+/** Fetch a single website setting by key */
+export async function getWebsiteSettings(key: string): Promise<unknown | null> {
+    const { data, error } = await supabase
+        .from('website_settings')
+        .select('value')
+        .eq('key', key)
+        .single();
+    if (error || !data) return null;
+    return data.value;
+}
+
+/** Fetch all website settings as a key→value map */
+export async function getAllWebsiteSettings(): Promise<Record<string, unknown>> {
+    const { data, error } = await supabase
+        .from('website_settings')
+        .select('key, value');
+    if (error || !data) return {};
+    return Object.fromEntries(data.map((row) => [row.key, row.value]));
+}
+
+/** Upsert a single website setting */
+export async function saveWebsiteSettings(key: string, value: unknown): Promise<void> {
+    const { error } = await supabase
+        .from('website_settings')
+        .upsert({ key, value, updated_at: new Date().toISOString() });
     if (error) throw error;
 }
 

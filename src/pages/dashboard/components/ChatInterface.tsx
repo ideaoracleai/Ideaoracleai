@@ -244,6 +244,39 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [showModelPicker, setShowModelPicker] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(() => {
+    try {
+      const stored = localStorage.getItem('admin_ai_settings');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.model) return parsed.model;
+      }
+    } catch {}
+    return 'ideaoracle-standard';
+  });
+  const modelPickerRef = useRef<HTMLDivElement>(null);
+
+  // IdeaOracle AI model options for the chat UI
+  const chatModelOptions = [
+    { id: 'ideaoracle-standard', name: 'IdeaOracle AI', subtitle: 'Standard', icon: 'ri-compass-3-line', color: 'text-[#C9A961]', bg: 'bg-[#C9A961]', desc: t('chat.modelStandard', 'Ausgewogen & präzise') },
+    { id: 'ideaoracle-fast', name: 'IdeaOracle AI', subtitle: 'Fast', icon: 'ri-flashlight-line', color: 'text-blue-400', bg: 'bg-blue-500', desc: t('chat.modelFast', 'Blitzschnell') },
+    { id: 'ideaoracle-thinking', name: 'IdeaOracle AI', subtitle: 'Thinking', icon: 'ri-brain-line', color: 'text-purple-400', bg: 'bg-purple-500', desc: t('chat.modelThinking', 'Tiefgehend') },
+  ];
+
+  const activeModel = chatModelOptions.find(m => m.id === selectedModel) || chatModelOptions[0];
+
+  // Save model selection to localStorage so demoAI.ts can read it
+  const handleModelSelect = (modelId: string) => {
+    setSelectedModel(modelId);
+    setShowModelPicker(false);
+    try {
+      const stored = localStorage.getItem('admin_ai_settings');
+      const current = stored ? JSON.parse(stored) : {};
+      current.model = modelId;
+      localStorage.setItem('admin_ai_settings', JSON.stringify(current));
+    } catch {}
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -500,6 +533,9 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
         setShowExportDropdown(false);
+      }
+      if (modelPickerRef.current && !modelPickerRef.current.contains(event.target as Node)) {
+        setShowModelPicker(false);
       }
       setShowSessionExportDropdown(null);
     };
@@ -1287,14 +1323,6 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                         )}
                       </div>
                     )}
-                    {message.role === 'assistant' && message.rating && (
-                      <div className="mt-3 pt-3 border-t border-[#3D3428]/30 flex items-center gap-2">
-                        <span className="text-lg">{getRatingEmoji(message.rating)}</span>
-                        <span className="text-xs font-semibold text-gray-400">
-                          {getRatingLabel(message.rating)}
-                        </span>
-                      </div>
-                    )}
                   </div>
                   {message.role === 'user' && (
                     <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#3D3428] rounded-lg items-center justify-center flex-shrink-0 hidden sm:flex">
@@ -1463,6 +1491,63 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
                       {t('chat.recording', 'Aufnahme läuft...')}
                     </span>
                   )}
+
+                  {/* ─── Model Selector ─── */}
+                  <div className="relative" ref={modelPickerRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowModelPicker(!showModelPicker)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+                        showModelPicker
+                          ? 'border-[#C9A961]/40 bg-[#C9A961]/10 text-[#C9A961]'
+                          : 'border-[#3D3428]/30 text-gray-400 hover:text-white hover:border-[#3D3428]/60'
+                      }`}
+                      title={t('chat.selectModel', 'Modell wählen')}
+                    >
+                      <i className={`${activeModel.icon} text-sm ${activeModel.color}`}></i>
+                      <span className="hidden sm:inline">{activeModel.subtitle}</span>
+                      <i className={`ri-arrow-${showModelPicker ? 'up' : 'down'}-s-line text-xs opacity-60`}></i>
+                    </button>
+
+                    {/* Dropdown */}
+                    {showModelPicker && (
+                      <div className="absolute bottom-full right-0 mb-2 w-64 bg-[#1A1F26] border border-[#3D3428]/50 rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-50">
+                        <div className="px-3 py-2.5 border-b border-[#3D3428]/30">
+                          <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">{t('chat.selectModel', 'Modell wählen')}</p>
+                        </div>
+                        {chatModelOptions.map((model) => {
+                          const isActive = selectedModel === model.id;
+                          return (
+                            <button
+                              key={model.id}
+                              onClick={() => handleModelSelect(model.id)}
+                              className={`w-full px-3 py-2.5 flex items-center gap-3 text-left transition-all cursor-pointer ${
+                                isActive
+                                  ? 'bg-[#C9A961]/10'
+                                  : 'hover:bg-[#0F1419]/50'
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                isActive ? `${model.bg}/20` : 'bg-slate-800'
+                              }`}>
+                                <i className={`${model.icon} text-base ${isActive ? model.color : 'text-gray-400'}`}></i>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-gray-300'}`}>{model.name}</span>
+                                  <span className={`text-xs font-bold ${isActive ? model.color : 'text-gray-500'}`}>{model.subtitle}</span>
+                                </div>
+                                <p className="text-[10px] text-gray-500">{model.desc}</p>
+                              </div>
+                              {isActive && (
+                                <i className={`ri-check-line ${model.color} text-sm flex-shrink-0`}></i>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={handleSendMessage}

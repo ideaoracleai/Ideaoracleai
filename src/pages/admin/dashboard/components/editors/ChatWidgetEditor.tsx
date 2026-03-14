@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { saveWebsiteSettings, getWebsiteSettings } from '../../../../../supabase/database';
 
 const STORAGE_KEY = 'website_chat_widget';
 
@@ -287,25 +288,31 @@ export default function ChatWidgetEditor() {
 
   // Load saved config on mount
   useEffect(() => {
+    const applyConfig = (parsed: Partial<ChatWidgetConfig>) => {
+      const mergedTexts: Record<string, LanguageTexts> = {};
+      LANGUAGES.forEach(lang => {
+        mergedTexts[lang.code] = {
+          ...DEFAULT_TEXTS[lang.code],
+          ...(parsed.texts?.[lang.code] || {}),
+        };
+      });
+      setConfig({
+        texts: mergedTexts,
+        appearance: { ...DEFAULT_APPEARANCE, ...(parsed.appearance || {}) },
+      });
+    };
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const mergedTexts: Record<string, LanguageTexts> = {};
-        LANGUAGES.forEach(lang => {
-          mergedTexts[lang.code] = {
-            ...DEFAULT_TEXTS[lang.code],
-            ...(parsed.texts?.[lang.code] || {}),
-          };
-        });
-        setConfig({
-          texts: mergedTexts,
-          appearance: { ...DEFAULT_APPEARANCE, ...(parsed.appearance || {}) },
-        });
-      }
+      if (stored) applyConfig(JSON.parse(stored));
     } catch (e) {
       console.error('Failed to load chat widget config:', e);
     }
+    getWebsiteSettings(STORAGE_KEY).then(value => {
+      if (value && typeof value === 'object') {
+        applyConfig(value as Partial<ChatWidgetConfig>);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+      }
+    });
   }, []);
 
   const updateText = useCallback((field: keyof LanguageTexts, value: string) => {
@@ -331,19 +338,13 @@ export default function ChatWidgetEditor() {
     }));
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     try {
       setSaveError('');
-      // Save to localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-
-      // Reload the widget with new config so changes take effect immediately
+      await saveWebsiteSettings(STORAGE_KEY, config);
       reloadWidgetWithConfig(config);
-
-      // Dispatch event for other components
       window.dispatchEvent(new Event('website_data_updated'));
-      window.dispatchEvent(new CustomEvent('chat_widget_updated', { detail: config }));
-
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {

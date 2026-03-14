@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../../supabase/database';
 
 interface DesignSettings {
   primaryColor: string;
@@ -39,13 +41,11 @@ export default function DesignEditor() {
 
   const [saved, setSaved] = useState(false);
 
-  // Load saved settings from localStorage (if any)
   useEffect(() => {
     try {
       const stored = localStorage.getItem('websiteDesign');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Validate parsed object before applying
         if (parsed && typeof parsed === 'object') {
           setSettings((prev) => ({ ...prev, ...parsed }));
         }
@@ -53,17 +53,19 @@ export default function DesignEditor() {
     } catch (error) {
       console.error('Failed to load design settings from localStorage:', error);
     }
+    getWebsiteSettings('websiteDesign').then((value) => {
+      if (value && typeof value === 'object') {
+        setSettings((prev) => ({ ...prev, ...(value as DesignSettings) }));
+        localStorage.setItem('websiteDesign', JSON.stringify(value));
+      }
+    });
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('websiteDesign', JSON.stringify(settings));
+      await saveEditorData('websiteDesign', settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      // Dispatch a custom event so other parts of the app can react
-      window.dispatchEvent(
-        new CustomEvent('websiteDesignUpdated', { detail: settings })
-      );
     } catch (error) {
       console.error('Failed to save design settings:', error);
     }

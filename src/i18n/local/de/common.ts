@@ -681,6 +681,19 @@ export const common = {
   'sub.cvc': 'CVC',
   'sub.cardHolderPlaceholder': 'Max Mustermann',
 
+  'admin.title': 'Admin Dashboard',
+  'admin.subtitle': 'Verwaltungszentrale',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Abmelden',
+  'admin.tabs.users': 'Benutzerverwaltung',
+  'admin.tabs.downgrades': 'Downgrades',
+  'admin.tabs.tips': 'Tipp des Tages',
+  'admin.tabs.coupons': 'Gutschein-Codes',
+  'admin.tabs.website': 'Website-Editor',
+  'admin.tabs.ai': 'KI-Einstellungen',
+  'admin.tabs.transactions': 'Transaktionslog',
+  'admin.tabs.stats': 'Statistiken',
+
 };
 
 export default common;

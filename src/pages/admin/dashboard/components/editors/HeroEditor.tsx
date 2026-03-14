@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultHeroData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Props {
   onSave: () => void;
@@ -29,14 +30,12 @@ export default function HeroEditor({ onSave }: Props) {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('website_hero', JSON.stringify(data));
-      // Dispatch custom event for same-tab updates
-      window.dispatchEvent(new Event('website_data_updated'));
+      await saveEditorData('website_hero', data);
       alert('Hero-Daten gespeichert!');
     } catch (e) {
-      console.error('Could not save hero data to localStorage', e);
+      console.error('Could not save hero data', e);
     }
     onSave();
   };

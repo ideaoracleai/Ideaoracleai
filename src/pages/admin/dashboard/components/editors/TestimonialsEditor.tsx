@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultTestimonialsData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Testimonial {
   stars: number;
@@ -33,9 +34,8 @@ export default function TestimonialsEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_testimonials', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_testimonials', data);
     alert('Testimonials gespeichert!');
   };
 

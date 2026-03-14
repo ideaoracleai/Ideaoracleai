@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultSeoData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Props {
   onSave: () => void;
@@ -20,9 +21,9 @@ export default function SeoEditor({ onSave }: Props) {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('website_seo', JSON.stringify(data));
+      await saveEditorData('website_seo', data);
       onSave();
     } catch (e) {
       console.error('Failed to save SEO data:', e);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { adminGetAllCoupons, adminCreateCoupon, adminDeleteCoupon, adminToggleCoupon } from '../../../../supabase/database';
 
 interface RegistrationCoupon {
   id: string;
@@ -204,136 +205,139 @@ export default function CouponManager() {
     }
   };
 
-  // Load coupons from localStorage on mount
-  useEffect(() => {
-    const savedRegCoupons = localStorage.getItem('admin_registration_coupons');
-    const savedTrialCoupons = localStorage.getItem('admin_trial_coupons');
-    
-    if (savedRegCoupons) {
-      try {
-        setRegistrationCoupons(JSON.parse(savedRegCoupons));
-      } catch {
-        setRegistrationCoupons(defaultRegistrationCoupons);
-        localStorage.setItem('admin_registration_coupons', JSON.stringify(defaultRegistrationCoupons));
-      }
-    } else {
-      setRegistrationCoupons(defaultRegistrationCoupons);
-      localStorage.setItem('admin_registration_coupons', JSON.stringify(defaultRegistrationCoupons));
+  const loadCoupons = async () => {
+    try {
+      const all = await adminGetAllCoupons();
+      const reg = all.filter(c => c.category === 'registration').map(c => ({
+        id: c.id ?? '',
+        code: c.code,
+        category: 'registration' as const,
+        type: 'Coupon',
+        plan: (c.plan ?? 'all') as RegistrationCoupon['plan'],
+        discount: undefined,
+        bonusCredits: c.credits ?? undefined,
+        duration: c.duration ?? undefined,
+        durationUnit: (c.durationUnit ?? 'days') as 'days' | 'months',
+        maxUses: c.maxUses ?? 0,
+        usedCount: c.usedCount ?? 0,
+        expiresAt: c.expiresAt ?? null,
+        createdAt: c.createdAt ?? new Date().toISOString().split('T')[0],
+        isActive: c.isActive,
+      }));
+      const trial = all.filter(c => c.category === 'trial').map(c => ({
+        id: c.id ?? '',
+        code: c.code,
+        category: 'trial' as const,
+        credits: c.credits ?? 0,
+        duration: c.duration ?? 7,
+        durationUnit: (c.durationUnit ?? 'days') as 'days' | 'months',
+        maxUses: c.maxUses ?? 0,
+        usedCount: c.usedCount ?? 0,
+        expiresAt: c.expiresAt ?? new Date().toISOString().split('T')[0],
+        createdAt: c.createdAt ?? new Date().toISOString().split('T')[0],
+        isActive: c.isActive,
+      }));
+      setRegistrationCoupons(reg);
+      setTrialCoupons(trial);
+    } catch (err) {
+      console.error('Failed to load coupons:', err);
+    } finally {
+      setIsLoaded(true);
     }
+  };
 
-    if (savedTrialCoupons) {
-      try {
-        setTrialCoupons(JSON.parse(savedTrialCoupons));
-      } catch {
-        setTrialCoupons(defaultTrialCoupons);
-        localStorage.setItem('admin_trial_coupons', JSON.stringify(defaultTrialCoupons));
-      }
-    } else {
-      setTrialCoupons(defaultTrialCoupons);
-      localStorage.setItem('admin_trial_coupons', JSON.stringify(defaultTrialCoupons));
-    }
-    
-    setIsLoaded(true);
+  useEffect(() => {
+    loadCoupons();
   }, []);
 
-  // Save coupons to localStorage whenever they change
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('admin_registration_coupons', JSON.stringify(registrationCoupons));
-      localStorage.setItem('admin_trial_coupons', JSON.stringify(trialCoupons));
-    }
-  }, [registrationCoupons, trialCoupons, isLoaded]);
-
-  const handleCreateRegistrationCoupon = () => {
+  const handleCreateRegistrationCoupon = async () => {
     if (!newRegCoupon.code || !newRegCoupon.type.trim()) {
       alert('Bitte fülle alle Pflichtfelder aus');
       return;
     }
-
     if (!newRegCoupon.noExpiry && !newRegCoupon.expiresAt) {
       alert('Bitte wähle ein Ablaufdatum oder aktiviere "Unbegrenzt gültig"');
       return;
     }
-
-    if (registrationCoupons.some(c => c.code.toLowerCase() === newRegCoupon.code.toLowerCase()) ||
-        trialCoupons.some(c => c.code.toLowerCase() === newRegCoupon.code.toLowerCase())) {
-      alert('Dieser Gutschein-Code existiert bereits');
-      return;
+    try {
+      await adminCreateCoupon({
+        code: newRegCoupon.code.toUpperCase(),
+        plan: newRegCoupon.plan,
+        duration: newRegCoupon.duration || 30,
+        durationUnit: newRegCoupon.durationUnit,
+        credits: newRegCoupon.bonusCredits || 0,
+        isActive: true,
+        maxUses: newRegCoupon.unlimitedUses ? 0 : newRegCoupon.maxUses,
+        category: 'registration',
+        expiresAt: newRegCoupon.noExpiry ? '' : newRegCoupon.expiresAt,
+      });
+      await loadCoupons();
+      setShowCreateModal(false);
+    } catch (err) {
+      console.error('Failed to create registration coupon:', err);
+      alert('Fehler beim Erstellen des Gutscheins');
     }
-
-    const coupon: RegistrationCoupon = {
-      id: Date.now().toString(),
-      code: newRegCoupon.code.toUpperCase(),
-      category: 'registration',
-      type: newRegCoupon.type.trim(),
-      plan: newRegCoupon.plan,
-      discount: newRegCoupon.discount > 0 ? newRegCoupon.discount : undefined,
-      bonusCredits: newRegCoupon.bonusCredits > 0 ? newRegCoupon.bonusCredits : undefined,
-      duration: newRegCoupon.duration > 0 ? newRegCoupon.duration : undefined,
-      durationUnit: newRegCoupon.duration > 0 ? newRegCoupon.durationUnit : undefined,
-      maxUses: newRegCoupon.unlimitedUses ? 0 : newRegCoupon.maxUses,
-      usedCount: 0,
-      expiresAt: newRegCoupon.noExpiry ? null : newRegCoupon.expiresAt,
-      createdAt: new Date().toISOString().split('T')[0],
-      isActive: true
-    };
-
-    setRegistrationCoupons([...registrationCoupons, coupon]);
-    setShowCreateModal(false);
   };
 
-  const handleCreateTrialCoupon = () => {
+  const handleCreateTrialCoupon = async () => {
     if (!newTrialCoupon.code || !newTrialCoupon.expiresAt) {
       alert('Bitte fülle alle Pflichtfelder aus');
       return;
     }
-
-    if (registrationCoupons.some(c => c.code.toLowerCase() === newTrialCoupon.code.toLowerCase()) ||
-        trialCoupons.some(c => c.code.toLowerCase() === newTrialCoupon.code.toLowerCase())) {
-      alert('Dieser Gutschein-Code existiert bereits');
-      return;
+    try {
+      await adminCreateCoupon({
+        code: newTrialCoupon.code.toUpperCase(),
+        plan: 'all',
+        duration: newTrialCoupon.duration,
+        durationUnit: newTrialCoupon.durationUnit,
+        credits: newTrialCoupon.credits,
+        isActive: true,
+        maxUses: newTrialCoupon.maxUses,
+        category: 'trial',
+        expiresAt: newTrialCoupon.expiresAt,
+      });
+      await loadCoupons();
+      setShowCreateModal(false);
+    } catch (err) {
+      console.error('Failed to create trial coupon:', err);
+      alert('Fehler beim Erstellen des Gutscheins');
     }
-
-    const coupon: TrialCoupon = {
-      id: Date.now().toString(),
-      code: newTrialCoupon.code.toUpperCase(),
-      category: 'trial',
-      credits: newTrialCoupon.credits,
-      duration: newTrialCoupon.duration,
-      durationUnit: newTrialCoupon.durationUnit,
-      maxUses: newTrialCoupon.maxUses,
-      usedCount: 0,
-      expiresAt: newTrialCoupon.expiresAt,
-      createdAt: new Date().toISOString().split('T')[0],
-      isActive: true
-    };
-
-    setTrialCoupons([...trialCoupons, coupon]);
-    setShowCreateModal(false);
   };
 
-  const handleDeleteRegistrationCoupon = (id: string) => {
+  const handleDeleteRegistrationCoupon = async (id: string) => {
     if (confirm('Möchtest du diesen Gutschein wirklich löschen?')) {
-      setRegistrationCoupons(registrationCoupons.filter(c => c.id !== id));
+      try {
+        await adminDeleteCoupon(id);
+        await loadCoupons();
+      } catch (err) { console.error('Delete failed:', err); }
     }
   };
 
-  const handleDeleteTrialCoupon = (id: string) => {
+  const handleDeleteTrialCoupon = async (id: string) => {
     if (confirm('Möchtest du diesen Gutschein wirklich löschen?')) {
-      setTrialCoupons(trialCoupons.filter(c => c.id !== id));
+      try {
+        await adminDeleteCoupon(id);
+        await loadCoupons();
+      } catch (err) { console.error('Delete failed:', err); }
     }
   };
 
-  const handleToggleRegistrationActive = (id: string) => {
-    setRegistrationCoupons(registrationCoupons.map(c => 
-      c.id === id ? { ...c, isActive: !c.isActive } : c
-    ));
+  const handleToggleRegistrationActive = async (id: string) => {
+    const coupon = registrationCoupons.find(c => c.id === id);
+    if (!coupon) return;
+    try {
+      await adminToggleCoupon(id, !coupon.isActive);
+      await loadCoupons();
+    } catch (err) { console.error('Toggle failed:', err); }
   };
 
-  const handleToggleTrialActive = (id: string) => {
-    setTrialCoupons(trialCoupons.map(c => 
-      c.id === id ? { ...c, isActive: !c.isActive } : c
-    ));
+  const handleToggleTrialActive = async (id: string) => {
+    const coupon = trialCoupons.find(c => c.id === id);
+    if (!coupon) return;
+    try {
+      await adminToggleCoupon(id, !coupon.isActive);
+      await loadCoupons();
+    } catch (err) { console.error('Toggle failed:', err); }
   };
 
   const getTypeColor = (type: string) => {

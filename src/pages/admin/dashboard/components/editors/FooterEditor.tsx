@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { defaultFooterData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface FooterLink {
   label: string;
@@ -40,10 +41,8 @@ export default function FooterEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_footer', JSON.stringify(footerData));
-    // Dispatch custom event for same-tab updates
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_footer', footerData);
     alert('Footer gespeichert!');
   };
 

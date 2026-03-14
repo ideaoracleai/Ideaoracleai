@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../../supabase/database';
 
 interface CustomCode {
   css: string;
@@ -25,25 +27,26 @@ export default function CustomCodeEditor() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('websiteCustomCode');
-      if (stored) {
-        setCode(JSON.parse(stored));
-      }
+      if (stored) setCode(JSON.parse(stored));
     } catch (err) {
       console.error('Failed to parse stored custom code:', err);
     }
+    getWebsiteSettings('websiteCustomCode').then(value => {
+      if (value && typeof value === 'object') {
+        setCode(value as CustomCode);
+        localStorage.setItem('websiteCustomCode', JSON.stringify(value));
+      }
+    });
   }, []);
 
   /* -------------------------------------------------
    * Save current custom code to localStorage and notify
    * ------------------------------------------------- */
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('websiteCustomCode', JSON.stringify(code));
+      await saveEditorData('websiteCustomCode', code);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-
-      // Notify other parts of the app that the code changed
-      window.dispatchEvent(new CustomEvent('websiteCustomCodeUpdated', { detail: code }));
     } catch (err) {
       console.error('Unable to save custom code:', err);
     }

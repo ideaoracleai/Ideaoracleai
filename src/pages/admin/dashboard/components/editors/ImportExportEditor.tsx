@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { saveWebsiteSettings, getAllWebsiteSettings } from '../../../../../supabase/database';
 
 export default function ImportExportEditor() {
   const [importData, setImportData] = useState('');
@@ -21,18 +22,29 @@ export default function ImportExportEditor() {
     'website_seo'
   ];
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const data: Record<string, unknown> = {};
-    storageKeys.forEach(key => {
-      const value = localStorage.getItem(key);
-      if (value) {
-        try {
-          data[key] = JSON.parse(value);
-        } catch {
-          data[key] = value;
+    // Fetch from Supabase (authoritative source)
+    try {
+      const supabaseData = await getAllWebsiteSettings();
+      storageKeys.forEach(key => {
+        if (supabaseData[key] !== undefined) {
+          data[key] = supabaseData[key];
+        } else {
+          const local = localStorage.getItem(key);
+          if (local) {
+            try { data[key] = JSON.parse(local); } catch { data[key] = local; }
+          }
         }
-      }
-    });
+      });
+    } catch {
+      storageKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+          try { data[key] = JSON.parse(value); } catch { data[key] = value; }
+        }
+      });
+    }
     const jsonString = JSON.stringify(data, null, 2);
     setExportData(jsonString);
     setMessage({ type: 'success', text: 'Daten erfolgreich exportiert!' });
@@ -66,7 +78,7 @@ export default function ImportExportEditor() {
     setMessage({ type: 'success', text: 'Backup heruntergeladen!' });
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!importData.trim()) {
       setMessage({ type: 'error', text: 'Bitte füge zuerst Daten ein.' });
       return;
@@ -75,18 +87,21 @@ export default function ImportExportEditor() {
     try {
       const data = JSON.parse(importData);
       let importedCount = 0;
-      
+      const saves: Promise<void>[] = [];
+
       Object.keys(data).forEach(key => {
         if (storageKeys.includes(key)) {
           localStorage.setItem(key, JSON.stringify(data[key]));
+          saves.push(saveWebsiteSettings(key, data[key]));
           importedCount++;
         }
       });
 
+      await Promise.all(saves);
       window.dispatchEvent(new Event('website_data_updated'));
       setMessage({ type: 'success', text: `${importedCount} Bereiche erfolgreich importiert!` });
       setImportData('');
-    } catch (e) {
+    } catch {
       setMessage({ type: 'error', text: 'Ungültiges JSON-Format. Bitte überprüfe die Daten.' });
     }
   };
@@ -103,7 +118,7 @@ export default function ImportExportEditor() {
     reader.readAsText(file);
   };
 
-  const handleResetAll = () => {
+  const handleResetAll = async () => {
     if (confirm('Möchtest du wirklich ALLE Website-Daten zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
       storageKeys.forEach(key => {
         localStorage.removeItem(key);

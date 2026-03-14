@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultFeaturesData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Feature {
   title: string;
@@ -36,9 +37,8 @@ export default function FeaturesEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_features', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_features', data);
     alert('Features gespeichert!');
   };
 

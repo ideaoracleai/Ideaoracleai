@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultAboutData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface AboutData {
   badge: string;
@@ -28,9 +29,8 @@ export default function AboutEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_about', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_about', data);
     alert('Über uns gespeichert!');
   };
 

@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface AboutData {
   badge: string;
@@ -43,6 +44,13 @@ export default function About() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_about').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as AboutData);
+        localStorage.setItem('website_about', JSON.stringify(value));
+      }
+    });
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'website_about') loadData();

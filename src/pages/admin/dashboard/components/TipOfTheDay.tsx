@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { adminGetTips, adminSaveTips } from '../../../../supabase/database';
 
 interface Tip {
   id: string;
@@ -37,15 +38,22 @@ export default function TipOfTheDay() {
   const [editingTip, setEditingTip] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedTips = localStorage.getItem('admin_tips_of_day');
-    if (savedTips) {
-      setTips(JSON.parse(savedTips));
-    }
+    try {
+      const cached = localStorage.getItem('admin_tips_of_day');
+      if (cached) setTips(JSON.parse(cached));
+    } catch { /* ignore */ }
+    adminGetTips().then(data => {
+      if (Array.isArray(data) && data.length > 0) setTips(data as Tip[]);
+    });
   }, []);
 
-  const saveTips = (updatedTips: Tip[]) => {
+  const saveTips = async (updatedTips: Tip[]) => {
     setTips(updatedTips);
-    localStorage.setItem('admin_tips_of_day', JSON.stringify(updatedTips));
+    try {
+      await adminSaveTips(updatedTips);
+    } catch (err) {
+      console.error('Failed to save tips:', err);
+    }
   };
 
   const generateAITip = () => {

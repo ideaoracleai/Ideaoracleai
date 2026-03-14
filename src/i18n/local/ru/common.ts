@@ -282,6 +282,20 @@ export const common = {
   'auth.or': 'или продолжить с',
   'auth.social.google': 'Продолжить с Google',
   'auth.social.apple': 'Продолжить с Apple',
+
+  'admin.title': 'Панель Администратора',
+  'admin.subtitle': 'Центр Управления',
+  'admin.superAdmin': 'Супер-администратор',
+  'admin.logout': 'Выйти',
+  'admin.tabs.users': 'Управление Пользователями',
+  'admin.tabs.downgrades': 'Понижения',
+  'admin.tabs.tips': 'Совет Дня',
+  'admin.tabs.coupons': 'Купонные Коды',
+  'admin.tabs.website': 'Редактор Сайта',
+  'admin.tabs.ai': 'Настройки ИИ',
+  'admin.tabs.transactions': 'Журнал Транзакций',
+  'admin.tabs.stats': 'Статистика',
+
 };
 
 export default common;

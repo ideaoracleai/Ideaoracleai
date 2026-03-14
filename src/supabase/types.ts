@@ -23,6 +23,49 @@ export interface Database {
                 Insert: CouponInsert;
                 Update: Partial<CouponInsert>;
             };
+            website_settings: {
+                Row: { key: string; value: unknown; updated_at: string };
+                Insert: { key: string; value: unknown; updated_at?: string };
+                Update: { key?: string; value?: unknown; updated_at?: string };
+            };
+        };
+        Functions: {
+            get_all_users_admin: {
+                Args: Record<string, never>;
+                Returns: Record<string, unknown>[];
+            };
+            update_user_admin: {
+                Args: { p_user_id: string; p_updates: Record<string, unknown> };
+                Returns: void;
+            };
+            get_all_coupons_admin: {
+                Args: Record<string, never>;
+                Returns: Record<string, unknown>[];
+            };
+            create_coupon_admin: {
+                Args: {
+                    p_code: string; p_plan: string; p_duration: number;
+                    p_duration_unit: string; p_credits: number; p_is_active: boolean;
+                    p_max_uses: number; p_category: string; p_expires_at: string;
+                };
+                Returns: void;
+            };
+            toggle_coupon_admin: {
+                Args: { p_coupon_id: string; p_active: boolean };
+                Returns: void;
+            };
+            delete_coupon_admin: {
+                Args: { p_coupon_id: string };
+                Returns: void;
+            };
+            get_all_credit_history_admin: {
+                Args: { p_limit: number };
+                Returns: Record<string, unknown>[];
+            };
+            get_admin_stats_rpc: {
+                Args: Record<string, never>;
+                Returns: Record<string, unknown>;
+            };
         };
     };
 }

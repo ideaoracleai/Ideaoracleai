@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'หรือดำเนินการต่อด้วย',
   'auth.social.google': 'ดำเนินการต่อด้วย Google',
   'auth.social.apple': 'ดำเนินการต่อด้วย Apple',
+
+  'admin.title': 'แดชบอร์ดผู้ดูแล',
+  'admin.subtitle': 'ศูนย์ควบคุม',
+  'admin.superAdmin': 'ซูเปอร์แอดมิน',
+  'admin.logout': 'ออกจากระบบ',
+  'admin.tabs.users': 'จัดการผู้ใช้',
+  'admin.tabs.downgrades': 'ดาวนเกรด',
+  'admin.tabs.tips': 'เคล็ดลับประจำวัน',
+  'admin.tabs.coupons': 'รหัสคูปอง',
+  'admin.tabs.website': 'ตัวแก้ไขเว็บไซต์',
+  'admin.tabs.ai': 'การตั้งค่า AI',
+  'admin.tabs.transactions': 'บันทึกธุรกรรม',
+  'admin.tabs.stats': 'สถิติ',
+
 };
 
 export default common;

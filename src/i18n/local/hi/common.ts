@@ -282,6 +282,20 @@ export const common = {
   'auth.or': 'या जारी रखें',
   'auth.social.google': 'Google से जारी रखें',
   'auth.social.apple': 'Apple से जारी रखें',
+
+  'admin.title': 'एडमिन डैशबोर्ड',
+  'admin.subtitle': 'नियंत्रण केंद्र',
+  'admin.superAdmin': 'सुपर एडमिन',
+  'admin.logout': 'साइन आउट',
+  'admin.tabs.users': 'उपयोगकर्ता प्रबंधन',
+  'admin.tabs.downgrades': 'डाउनग्रेड',
+  'admin.tabs.tips': 'आज की युक्ति',
+  'admin.tabs.coupons': 'कूपन कोड',
+  'admin.tabs.website': 'वेबसाइट संपादक',
+  'admin.tabs.ai': 'AI सेटिंग्स',
+  'admin.tabs.transactions': 'लेनदेन लॉग',
+  'admin.tabs.stats': 'आंकड़े',
+
 };
 
 export default common;

@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'veya şununla devam et',
   'auth.social.google': 'Google ile devam et',
   'auth.social.apple': 'Apple ile devam et',
+
+  'admin.title': 'Admin Paneli',
+  'admin.subtitle': 'Kontrol Merkezi',
+  'admin.superAdmin': 'Süper Admin',
+  'admin.logout': 'Çıkış Yap',
+  'admin.tabs.users': 'Kullanıcı Yönetimi',
+  'admin.tabs.downgrades': 'Düşürmeler',
+  'admin.tabs.tips': 'Günün İpucu',
+  'admin.tabs.coupons': 'Kupon Kodları',
+  'admin.tabs.website': 'Web Sitesi Düzenleyici',
+  'admin.tabs.ai': 'AI Ayarları',
+  'admin.tabs.transactions': 'İşlem Günlüğü',
+  'admin.tabs.stats': 'İstatistikler',
+
 };
 
 export default common;

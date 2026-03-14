@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { defaultFaqData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface FaqItem {
   question: string;
@@ -40,10 +41,8 @@ export default function FaqEditor({ onSave }: Props) {
   }, []);
 
   /** Persist current FAQs and notify the parent */
-  const handleSave = () => {
-    localStorage.setItem('website_faq', JSON.stringify(faqs));
-    // Dispatch custom event for same-tab updates
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_faq', faqs);
     alert('FAQ gespeichert!');
   };
 

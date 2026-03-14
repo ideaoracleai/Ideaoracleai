@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface FaqItem {
   question: string;
@@ -35,6 +36,14 @@ export default function FAQ() {
     };
 
     loadData();
+
+    // Fetch from Supabase (authoritative – overrides localStorage cache)
+    getWebsiteSettings('website_faq').then(value => {
+      if (Array.isArray(value)) {
+        setCustomFaqs(value as FaqItem[]);
+        localStorage.setItem('website_faq', JSON.stringify(value));
+      }
+    });
 
     // Listen for storage changes (when admin saves data)
     const handleStorageChange = (e: StorageEvent) => {

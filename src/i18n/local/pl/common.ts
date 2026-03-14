@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'lub kontynuuj z',
   'auth.social.google': 'Kontynuuj z Google',
   'auth.social.apple': 'Kontynuuj z Apple',
+
+  'admin.title': 'Panel Admina',
+  'admin.subtitle': 'Centrum Sterowania',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Wyloguj się',
+  'admin.tabs.users': 'Zarządzanie Użytkownikami',
+  'admin.tabs.downgrades': 'Obniżenia',
+  'admin.tabs.tips': 'Wskazówka Dnia',
+  'admin.tabs.coupons': 'Kody Kuponów',
+  'admin.tabs.website': 'Edytor Strony',
+  'admin.tabs.ai': 'Ustawienia AI',
+  'admin.tabs.transactions': 'Dziennik Transakcji',
+  'admin.tabs.stats': 'Statystyki',
+
 };
 
 export default common;

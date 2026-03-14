@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../../../../components/feature/LanguageSelector';
 
 export default function AdminHeader() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     localStorage.removeItem('adminAuth');
@@ -22,24 +25,25 @@ export default function AdminHeader() {
                 </div>
               </div>
               <div>
-                <h1 className="text-white font-bold text-lg">Admin Dashboard</h1>
-                <p className="text-xs text-gray-400 -mt-0.5">Verwaltungszentrale</p>
+                <h1 className="text-white font-bold text-lg">{t('admin.title', 'Admin Dashboard')}</h1>
+                <p className="text-xs text-gray-400 -mt-0.5">{t('admin.subtitle', 'Control Center')}</p>
               </div>
             </a>
           </div>
 
-          {/* Admin Info & Logout */}
+          {/* Admin Info, Language & Logout */}
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-white">Super Admin</p>
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-white">{t('admin.superAdmin', 'Super Admin')}</p>
               <p className="text-xs text-slate-400">admin@nichefinder.com</p>
             </div>
+            <LanguageSelector />
             <button
               onClick={handleLogout}
               className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all flex items-center gap-2 whitespace-nowrap"
             >
               <i className="ri-logout-box-line"></i>
-              <span>Abmelden</span>
+              <span>{t('admin.logout', 'Sign Out')}</span>
             </button>
           </div>
         </div>

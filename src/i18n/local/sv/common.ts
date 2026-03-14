@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'eller fortsätt med',
   'auth.social.google': 'Fortsätt med Google',
   'auth.social.apple': 'Fortsätt med Apple',
+
+  'admin.title': 'Admin Dashboard',
+  'admin.subtitle': 'Kontrollcenter',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Logga ut',
+  'admin.tabs.users': 'Användarhantering',
+  'admin.tabs.downgrades': 'Nedgraderingar',
+  'admin.tabs.tips': 'Dagens Tips',
+  'admin.tabs.coupons': 'Kupongkoder',
+  'admin.tabs.website': 'Webbplatsredigerare',
+  'admin.tabs.ai': 'AI-inställningar',
+  'admin.tabs.transactions': 'Transaktionslogg',
+  'admin.tabs.stats': 'Statistik',
+
 };
 
 export default common;

@@ -282,6 +282,20 @@ export const common = {
   'auth.or': 'atau lanjutkan dengan',
   'auth.social.google': 'Lanjutkan dengan Google',
   'auth.social.apple': 'Lanjutkan dengan Apple',
+
+  'admin.title': 'Dasbor Admin',
+  'admin.subtitle': 'Pusat Kontrol',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Keluar',
+  'admin.tabs.users': 'Manajemen Pengguna',
+  'admin.tabs.downgrades': 'Penurunan',
+  'admin.tabs.tips': 'Tips Hari Ini',
+  'admin.tabs.coupons': 'Kode Kupon',
+  'admin.tabs.website': 'Editor Situs Web',
+  'admin.tabs.ai': 'Pengaturan AI',
+  'admin.tabs.transactions': 'Log Transaksi',
+  'admin.tabs.stats': 'Statistik',
+
 };
 
 export default common;

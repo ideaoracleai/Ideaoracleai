@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import DowngradeModal from './DowngradeModal';
+import { getAllUsers } from '../../../../supabase/database';
 
 interface User {
   id: string;
@@ -204,11 +205,19 @@ export default function DowngradeManager() {
       localStorage.setItem('downgradeRequests', JSON.stringify(demoRequests));
     }
 
-    // Lade Benutzer
-    const savedUsers = localStorage.getItem('adminUsers');
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    }
+    // Lade Benutzer from Supabase
+    getAllUsers().then(adminUsers => {
+      setUsers(adminUsers.map(u => ({
+        id: u.uid,
+        email: u.email,
+        name: u.name || u.email.split('@')[0],
+        plan: u.plan,
+        credits: u.credits,
+        joinDate: u.joinDate,
+        lastActive: u.joinDate,
+        totalSpent: u.totalSpent,
+      })));
+    }).catch(err => console.error('Failed to load users for DowngradeManager:', err));
 
     // Lade Einstellungen
     const savedAutoApprove = localStorage.getItem('autoApproveDowngrades');

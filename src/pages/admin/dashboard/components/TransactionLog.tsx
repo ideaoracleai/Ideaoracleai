@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { adminGetCreditHistory } from '../../../../supabase/database';
 
 interface Transaction {
   id: string;
@@ -25,11 +26,31 @@ export default function TransactionLog() {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<'all' | 'visa' | 'mastercard' | 'amex'>('all');
 
   useEffect(() => {
-    // Transaktionen aus localStorage laden
+    adminGetCreditHistory(200).then(history => {
+      const mapped: Transaction[] = history.map(h => ({
+        id: h.id,
+        userId: h.userId,
+        userName: h.userId.substring(0, 8),
+        userEmail: '',
+        type: h.change > 0 ? 'upgrade' : 'downgrade',
+        toPlan: h.action,
+        amount: h.change > 0 ? h.change : undefined,
+        refundAmount: h.change < 0 ? Math.abs(h.change) : undefined,
+        date: h.date,
+        status: 'completed' as const,
+      }));
+      setTransactions(mapped);
+    }).catch(err => {
+      console.error('Failed to load credit history:', err);
+    });
+
+    // Keep localStorage fallback for legacy transactions
     const storedTransactions = JSON.parse(localStorage.getItem('adminTransactions') || '[]');
-    
-    // Demo-Transaktionen mit Zahlungsmethoden hinzufügen
-    if (storedTransactions.length === 0) {
+    if (storedTransactions.length > 0) {
+      setTransactions(storedTransactions);
+    }
+
+    if (false) {
       const demoTransactions: Transaction[] = [
         {
           id: 'TXN-1705847123',

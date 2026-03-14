@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../../../components/feature/LanguageSelector';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface NavLink {
   label: string;
@@ -42,6 +43,13 @@ export default function Navbar({ isScrolled = false }: NavbarProps) {
     };
 
     loadData();
+
+    getWebsiteSettings('website_navbar').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as NavbarData);
+        localStorage.setItem('website_navbar', JSON.stringify(value));
+      }
+    });
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'website_navbar') loadData();

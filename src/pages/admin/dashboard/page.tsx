@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminHeader from './components/AdminHeader';
 import UserList from './components/UserList';
 import TransactionLog from './components/TransactionLog';
@@ -12,6 +13,7 @@ import DowngradeManager from './components/DowngradeManager';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'users' | 'transactions' | 'coupons' | 'stats' | 'website' | 'ai' | 'tips' | 'downgrades'>('users');
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-user-line mr-2"></i>
-            Benutzerverwaltung
+            {t('admin.tabs.users', 'User Management')}
           </button>
 
           <button
@@ -51,7 +53,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-arrow-down-line mr-2"></i>
-            Downgrades
+            {t('admin.tabs.downgrades', 'Downgrades')}
           </button>
 
           <button
@@ -61,7 +63,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-lightbulb-flash-line mr-2"></i>
-            Tipp des Tages
+            {t('admin.tabs.tips', 'Tip of the Day')}
           </button>
 
           <button
@@ -71,7 +73,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-coupon-3-line mr-2"></i>
-            Gutschein-Codes
+            {t('admin.tabs.coupons', 'Coupon Codes')}
           </button>
 
           <button
@@ -81,7 +83,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-global-line mr-2"></i>
-            Website-Editor
+            {t('admin.tabs.website', 'Website Editor')}
           </button>
 
           <button
@@ -91,7 +93,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-robot-2-line mr-2"></i>
-            KI-Einstellungen
+            {t('admin.tabs.ai', 'AI Settings')}
           </button>
 
           <button
@@ -101,7 +103,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-exchange-line mr-2"></i>
-            Transaktionslog
+            {t('admin.tabs.transactions', 'Transaction Log')}
           </button>
 
           <button
@@ -111,7 +113,7 @@ export default function AdminDashboard() {
             }`}
           >
             <i className="ri-bar-chart-line mr-2"></i>
-            Statistiken
+            {t('admin.tabs.stats', 'Statistics')}
           </button>
         </div>
 

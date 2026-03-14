@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface FooterLink {
   label: string;
@@ -9,6 +10,17 @@ interface FooterLink {
 interface FooterColumn {
   title: string;
   links: FooterLink[];
+}
+
+interface SocialLinks {
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  linkedin: string;
+  youtube: string;
+  tiktok: string;
+  github: string;
+  discord: string;
 }
 
 interface FooterData {
@@ -28,6 +40,7 @@ interface FooterData {
 export default function Footer() {
   const { t } = useTranslation();
   const [footerData, setFooterData] = useState<FooterData | null>(null);
+  const [socials, setSocials] = useState<Partial<SocialLinks>>({});
 
   useEffect(() => {
     const loadData = () => {
@@ -45,6 +58,24 @@ export default function Footer() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_footer').then(value => {
+      if (value && typeof value === 'object') {
+        setFooterData(value as FooterData);
+        localStorage.setItem('website_footer', JSON.stringify(value));
+      }
+    });
+
+    try {
+      const cachedSocials = localStorage.getItem('websiteSocials');
+      if (cachedSocials) setSocials(JSON.parse(cachedSocials));
+    } catch { /* ignore */ }
+    getWebsiteSettings('websiteSocials').then(value => {
+      if (value && typeof value === 'object') {
+        setSocials(value as Partial<SocialLinks>);
+        localStorage.setItem('websiteSocials', JSON.stringify(value));
+      }
+    });
 
     // Listen for storage changes (when admin saves data)
     const handleStorageChange = (e: StorageEvent) => {
@@ -208,6 +239,19 @@ export default function Footer() {
         {/* Bottom */}
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-sm">{copyright}</p>
+          {/* Social Media Icons */}
+          {Object.entries(socials).some(([, v]) => v) && (
+            <div className="flex items-center gap-3">
+              {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-facebook-fill text-xl"></i></a>}
+              {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-twitter-x-fill text-xl"></i></a>}
+              {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-instagram-fill text-xl"></i></a>}
+              {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-linkedin-fill text-xl"></i></a>}
+              {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-youtube-fill text-xl"></i></a>}
+              {socials.tiktok && <a href={socials.tiktok} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-tiktok-fill text-xl"></i></a>}
+              {socials.github && <a href={socials.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-github-fill text-xl"></i></a>}
+              {socials.discord && <a href={socials.discord} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#C9A961] transition-colors"><i className="ri-discord-fill text-xl"></i></a>}
+            </div>
+          )}
           <a
             href={readyLinkUrl}
             target="_blank"

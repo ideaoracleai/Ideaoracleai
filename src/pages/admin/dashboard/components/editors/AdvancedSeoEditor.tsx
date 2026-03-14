@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../../supabase/database';
 
 interface AdvancedSeoSettings {
   robotsTxt: string;
@@ -79,20 +81,23 @@ export default function AdvancedSeoEditor() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('advancedSeoSettings');
-      if (stored) {
-        setSettings(JSON.parse(stored));
-      }
+      if (stored) setSettings(JSON.parse(stored));
     } catch (err) {
       console.error('Failed to parse stored SEO settings:', err);
     }
+    getWebsiteSettings('advancedSeoSettings').then(value => {
+      if (value && typeof value === 'object') {
+        setSettings(value as AdvancedSeoSettings);
+        localStorage.setItem('advancedSeoSettings', JSON.stringify(value));
+      }
+    });
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('advancedSeoSettings', JSON.stringify(settings));
+      await saveEditorData('advancedSeoSettings', settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      window.dispatchEvent(new CustomEvent('advancedSeoUpdated', { detail: settings }));
     } catch (err) {
       console.error('Failed to save SEO settings:', err);
     }

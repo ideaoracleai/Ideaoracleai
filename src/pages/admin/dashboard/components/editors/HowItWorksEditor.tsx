@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultHowItWorksData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface Step {
   number: string;
@@ -30,9 +31,8 @@ export default function HowItWorksEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_howitworks', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_howitworks', data);
     alert('Schritte gespeichert!');
   };
 

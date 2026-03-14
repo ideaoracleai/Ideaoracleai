@@ -719,6 +719,20 @@ export const common = {
   'sub.cvc': 'CVC',
   'sub.cardHolderPlaceholder': 'John Doe',
 
+  // ─── Admin Panel ─────────────────────────────────────────────────────────────
+  'admin.title': 'Admin Dashboard',
+  'admin.subtitle': 'Control Center',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Sign Out',
+  'admin.tabs.users': 'User Management',
+  'admin.tabs.downgrades': 'Downgrades',
+  'admin.tabs.tips': 'Tip of the Day',
+  'admin.tabs.coupons': 'Coupon Codes',
+  'admin.tabs.website': 'Website Editor',
+  'admin.tabs.ai': 'AI Settings',
+  'admin.tabs.transactions': 'Transaction Log',
+  'admin.tabs.stats': 'Statistics',
+
 };
 
 export default common;

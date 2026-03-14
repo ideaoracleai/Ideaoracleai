@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../../../hooks/useCurrency';
 import CurrencySelector from '../../../components/feature/CurrencySelector';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface PlanData {
   id: string;
@@ -51,6 +52,13 @@ export default function Pricing() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_pricing').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as PricingData);
+        localStorage.setItem('website_pricing', JSON.stringify(value));
+      }
+    });
 
     // Listen for storage changes (when admin saves data)
     const handleStorageChange = (e: StorageEvent) => {

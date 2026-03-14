@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'hoặc tiếp tục với',
   'auth.social.google': 'Tiếp tục với Google',
   'auth.social.apple': 'Tiếp tục với Apple',
+
+  'admin.title': 'Bảng Điều Khiển Admin',
+  'admin.subtitle': 'Trung Tâm Điều Khiển',
+  'admin.superAdmin': 'Quản Trị Viên Cấp Cao',
+  'admin.logout': 'Đăng Xuất',
+  'admin.tabs.users': 'Quản Lý Người Dùng',
+  'admin.tabs.downgrades': 'Hạ Cấp',
+  'admin.tabs.tips': 'Mẹo Trong Ngày',
+  'admin.tabs.coupons': 'Mã Phiếu Giảm Giá',
+  'admin.tabs.website': 'Trình Chỉnh Sửa Trang Web',
+  'admin.tabs.ai': 'Cài Đặt AI',
+  'admin.tabs.transactions': 'Nhật Ký Giao Dịch',
+  'admin.tabs.stats': 'Thống Kê',
+
 };
 
 export default common;

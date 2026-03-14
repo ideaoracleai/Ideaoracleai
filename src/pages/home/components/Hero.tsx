@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface TrialCoupon {
   id: string;
@@ -58,6 +59,13 @@ export default function Hero() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_hero').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as HeroData);
+        localStorage.setItem('website_hero', JSON.stringify(value));
+      }
+    });
 
     // Listen for storage changes (when admin saves data)
     const handleStorageChange = (e: StorageEvent) => {

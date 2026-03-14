@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminRevenueStats, planPrices } from '../../../../mocks/dashboardData';
+import { getAdminStats, adminGetAllCoupons } from '../../../../supabase/database';
 
 interface Stats {
   totalUsers: number;
@@ -40,28 +40,20 @@ interface CouponStats {
 
 export default function AdminStats() {
   const [stats, setStats] = useState<Stats>({
-    totalUsers: 5,
-    totalRevenue: 257,
-    activeSubscriptions: 4,
-    totalTransactions: 8,
-    planDistribution: {
-      starter: 1,
-      pro: 2,
-      builder: 2
-    },
-    revenueByPlan: {
-      starter: 0,
-      pro: 58,
-      builder: 198
-    },
-    monthlyRevenue: adminRevenueStats.monthlyRevenue,
-    churnRate: adminRevenueStats.churnRate,
-    averageRevenuePerUser: adminRevenueStats.averageRevenuePerUser,
-    revenueGrowth: adminRevenueStats.revenueGrowth,
+    totalUsers: 0,
+    totalRevenue: 0,
+    activeSubscriptions: 0,
+    totalTransactions: 0,
+    planDistribution: { starter: 0, pro: 0, builder: 0 },
+    revenueByPlan: { starter: 0, pro: 0, builder: 0 },
+    monthlyRevenue: 0,
+    churnRate: 0,
+    averageRevenuePerUser: 0,
+    revenueGrowth: 0,
     totalRefunds: 0,
     pendingRefunds: 0,
     refundCount: 0,
-    netRevenue: adminRevenueStats.monthlyRevenue
+    netRevenue: 0,
   });
 
   const [couponStats, setCouponStats] = useState<CouponStats>({
@@ -72,89 +64,70 @@ export default function AdminStats() {
     trialRedemptions: 0,
     activeCoupons: 0,
     expiredCoupons: 0,
-    topCoupons: []
+    topCoupons: [],
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    // Lade Rückerstattungs-Statistiken aus localStorage
-    const loadRefundStats = () => {
+    const loadStats = async () => {
+      setIsLoading(true);
       try {
-        const refundData = JSON.parse(localStorage.getItem('downgradeRefunds') || '[]');
-        const pendingRefunds = JSON.parse(localStorage.getItem('pendingDowngradeRefunds') || '[]');
-        
-        const totalRefunds = refundData.reduce((sum: number, r: any) => sum + (r.amount || 0), 0);
-        const pendingAmount = pendingRefunds.reduce((sum: number, r: any) => sum + (r.amount || 0), 0);
-        
-        setStats(prev => ({
-          ...prev,
-          totalRefunds,
-          pendingRefunds: pendingAmount,
-          refundCount: refundData.length,
-          netRevenue: prev.monthlyRevenue - totalRefunds
-        }));
-      } catch (error) {
-        console.error('Fehler beim Laden der Rückerstattungs-Statistiken:', error);
+        const s = await getAdminStats();
+        const dist = s.planDistribution;
+        const proRevenue = (dist['Pro'] ?? 0) * 29;
+        const builderRevenue = (dist['Builder'] ?? 0) * 99;
+        const monthlyRev = proRevenue + builderRevenue;
+        setStats({
+          totalUsers: s.totalUsers,
+          totalRevenue: s.totalRevenue,
+          activeSubscriptions: s.activeSubscriptions,
+          totalTransactions: s.totalUsers,
+          planDistribution: {
+            starter: dist['Starter'] ?? 0,
+            pro: dist['Pro'] ?? 0,
+            builder: dist['Builder'] ?? 0,
+          },
+          revenueByPlan: { starter: 0, pro: proRevenue, builder: builderRevenue },
+          monthlyRevenue: monthlyRev,
+          churnRate: s.totalUsers > 0 ? Math.round((s.cancelledUsers / s.totalUsers) * 100 * 10) / 10 : 0,
+          averageRevenuePerUser: s.activeSubscriptions > 0 ? Math.round(monthlyRev / s.activeSubscriptions) : 0,
+          revenueGrowth: 0,
+          totalRefunds: 0,
+          pendingRefunds: 0,
+          refundCount: 0,
+          netRevenue: monthlyRev,
+        });
+      } catch (err) {
+        console.error('Failed to load admin stats:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadRefundStats();
-    
-    // Aktualisiere alle 2 Sekunden
-    const interval = setInterval(loadRefundStats, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    // Lade Gutschein-Statistiken aus localStorage
-    const loadCouponStats = () => {
+    const loadCouponStats = async () => {
       try {
-        const regCoupons = JSON.parse(localStorage.getItem('admin_registration_coupons') || '[]');
-        const trialCoupons = JSON.parse(localStorage.getItem('admin_trial_coupons') || '[]');
-
+        const coupons = await adminGetAllCoupons();
         const now = new Date();
-        
-        // Berechne Statistiken für Registrierungs-Gutscheine
-        let regRedemptions = 0;
-        let regActive = 0;
-        let regExpired = 0;
-        
-        regCoupons.forEach((coupon: any) => {
-          regRedemptions += coupon.usedCount || 0;
-          if (coupon.isActive) {
-            if (coupon.expiresAt && new Date(coupon.expiresAt) < now) {
-              regExpired++;
-            } else {
-              regActive++;
-            }
-          } else {
-            regExpired++;
-          }
+        const regCoupons = coupons.filter(c => c.category === 'registration');
+        const trialCoupons = coupons.filter(c => c.category === 'trial');
+        let regRedemptions = 0, regActive = 0, regExpired = 0;
+        regCoupons.forEach(c => {
+          regRedemptions += c.usedCount ?? 0;
+          if (c.isActive && (!c.expiresAt || new Date(c.expiresAt) >= now)) regActive++;
+          else regExpired++;
         });
-
-        // Berechne Statistiken für Trial-Gutscheine
-        let trialRedemptions = 0;
-        let trialActive = 0;
-        let trialExpired = 0;
-        
-        trialCoupons.forEach((coupon: any) => {
-          trialRedemptions += coupon.usedCount || 0;
-          if (coupon.isActive && coupon.expiresAt && new Date(coupon.expiresAt) >= now) {
-            trialActive++;
-          } else {
-            trialExpired++;
-          }
+        let trialRedemptions = 0, trialActive = 0, trialExpired = 0;
+        trialCoupons.forEach(c => {
+          trialRedemptions += c.usedCount ?? 0;
+          if (c.isActive && c.expiresAt && new Date(c.expiresAt) >= now) trialActive++;
+          else trialExpired++;
         });
-
-        // Top Gutscheine nach Einlösungen
-        const allCoupons = [
-          ...regCoupons.map((c: any) => ({ code: c.code, usedCount: c.usedCount, type: 'Registrierung' })),
-          ...trialCoupons.map((c: any) => ({ code: c.code, usedCount: c.usedCount, type: 'Test-Zugang' }))
-        ];
-        const topCoupons = allCoupons
-          .filter((c: any) => c.usedCount > 0)
-          .sort((a: any, b: any) => b.usedCount - a.usedCount)
-          .slice(0, 5);
-
+        const topCoupons = coupons
+          .filter(c => (c.usedCount ?? 0) > 0)
+          .sort((a, b) => (b.usedCount ?? 0) - (a.usedCount ?? 0))
+          .slice(0, 5)
+          .map(c => ({ code: c.code, usedCount: c.usedCount ?? 0, type: c.category === 'registration' ? 'Registrierung' : 'Test-Zugang' }));
         setCouponStats({
           totalRegistrationCoupons: regCoupons.length,
           totalTrialCoupons: trialCoupons.length,
@@ -170,11 +143,8 @@ export default function AdminStats() {
       }
     };
 
+    loadStats();
     loadCouponStats();
-    
-    // Aktualisiere alle 5 Sekunden
-    const interval = setInterval(loadCouponStats, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   return (

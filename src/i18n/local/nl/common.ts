@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'of doorgaan met',
   'auth.social.google': 'Doorgaan met Google',
   'auth.social.apple': 'Doorgaan met Apple',
+
+  'admin.title': 'Admin Dashboard',
+  'admin.subtitle': 'Controlepaneel',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Uitloggen',
+  'admin.tabs.users': 'Gebruikersbeheer',
+  'admin.tabs.downgrades': 'Downgrades',
+  'admin.tabs.tips': 'Tip van de Dag',
+  'admin.tabs.coupons': 'Couponcodes',
+  'admin.tabs.website': 'Website-editor',
+  'admin.tabs.ai': 'AI-instellingen',
+  'admin.tabs.transactions': 'Transactielog',
+  'admin.tabs.stats': 'Statistieken',
+
 };
 
 export default common;

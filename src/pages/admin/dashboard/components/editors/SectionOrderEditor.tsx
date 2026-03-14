@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../../supabase/database';
 
 interface Section {
   id: string;
@@ -32,24 +34,25 @@ export default function SectionOrderEditor() {
       const stored = localStorage.getItem('sectionOrder');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Validate parsed data before applying it
-        if (Array.isArray(parsed) && parsed.every(item => typeof item.id === 'string')) {
-          setSections(parsed);
-        }
+        if (Array.isArray(parsed) && parsed.every(item => typeof item.id === 'string')) setSections(parsed);
       }
     } catch (e) {
       console.error('Failed to load saved section order:', e);
     }
+    getWebsiteSettings('sectionOrder').then(value => {
+      if (Array.isArray(value)) {
+        setSections(value as Section[]);
+        localStorage.setItem('sectionOrder', JSON.stringify(value));
+      }
+    });
   }, []);
 
   // ---------- Handlers ----------
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('sectionOrder', JSON.stringify(sections));
+      await saveEditorData('sectionOrder', sections);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      // Notify other parts of the app about the change
-      window.dispatchEvent(new CustomEvent('sectionOrderUpdated', { detail: sections }));
     } catch (e) {
       console.error('Failed to save section order:', e);
     }

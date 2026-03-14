@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { defaultCtaData } from '../../../../../mocks/websiteDefaults';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
 
 interface CtaData {
   title: string;
@@ -23,9 +24,8 @@ export default function CtaEditor() {
     }
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('website_cta', JSON.stringify(data));
-    window.dispatchEvent(new Event('website_data_updated'));
+  const handleSave = async () => {
+    await saveEditorData('website_cta', data);
     alert('CTA gespeichert!');
   };
 

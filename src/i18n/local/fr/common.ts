@@ -333,6 +333,20 @@ export const common = {
   'auth.or': 'ou continuer avec',
   'auth.social.google': 'Continuer avec Google',
   'auth.social.apple': 'Continuer avec Apple',
+
+  'admin.title': 'Tableau de Bord Admin',
+  'admin.subtitle': 'Centre de Contrôle',
+  'admin.superAdmin': 'Super Admin',
+  'admin.logout': 'Déconnexion',
+  'admin.tabs.users': 'Gestion des Utilisateurs',
+  'admin.tabs.downgrades': 'Déclassements',
+  'admin.tabs.tips': 'Conseil du Jour',
+  'admin.tabs.coupons': 'Codes Promo',
+  'admin.tabs.website': 'Éditeur du Site',
+  'admin.tabs.ai': 'Paramètres IA',
+  'admin.tabs.transactions': 'Journal des Transactions',
+  'admin.tabs.stats': 'Statistiques',
+
 };
 
 export default common;

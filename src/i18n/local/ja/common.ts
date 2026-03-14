@@ -308,6 +308,20 @@ export const common = {
   'auth.or': 'または続ける',
   'auth.social.google': 'Googleで続ける',
   'auth.social.apple': 'Appleで続ける',
+
+  'admin.title': '管理ダッシュボード',
+  'admin.subtitle': 'コントロールセンター',
+  'admin.superAdmin': 'スーパー管理者',
+  'admin.logout': 'ログアウト',
+  'admin.tabs.users': 'ユーザー管理',
+  'admin.tabs.downgrades': 'ダウングレード',
+  'admin.tabs.tips': '今日のヒント',
+  'admin.tabs.coupons': 'クーポンコード',
+  'admin.tabs.website': 'ウェブサイト編集機',
+  'admin.tabs.ai': 'AI設定',
+  'admin.tabs.transactions': '取引ログ',
+  'admin.tabs.stats': '統計',
+
 };
 
 export default common;

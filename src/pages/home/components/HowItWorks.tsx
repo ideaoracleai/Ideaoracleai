@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface Step {
   number: string;
@@ -34,6 +35,13 @@ export default function HowItWorks() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_howitworks').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as HowItWorksData);
+        localStorage.setItem('website_howitworks', JSON.stringify(value));
+      }
+    });
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'website_howitworks') loadData();

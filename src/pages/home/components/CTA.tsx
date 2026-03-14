@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { getWebsiteSettings } from '../../../supabase/database';
 
 interface CtaData {
   title: string;
@@ -33,6 +34,13 @@ export default function CTA() {
     };
 
     loadData();
+
+    getWebsiteSettings('website_cta').then(value => {
+      if (value && typeof value === 'object') {
+        setCustomData(value as CtaData);
+        localStorage.setItem('website_cta', JSON.stringify(value));
+      }
+    });
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'website_cta') loadData();

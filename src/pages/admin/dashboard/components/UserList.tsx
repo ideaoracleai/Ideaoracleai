@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import DowngradeModal from './DowngradeModal';
-import { adminUsers } from '../../../../mocks/dashboardData';
+import {
+  getAllUsers,
+  adminSetUserBlocked,
+  adminCancelSubscription,
+  adminReactivateSubscription,
+  adminUpdateUserPlan,
+  adminAddCredits,
+  type AdminUser,
+} from '../../../../supabase/database';
 
 interface PaymentMethod {
   type: 'visa' | 'mastercard' | 'amex';
@@ -64,9 +72,41 @@ export default function UserList() {
   const [newPlan, setNewPlan] = useState('Pro');
   const [cancellationReason, setCancellationReason] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'cancelled'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const mapAdminUser = (u: AdminUser): User => ({
+    id: u.uid,
+    email: u.email,
+    name: u.name || u.email.split('@')[0],
+    plan: u.plan,
+    credits: u.credits,
+    joinDate: u.joinDate,
+    lastActive: u.joinDate,
+    totalSpent: u.totalSpent,
+    isBlocked: u.isBlocked,
+    subscriptionStatus: u.subscriptionStatus,
+    cancelledAt: u.cancelledAt,
+    cancelledEffectiveDate: u.cancelledEffectiveDate,
+    cancellationReason: u.cancellationReason,
+    paymentMethod: { type: 'visa' as const, last4: '****', expiryMonth: 12, expiryYear: 2025 },
+    billingAddress: { name: u.name, street: '', city: '', postalCode: '', country: '' },
+    transactions: [],
+  });
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAllUsers();
+      setUsers(data.map(mapAdminUser));
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setUsers(adminUsers as User[]);
+    loadUsers();
   }, []);
 
   useEffect(() => {
@@ -141,53 +181,43 @@ export default function UserList() {
     setActiveDropdown(null);
   };
 
-  const confirmFreeAccount = () => {
+  const confirmFreeAccount = async () => {
     if (!selectedUser) return;
-    
-    const freeUntilDate = new Date();
-    freeUntilDate.setMonth(freeUntilDate.getMonth() + freeMonths);
-    
-    const updatedUser = {
-      ...selectedUser,
-      plan: freePlan,
-      isFree: true,
-      freeUntil: freeUntilDate.toISOString().split('T')[0],
-      credits: freePlan === 'Builder' ? 50000 : freePlan === 'Pro' ? 10000 : 2500
-    };
-    
-    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    const bonusCredits = freePlan === 'Builder' ? 50000 : freePlan === 'Pro' ? 10000 : 2500;
+    try {
+      await adminUpdateUserPlan(selectedUser.id, freePlan, bonusCredits);
+      await adminAddCredits(selectedUser.id, bonusCredits);
+      await loadUsers();
+      showSuccess(`${selectedUser.name} hat jetzt ${freeMonths} Monat(e) kostenloses ${freePlan}-Paket`);
+    } catch (err) {
+      console.error('Failed to grant free account:', err);
+    }
     setShowFreeModal(false);
     setSelectedUser(null);
-    showSuccess(`${selectedUser.name} hat jetzt ${freeMonths} Monat(e) kostenloses ${freePlan}-Paket`);
   };
 
-  const confirmBlockUser = () => {
+  const confirmBlockUser = async () => {
     if (!selectedUser) return;
-    
-    const updatedUser = {
-      ...selectedUser,
-      isBlocked: !selectedUser.isBlocked
-    };
-    
-    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    const newBlocked = !selectedUser.isBlocked;
+    try {
+      await adminSetUserBlocked(selectedUser.id, newBlocked);
+      await loadUsers();
+      showSuccess(newBlocked ? `${selectedUser.name} wurde blockiert` : `${selectedUser.name} wurde entsperrt`);
+    } catch (err) {
+      console.error('Failed to block/unblock user:', err);
+    }
     setShowBlockModal(false);
     setSelectedUser(null);
-    showSuccess(updatedUser.isBlocked 
-      ? `${selectedUser.name} wurde blockiert` 
-      : `${selectedUser.name} wurde entsperrt`
-    );
   };
 
-  const removeFreeStatus = (user: User) => {
-    const updatedUser = {
-      ...user,
-      isFree: false,
-      freeUntil: undefined,
-      plan: 'Starter',
-      credits: 2500
-    };
-    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
-    showSuccess(`Gratis-Status von ${user.name} wurde entfernt`);
+  const removeFreeStatus = async (user: User) => {
+    try {
+      await adminUpdateUserPlan(user.id, 'Starter', 0);
+      await loadUsers();
+      showSuccess(`Gratis-Status von ${user.name} wurde entfernt`);
+    } catch (err) {
+      console.error('Failed to remove free status:', err);
+    }
     setActiveDropdown(null);
   };
 
@@ -248,48 +278,40 @@ export default function UserList() {
     }
   };
 
-  const confirmSubscriptionAction = () => {
+  const confirmSubscriptionAction = async () => {
     if (!selectedUser) return;
-    
-    let updatedUser = { ...selectedUser };
     let message = '';
-
-    switch (subscriptionAction) {
-      case 'cancel':
-        const today = new Date().toISOString().split('T')[0];
-        const endOfMonth = getEndOfMonth();
-        updatedUser.subscriptionStatus = 'cancelled';
-        updatedUser.cancelledAt = today;
-        updatedUser.cancelledEffectiveDate = endOfMonth;
-        updatedUser.cancellationReason = cancellationReason || 'Kein Grund angegeben';
-        message = `Abo von ${selectedUser.name} wurde gekündigt (gültig bis ${new Date(endOfMonth).toLocaleDateString('de-CH')})`;
-        break;
-      case 'pause':
-        updatedUser.subscriptionStatus = 'overdue';
-        message = `Abo von ${selectedUser.name} wurde pausiert`;
-        break;
-      case 'change':
-        updatedUser.plan = newPlan;
-        updatedUser.subscriptionStatus = 'active';
-        updatedUser.cancelledAt = null;
-        updatedUser.cancelledEffectiveDate = null;
-        updatedUser.cancellationReason = null;
-        message = `Abo von ${selectedUser.name} wurde auf ${newPlan} geändert`;
-        break;
-      case 'reactivate':
-        updatedUser.subscriptionStatus = 'active';
-        updatedUser.cancelledAt = null;
-        updatedUser.cancelledEffectiveDate = null;
-        updatedUser.cancellationReason = null;
-        message = `Abo von ${selectedUser.name} wurde reaktiviert`;
-        break;
+    try {
+      switch (subscriptionAction) {
+        case 'cancel': {
+          const endOfMonth = getEndOfMonth();
+          await adminCancelSubscription(selectedUser.id, cancellationReason || 'Kein Grund angegeben', endOfMonth);
+          message = `Abo von ${selectedUser.name} wurde gekündigt (gültig bis ${new Date(endOfMonth).toLocaleDateString('de-CH')})`;
+          break;
+        }
+        case 'pause':
+          await adminCancelSubscription(selectedUser.id, 'Pausiert', getEndOfMonth());
+          message = `Abo von ${selectedUser.name} wurde pausiert`;
+          break;
+        case 'change': {
+          const planCreds: Record<string, number> = { Starter: 0, Pro: 5000, Builder: 999999 };
+          await adminUpdateUserPlan(selectedUser.id, newPlan, planCreds[newPlan] ?? 0);
+          message = `Abo von ${selectedUser.name} wurde auf ${newPlan} geändert`;
+          break;
+        }
+        case 'reactivate':
+          await adminReactivateSubscription(selectedUser.id);
+          message = `Abo von ${selectedUser.name} wurde reaktiviert`;
+          break;
+      }
+      await loadUsers();
+      showSuccess(message);
+    } catch (err) {
+      console.error('Failed to update subscription:', err);
     }
-
-    setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
     setShowSubscriptionModal(false);
     setSelectedUser(null);
     setCancellationReason('');
-    showSuccess(message);
   };
 
   const getPlanColor = (plan: string) => {
@@ -938,8 +960,8 @@ export default function UserList() {
             setShowDowngradeModal(false);
             setSelectedUser(null);
           }}
-          onSuccess={(updatedUser) => {
-            setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+          onSuccess={async () => {
+            await loadUsers();
             setShowDowngradeModal(false);
             setSelectedUser(null);
           }}

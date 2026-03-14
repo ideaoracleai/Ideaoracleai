@@ -308,6 +308,20 @@ export const common = {
   'auth.or': '또는 계속하기',
   'auth.social.google': 'Google로 계속하기',
   'auth.social.apple': 'Apple로 계속하기',
+
+  'admin.title': '관리자 대시보드',
+  'admin.subtitle': '제어 센터',
+  'admin.superAdmin': '슈퍼 관리자',
+  'admin.logout': '로그아웃',
+  'admin.tabs.users': '사용자 관리',
+  'admin.tabs.downgrades': '다운그레이드',
+  'admin.tabs.tips': '오늘의 팁',
+  'admin.tabs.coupons': '쿠폰 코드',
+  'admin.tabs.website': '웹사이트 편집기',
+  'admin.tabs.ai': 'AI 설정',
+  'admin.tabs.transactions': '거래 로그',
+  'admin.tabs.stats': '통계',
+
 };
 
 export default common;

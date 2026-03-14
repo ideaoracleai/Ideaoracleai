@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { saveEditorData } from '../../../../../utils/saveEditorData';
+import { getWebsiteSettings } from '../../../../../supabase/database';
 
 interface SocialMedia {
   platform: string;
@@ -30,24 +32,25 @@ export default function SocialMediaEditor() {
       const stored = localStorage.getItem('websiteSocials');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Basic validation – ensure we have an array of objects with required keys
-        if (Array.isArray(parsed)) {
-          setSocials(parsed);
-        }
+        if (Array.isArray(parsed)) setSocials(parsed);
       }
     } catch (e) {
       console.error('Failed to parse stored social links:', e);
     }
+    getWebsiteSettings('websiteSocials').then(value => {
+      if (Array.isArray(value)) {
+        setSocials(value as SocialMedia[]);
+        localStorage.setItem('websiteSocials', JSON.stringify(value));
+      }
+    });
   }, []);
 
   // ----- Save handler -------------------------------------------------------
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      localStorage.setItem('websiteSocials', JSON.stringify(socials));
+      await saveEditorData('websiteSocials', socials);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      // Notify other parts of the app that the socials have changed
-      window.dispatchEvent(new CustomEvent('websiteSocialsUpdated', { detail: socials }));
     } catch (e) {
       console.error('Failed to save social links:', e);
     }
