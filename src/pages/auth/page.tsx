@@ -248,7 +248,7 @@ export default function AuthPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateCouponCode = () => {
+  const validateCouponCode = async () => {
     if (!formData.couponCode.trim()) {
       setValidatedCoupon(null);
       setCouponError('');
@@ -258,59 +258,37 @@ export default function AuthPage() {
     setCouponLoading(true);
     setCouponError('');
 
-    setTimeout(() => {
-      // Lade Coupons aus localStorage
-      const savedCoupons = localStorage.getItem('admin_coupons');
-      const coupons = savedCoupons ? JSON.parse(savedCoupons) : [];
+    try {
+      const { getCoupon } = await import('../../supabase/database');
+      const coupon = await getCoupon(formData.couponCode.trim().toUpperCase());
 
-      const coupon = coupons.find((c: {
-        code: string;
-        isActive: boolean;
-        usedCount: number;
-        maxUses: number;
-        expiresAt: string | null;
-        category: 'registration' | 'trial';
-      }) =>
-        c.code.toLowerCase() === formData.couponCode.trim().toLowerCase() &&
-        c.isActive &&
-        c.usedCount < c.maxUses &&
-        (!c.expiresAt || new Date(c.expiresAt) > new Date())
-      );
-
-      if (!coupon) {
+      if (!coupon || !coupon.isActive || coupon.usedCount >= coupon.maxUses || (coupon.expiresAt && new Date(coupon.expiresAt) < new Date())) {
         setValidatedCoupon(null);
         setCouponError('Ungültiger oder abgelaufener Code');
-        setCouponLoading(false);
         return;
       }
 
-      // Prüfe Kategorie: Nur Registrierungs-Gutscheine erlaubt
       if (coupon.category === 'trial') {
         setValidatedCoupon(null);
         setCouponError('Dieser Code ist nur für den Test-Zugang gültig. Bitte auf der Startseite einlösen.');
-        setCouponLoading(false);
         return;
       }
 
-      if (coupon.category === 'registration') {
-        setValidatedCoupon({
-          code: coupon.code,
-          plan: coupon.plan,
-          duration: coupon.duration || 0,
-          durationUnit: coupon.durationUnit || 'days',
-          credits: coupon.value || 0,
-          isValid: true,
-        });
-        // Automatisch das Paket auswählen
-        setFormData(prev => ({ ...prev, selectedPlan: coupon.plan }));
-        setCouponError('');
-      } else {
-        setValidatedCoupon(null);
-        setCouponError('Ungültiger Gutschein-Typ');
-      }
-
+      setValidatedCoupon({
+        code: coupon.code,
+        plan: coupon.plan as PlanType,
+        duration: coupon.duration || 0,
+        durationUnit: coupon.durationUnit || 'days',
+        credits: coupon.credits || 0,
+        isValid: true,
+      });
+      setFormData(prev => ({ ...prev, selectedPlan: coupon.plan as PlanType }));
+      setCouponError('');
+    } catch {
+      setCouponError('Fehler beim Prüfen des Codes. Bitte erneut versuchen.');
+    } finally {
       setCouponLoading(false);
-    }, 500);
+    }
   };
 
   const removeCoupon = () => {

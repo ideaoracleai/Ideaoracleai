@@ -66,6 +66,7 @@ export async function loginWithGoogle(): Promise<void> {
         provider: 'google',
         options: {
             queryParams: { prompt: 'select_account' },
+            redirectTo: `${window.location.origin}/dashboard`,
         },
     });
     if (error) throw error;
