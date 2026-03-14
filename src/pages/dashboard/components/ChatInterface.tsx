@@ -1511,7 +1511,7 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
 
                     {/* Dropdown */}
                     {showModelPicker && (
-                      <div className="absolute bottom-full right-0 mb-2 w-64 bg-[#1A1F26] border border-[#3D3428]/50 rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-50">
+                      <div className="absolute bottom-full left-0 sm:left-auto sm:right-0 mb-2 w-52 sm:w-64 bg-[#1A1F26] border border-[#3D3428]/50 rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-50">
                         <div className="px-3 py-2.5 border-b border-[#3D3428]/30">
                           <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">{t('chat.selectModel', 'Modell wählen')}</p>
                         </div>
