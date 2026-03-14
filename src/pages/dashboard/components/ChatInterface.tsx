@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { generateDemoResponse, getRatingEmoji, getRatingLabel } from '../../../services/demoAI';
 import { useSubscription } from '../../../hooks/useSubscription';
+import { useAuth } from '../../../supabase';
+import { saveIdeaRecord } from '../../../supabase/database';
 
 /**
  * Split markdown into logical blocks (paragraphs, headings, tables, lists etc.)
@@ -221,6 +223,7 @@ const getRecognitionLanguage = (lang: string): string => {
 
 export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const { t, i18n } = useTranslation();
+  const { firebaseUser } = useAuth();
 
   // Subscription Hook verwenden
   const { subscription, deductCredits, hasEnoughCredits } = useSubscription();
@@ -818,6 +821,23 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         }
         return session;
       }));
+
+      // Save analysis to Supabase ideas table (fire-and-forget)
+      if (firebaseUser?.id) {
+        const sessionTitle = sessions.find(s => s.id === sessionId)?.title || userInput.substring(0, 80);
+        saveIdeaRecord(firebaseUser.id, {
+          title: sessionTitle,
+          content: aiResponse.content,
+          rating: aiResponse.rating,
+          creditsUsed: CREDITS_PER_QUESTION,
+          tags: [],
+          conversationHistory: [
+            ...conversationHistory.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+            { role: 'user' as const, content: userInput },
+            { role: 'assistant' as const, content: aiResponse.content },
+          ],
+        }).catch(() => {}); // silent fail — don't block UX
+      }
     } catch (error) {
       console.error('AI response failed:', error);
 
