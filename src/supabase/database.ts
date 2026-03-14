@@ -235,6 +235,38 @@ export async function checkAndResetCredits(
     return true;
 }
 
+// ─── Credit Deduction ─────────────────────────────────────────────────────────
+
+/** Deduct credits from a user and log to credit_history (fire-and-forget safe) */
+export async function deductUserCredits(
+    uid: string,
+    amount: number,
+    action: string = 'KI-Analyse'
+): Promise<void> {
+    // Read current credits first
+    const { data: row, error: fetchErr } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', uid)
+        .single();
+
+    if (fetchErr) throw fetchErr;
+
+    const current = (row?.credits as number) ?? 0;
+    const newBalance = Math.max(0, current - amount);
+
+    // Update balance
+    const { error: updateErr } = await supabase
+        .from('users')
+        .update({ credits: newBalance })
+        .eq('id', uid);
+
+    if (updateErr) throw updateErr;
+
+    // Log to credit_history
+    await addCreditHistory(uid, { action, change: -amount, balance: newBalance });
+}
+
 // ─── Credit History ───────────────────────────────────────────────────────────
 
 async function addCreditHistory(
