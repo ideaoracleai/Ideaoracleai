@@ -381,6 +381,12 @@ export async function getAllUsers(): Promise<AdminUser[]> {
     return (data ?? []).map((row: Record<string, unknown>) => rowToAdminUser(row));
 }
 
+/** Get users filtered by plan */
+export async function getUsersByPlan(plan: string): Promise<AdminUser[]> {
+    const all = await getAllUsers();
+    return all.filter(u => u.plan === plan);
+}
+
 /** Block or unblock a user */
 export async function adminSetUserBlocked(uid: string, blocked: boolean): Promise<void> {
     const { error } = await supabase.rpc('update_user_admin', {
