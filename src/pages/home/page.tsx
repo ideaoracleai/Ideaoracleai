@@ -22,8 +22,8 @@ const DEFAULT_SECTIONS: SectionConfig[] = [
   { id: 'hero', label: 'Hero', visible: true },
   { id: 'features', label: 'Features', visible: true },
   { id: 'howItWorks', label: 'How It Works', visible: true },
-  { id: 'testimonials', label: 'Testimonials', visible: true },
-  { id: 'aboutUs', label: 'About Us', visible: true },
+  { id: 'testimonials', label: 'Testimonials', visible: false },
+  { id: 'aboutUs', label: 'About Us', visible: false },
   { id: 'pricing', label: 'Pricing', visible: true },
   { id: 'faq', label: 'FAQ', visible: true },
 ];
