@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminGetTips, adminSaveTips } from '../../../../supabase/database';
 
 interface Tip {
@@ -12,26 +13,27 @@ interface Tip {
 }
 
 const categoryConfig = {
-  feature: { label: 'Neue Funktion', icon: 'ri-sparkle-line', color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  productivity: { label: 'Produktivität', icon: 'ri-rocket-line', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+  feature: { label: 'New Feature', icon: 'ri-sparkle-line', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  productivity: { label: 'Productivity', icon: 'ri-rocket-line', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   update: { label: 'Update', icon: 'ri-refresh-line', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  tip: { label: 'Tipp', icon: 'ri-lightbulb-line', color: 'text-purple-400', bg: 'bg-purple-500/10' }
+  tip: { label: 'Tip', icon: 'ri-lightbulb-line', color: 'text-purple-400', bg: 'bg-purple-500/10' }
 };
 
 const aiGeneratedTips = [
-  "Nutze die Tastenkombination Strg+Enter, um deine Ideen schneller zu analysieren.",
-  "Speichere deine besten Ideen als Favoriten, um sie später leicht wiederzufinden.",
-  "Je detaillierter deine Ideenbeschreibung, desto präziser die KI-Analyse.",
-  "Exportiere deine Analysen als PDF für Präsentationen und Meetings.",
-  "Nutze die Verlaufsfunktion, um frühere Ideen erneut zu betrachten.",
-  "Kombiniere mehrere kleine Ideen zu einem größeren Konzept für bessere Ergebnisse.",
-  "Überprüfe regelmäßig deine Credits, um dein Kontingent optimal zu nutzen.",
-  "Teile deine besten Ideen mit dem Team über die Export-Funktion.",
-  "Nutze verschiedene Kategorien, um deine Ideen besser zu organisieren.",
-  "Die KI lernt aus deinem Feedback - bewerte Analysen für bessere Ergebnisse."
+  "Use the keyboard shortcut Ctrl+Enter to analyze your ideas faster.",
+  "Save your best ideas as favorites to easily find them later.",
+  "The more detailed your idea description, the more precise the AI analysis.",
+  "Export your analyses as PDF for presentations and meetings.",
+  "Use the history feature to revisit previous ideas.",
+  "Combine multiple small ideas into a bigger concept for better results.",
+  "Check your credits regularly to make the most of your quota.",
+  "Share your best ideas with the team via the export function.",
+  "Use different categories to organize your ideas better.",
+  "The AI learns from your feedback - rate analyses for better results."
 ];
 
 export default function TipOfTheDay() {
+  const { t } = useTranslation();
   const [tips, setTips] = useState<Tip[]>([]);
   const [newTip, setNewTip] = useState({ title: '', content: '', category: 'tip' as Tip['category'] });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -66,10 +68,10 @@ export default function TipOfTheDay() {
       const randomCategory = categories[Math.floor(Math.random() * categories.length)];
       
       const titles = {
-        feature: 'Neue Funktion entdecken',
-        productivity: 'Produktivitäts-Boost',
-        update: 'Wichtiges Update',
-        tip: 'Tipp des Tages'
+        feature: 'Discover New Feature',
+        productivity: 'Productivity Boost',
+        update: 'Important Update',
+        tip: 'Tip of the Day'
       };
 
       setNewTip({
@@ -125,10 +127,10 @@ export default function TipOfTheDay() {
         <div>
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <i className="ri-lightbulb-flash-line text-[#C9A961]"></i>
-            Tipp des Tages
+            {t('admin.tips.title', 'Tip of the Day')}
           </h3>
           <p className="text-sm text-slate-400 mt-1">
-            Erstelle und verwalte Tipps, die allen Benutzern angezeigt werden
+            {t('admin.tips.subtitle', 'Create and manage tips shown to all users')}
           </p>
         </div>
       </div>
@@ -147,7 +149,7 @@ export default function TipOfTheDay() {
                 </span>
                 <span className="text-xs text-green-400 flex items-center gap-1">
                   <i className="ri-checkbox-circle-fill"></i>
-                  Aktiv
+                  {t('admin.tips.active', 'Active')}
                 </span>
               </div>
               <h4 className="text-lg font-semibold text-white mb-2">{activeTip.title}</h4>
@@ -155,7 +157,7 @@ export default function TipOfTheDay() {
             </div>
           </div>
           <p className="text-xs text-slate-500 mt-4 text-right">
-            Dieser Tipp wird aktuell allen Benutzern angezeigt
+            {t('admin.tips.currentlyShown', 'This tip is currently shown to all users')}
           </p>
         </div>
       )}
@@ -163,7 +165,7 @@ export default function TipOfTheDay() {
       {/* Create New Tip */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-semibold text-white">Neuen Tipp erstellen</h4>
+          <h4 className="text-lg font-semibold text-white">{t('admin.tips.createNew', 'Create New Tip')}</h4>
           <button
             onClick={generateAITip}
             disabled={isGenerating}
@@ -172,12 +174,12 @@ export default function TipOfTheDay() {
             {isGenerating ? (
               <>
                 <i className="ri-loader-4-line animate-spin"></i>
-                Generiere...
+                {t('admin.tips.generating', 'Generating...')}
               </>
             ) : (
               <>
                 <i className="ri-magic-line"></i>
-                KI-Tipp generieren
+                {t('admin.tips.generateAI', 'Generate AI Tip')}
               </>
             )}
           </button>
@@ -186,36 +188,36 @@ export default function TipOfTheDay() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Titel</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.tips.titleLabel', 'Title')}</label>
               <input
                 type="text"
                 value={newTip.title}
                 onChange={(e) => setNewTip({ ...newTip, title: e.target.value })}
-                placeholder="z.B. Tipp des Tages"
+                placeholder={t('admin.tips.titlePlaceholder', 'e.g. Tip of the Day')}
                 className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-[#C9A961] transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Kategorie</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.tips.category', 'Category')}</label>
               <select
                 value={newTip.category}
                 onChange={(e) => setNewTip({ ...newTip, category: e.target.value as Tip['category'] })}
                 className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-[#C9A961] transition-colors cursor-pointer"
               >
-                <option value="tip">💡 Tipp</option>
-                <option value="feature">✨ Neue Funktion</option>
-                <option value="productivity">🚀 Produktivität</option>
-                <option value="update">🔄 Update</option>
+                <option value="tip">💡 {t('admin.tips.categoryTip', 'Tip')}</option>
+                <option value="feature">✨ {t('admin.tips.categoryFeature', 'New Feature')}</option>
+                <option value="productivity">🚀 {t('admin.tips.categoryProductivity', 'Productivity')}</option>
+                <option value="update">🔄 {t('admin.tips.categoryUpdate', 'Update')}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Inhalt</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.tips.content', 'Content')}</label>
             <textarea
               value={newTip.content}
               onChange={(e) => setNewTip({ ...newTip, content: e.target.value })}
-              placeholder="Schreibe hier deinen Tipp für die Benutzer..."
+              placeholder={t('admin.tips.contentPlaceholder', 'Write your tip for users here...')}
               rows={3}
               maxLength={500}
               className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-[#C9A961] transition-colors resize-none"
@@ -229,22 +231,22 @@ export default function TipOfTheDay() {
             className="w-full py-3 bg-[#C9A961] text-slate-900 rounded-lg font-semibold hover:bg-[#d4b872] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
           >
             <i className="ri-add-line mr-2"></i>
-            Tipp hinzufügen
+            {t('admin.tips.addTip', 'Add Tip')}
           </button>
         </div>
       </div>
 
       {/* Tips List */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-        <h4 className="text-lg font-semibold text-white mb-4">Alle Tipps ({tips.length})</h4>
+        <h4 className="text-lg font-semibold text-white mb-4">{t('admin.tips.allTips', 'All Tips')} ({tips.length})</h4>
         
         {tips.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="ri-lightbulb-line text-slate-500 text-2xl"></i>
             </div>
-            <p className="text-slate-400 mb-2">Noch keine Tipps erstellt</p>
-            <p className="text-sm text-slate-500">Klicke auf "KI-Tipp generieren" um zu starten</p>
+            <p className="text-slate-400 mb-2">{t('admin.tips.noTips', 'No tips created yet')}</p>
+            <p className="text-sm text-slate-500">{t('admin.tips.noTipsHint', 'Click "Generate AI Tip" to get started')}</p>
           </div>
         ) : (
           <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -276,7 +278,7 @@ export default function TipOfTheDay() {
                       onClick={() => setEditingTip(null)}
                       className="text-sm text-[#C9A961] hover:underline cursor-pointer"
                     >
-                      Fertig
+                      {t('admin.actions.done', 'Done')}
                     </button>
                   </div>
                 ) : (
@@ -290,13 +292,13 @@ export default function TipOfTheDay() {
                           <h5 className="text-sm font-medium text-white truncate">{tip.title}</h5>
                           {tip.isActive && (
                             <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full whitespace-nowrap">
-                              Aktiv
+                              {t('admin.tips.active', 'Active')}
                             </span>
                           )}
                         </div>
                         <p className="text-sm text-slate-400 line-clamp-2">{tip.content}</p>
                         <p className="text-xs text-slate-500 mt-2">
-                          {new Date(tip.createdAt).toLocaleDateString('de-DE', {
+                          {new Date(tip.createdAt).toLocaleDateString(undefined, {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -314,21 +316,21 @@ export default function TipOfTheDay() {
                             ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
                             : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
                         }`}
-                        title={tip.isActive ? 'Deaktivieren' : 'Aktivieren'}
+                        title={tip.isActive ? t('admin.actions.deactivate', 'Deactivate') : t('admin.actions.activate', 'Activate')}
                       >
                         <i className={tip.isActive ? 'ri-eye-line' : 'ri-eye-off-line'}></i>
                       </button>
                       <button
                         onClick={() => setEditingTip(tip.id)}
                         className="w-8 h-8 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-                        title="Bearbeiten"
+                        title={t('admin.actions.edit', 'Edit')}
                       >
                         <i className="ri-edit-line"></i>
                       </button>
                       <button
                         onClick={() => deleteTip(tip.id)}
                         className="w-8 h-8 bg-red-500/20 hover:bg-red-500/30 rounded-lg flex items-center justify-center text-red-400 transition-colors cursor-pointer"
-                        title="Löschen"
+                        title={t('admin.actions.delete', 'Delete')}
                       >
                         <i className="ri-delete-bin-line"></i>
                       </button>

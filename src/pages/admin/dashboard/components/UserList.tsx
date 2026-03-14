@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import DowngradeModal from './DowngradeModal';
 import {
   getAllUsers,
@@ -265,16 +266,18 @@ export default function UserList() {
     }
   };
 
+  const { t } = useTranslation();
+
   const getSubscriptionStatusText = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Aktiv';
+        return t('admin.subscription.active', 'Active');
       case 'cancelled':
-        return 'Gekündigt';
+        return t('admin.subscription.cancelled', 'Cancelled');
       case 'overdue':
-        return 'Pausiert';
+        return t('admin.subscription.paused', 'Paused');
       default:
-        return 'Unbekannt';
+        return t('admin.subscription.unknown', 'Unknown');
     }
   };
 
@@ -285,23 +288,23 @@ export default function UserList() {
       switch (subscriptionAction) {
         case 'cancel': {
           const endOfMonth = getEndOfMonth();
-          await adminCancelSubscription(selectedUser.id, cancellationReason || 'Kein Grund angegeben', endOfMonth);
-          message = `Abo von ${selectedUser.name} wurde gekündigt (gültig bis ${new Date(endOfMonth).toLocaleDateString('de-CH')})`;
+          await adminCancelSubscription(selectedUser.id, cancellationReason || t('admin.users.noReasonGiven', 'No reason given'), endOfMonth);
+          message = t('admin.users.subCancelled', 'Subscription of {{name}} cancelled (valid until {{date}})', { name: selectedUser.name, date: new Date(endOfMonth).toLocaleDateString() });
           break;
         }
         case 'pause':
-          await adminCancelSubscription(selectedUser.id, 'Pausiert', getEndOfMonth());
-          message = `Abo von ${selectedUser.name} wurde pausiert`;
+          await adminCancelSubscription(selectedUser.id, t('admin.users.paused', 'Paused'), getEndOfMonth());
+          message = t('admin.users.subPaused', 'Subscription of {{name}} has been paused', { name: selectedUser.name });
           break;
         case 'change': {
           const planCreds: Record<string, number> = { Starter: 0, Pro: 5000, Builder: 999999 };
           await adminUpdateUserPlan(selectedUser.id, newPlan, planCreds[newPlan] ?? 0);
-          message = `Abo von ${selectedUser.name} wurde auf ${newPlan} geändert`;
+          message = t('admin.users.subChanged', 'Subscription of {{name}} changed to {{plan}}', { name: selectedUser.name, plan: newPlan });
           break;
         }
         case 'reactivate':
           await adminReactivateSubscription(selectedUser.id);
-          message = `Abo von ${selectedUser.name} wurde reaktiviert`;
+          message = t('admin.users.subReactivated', 'Subscription of {{name}} has been reactivated', { name: selectedUser.name });
           break;
       }
       await loadUsers();
@@ -351,7 +354,7 @@ export default function UserList() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Benutzer suchen (E-Mail oder Name)..."
+            placeholder={t('admin.users.searchPlaceholder', 'Search users (email or name)...')}
             className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
           />
         </div>
@@ -366,7 +369,7 @@ export default function UserList() {
                 : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50'
             }`}
           >
-            Alle ({users.length})
+            {t('admin.filter.all', 'All')} ({users.length})
           </button>
           <button
             onClick={() => setStatusFilter('active')}
@@ -376,7 +379,7 @@ export default function UserList() {
                 : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50'
             }`}
           >
-            Aktiv ({activeCount})
+            {t('admin.subscription.active', 'Active')} ({activeCount})
           </button>
           <button
             onClick={() => setStatusFilter('cancelled')}
@@ -386,7 +389,7 @@ export default function UserList() {
                 : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50'
             }`}
           >
-            Gekündigt ({cancelledCount})
+            {t('admin.subscription.cancelled', 'Cancelled')} ({cancelledCount})
           </button>
         </div>
       </div>
@@ -395,15 +398,15 @@ export default function UserList() {
       <div className="mb-4 flex flex-wrap gap-4 text-xs">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-          <span className="text-slate-400">Gratis-Konto</span>
+          <span className="text-slate-400">{t('admin.users.freeAccount', 'Free Account')}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-red-500"></span>
-          <span className="text-slate-400">Blockiert</span>
+          <span className="text-slate-400">{t('admin.users.blocked', 'Blocked')}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-orange-500"></span>
-          <span className="text-slate-400">Gekündigt (läuft aus)</span>
+          <span className="text-slate-400">{t('admin.users.cancelledExpiring', 'Cancelled (expiring)')}</span>
         </div>
       </div>
 
@@ -414,25 +417,25 @@ export default function UserList() {
             <thead className="bg-slate-900/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Benutzer
+                  {t('admin.table.user', 'User')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Paket
+                  {t('admin.table.plan', 'Plan')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Abo-Status
+                  {t('admin.table.subStatus', 'Subscription Status')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Kündigung
+                  {t('admin.table.cancellation', 'Cancellation')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Zahlungsmethode
+                  {t('admin.table.payment', 'Payment Method')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Ausgaben
+                  {t('admin.table.spending', 'Spending')}
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
-                  Aktionen
+                  {t('admin.table.actions', 'Actions')}
                 </th>
               </tr>
             </thead>
@@ -473,15 +476,15 @@ export default function UserList() {
                       <div className="text-xs">
                         <div className="flex items-center gap-1 text-orange-400 mb-1">
                           <i className="ri-calendar-close-line"></i>
-                          <span>Gekündigt: {new Date(user.cancelledAt).toLocaleDateString('de-CH')}</span>
+                          <span>{t('admin.users.cancelledOn', 'Cancelled:')} {new Date(user.cancelledAt).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1 text-red-400">
                           <i className="ri-timer-line"></i>
-                          <span>Endet: {user.cancelledEffectiveDate ? new Date(user.cancelledEffectiveDate).toLocaleDateString('de-CH') : '-'}</span>
+                          <span>{t('admin.users.endsOn', 'Ends:')} {user.cancelledEffectiveDate ? new Date(user.cancelledEffectiveDate).toLocaleDateString() : '-'}</span>
                         </div>
                         {user.cancelledEffectiveDate && (
                           <div className="mt-1 text-slate-500">
-                            ({getDaysUntilEnd(user.cancelledEffectiveDate)} Tage verbleibend)
+                            ({getDaysUntilEnd(user.cancelledEffectiveDate)} {t('admin.users.daysRemaining', 'days remaining')})
                           </div>
                         )}
                       </div>
@@ -524,7 +527,7 @@ export default function UserList() {
                             className="w-full px-4 py-3 text-left text-sm text-white hover:bg-slate-700/50 flex items-center gap-3 transition-colors cursor-pointer"
                           >
                             <i className="ri-eye-line"></i>
-                            Details anzeigen
+                            {t('admin.actions.viewDetails', 'View details')}
                           </button>
                           
                           <button
@@ -535,7 +538,7 @@ export default function UserList() {
                             className="w-full px-4 py-3 text-left text-sm text-amber-400 hover:bg-slate-700/50 flex items-center gap-3 transition-colors cursor-pointer"
                           >
                             <i className="ri-settings-3-line"></i>
-                            Abo verwalten
+                            {t('admin.users.manageSubscription', 'Manage subscription')}
                           </button>
                           
                           <div className="border-t border-slate-700"></div>
@@ -550,7 +553,7 @@ export default function UserList() {
                             }`}
                           >
                             <i className={user.isBlocked ? 'ri-lock-unlock-line' : 'ri-forbid-line'}></i>
-                            {user.isBlocked ? 'Entsperren' : 'Blockieren'}
+                            {user.isBlocked ? t('admin.users.unblock', 'Unblock') : t('admin.users.block', 'Block')}
                           </button>
                         </div>
                       )}
@@ -594,29 +597,29 @@ export default function UserList() {
                   <div className="flex items-start gap-3">
                     <i className="ri-error-warning-line text-orange-400 text-xl mt-0.5"></i>
                     <div className="flex-1">
-                      <p className="text-orange-400 font-medium mb-2">Abo gekündigt</p>
+                      <p className="text-orange-400 font-medium mb-2">{t('admin.users.subCancelled', 'Subscription cancelled')}</p>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-slate-400">Kündigungsdatum</p>
-                          <p className="text-white font-medium">{new Date(selectedUser.cancelledAt).toLocaleDateString('de-CH')}</p>
+                          <p className="text-slate-400">{t('admin.users.cancellationDate', 'Cancellation date')}</p>
+                          <p className="text-white font-medium">{new Date(selectedUser.cancelledAt).toLocaleDateString()}</p>
                         </div>
                         <div>
-                          <p className="text-slate-400">Gültig bis (Ende Monat)</p>
+                          <p className="text-slate-400">{t('admin.users.validUntil', 'Valid until (end of month)')}</p>
                           <p className="text-white font-medium">
                             {selectedUser.cancelledEffectiveDate 
-                              ? new Date(selectedUser.cancelledEffectiveDate).toLocaleDateString('de-CH')
+                              ? new Date(selectedUser.cancelledEffectiveDate).toLocaleDateString()
                               : '-'}
                           </p>
                         </div>
                         <div className="col-span-2">
-                          <p className="text-slate-400">Kündigungsgrund</p>
-                          <p className="text-white">{selectedUser.cancellationReason || 'Kein Grund angegeben'}</p>
+                          <p className="text-slate-400">{t('admin.users.cancellationReason', 'Cancellation reason')}</p>
+                          <p className="text-white">{selectedUser.cancellationReason || t('admin.users.noReason', 'No reason given')}</p>
                         </div>
                         {selectedUser.cancelledEffectiveDate && (
                           <div className="col-span-2">
-                            <p className="text-slate-400">Verbleibende Zeit</p>
+                            <p className="text-slate-400">{t('admin.users.timeRemaining', 'Time remaining')}</p>
                             <p className="text-orange-400 font-medium">
-                              {getDaysUntilEnd(selectedUser.cancelledEffectiveDate)} Tage bis zur Deaktivierung
+                              {getDaysUntilEnd(selectedUser.cancelledEffectiveDate)} {t('admin.users.daysUntilDeactivation', 'days until deactivation')}
                             </p>
                           </div>
                         )}
@@ -628,26 +631,26 @@ export default function UserList() {
 
               {/* Abo-Informationen */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">Abo-Informationen</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">{t('admin.users.subInfo', 'Subscription Information')}</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-slate-900/50 rounded-xl">
-                    <p className="text-sm text-slate-400 mb-1">Aktuelles Paket</p>
+                    <p className="text-sm text-slate-400 mb-1">{t('admin.users.currentPlan', 'Current Plan')}</p>
                     <p className="text-xl font-bold text-white">{selectedUser.plan}</p>
                   </div>
                   <div className="p-4 bg-slate-900/50 rounded-xl">
-                    <p className="text-sm text-slate-400 mb-1">Status</p>
+                    <p className="text-sm text-slate-400 mb-1">{t('admin.table.status', 'Status')}</p>
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getSubscriptionStatusColor(selectedUser.subscriptionStatus)}`}>
                       {getSubscriptionStatusText(selectedUser.subscriptionStatus)}
                     </span>
                   </div>
                   <div className="p-4 bg-slate-900/50 rounded-xl">
-                    <p className="text-sm text-slate-400 mb-1">Beigetreten</p>
+                    <p className="text-sm text-slate-400 mb-1">{t('admin.users.joined', 'Joined')}</p>
                     <p className="text-lg font-medium text-white">
-                      {new Date(selectedUser.joinDate).toLocaleDateString('de-CH')}
+                      {new Date(selectedUser.joinDate).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="p-4 bg-slate-900/50 rounded-xl">
-                    <p className="text-sm text-slate-400 mb-1">Gesamtausgaben</p>
+                    <p className="text-sm text-slate-400 mb-1">{t('admin.users.totalSpent', 'Total Spent')}</p>
                     <p className="text-xl font-bold text-emerald-400">CHF {selectedUser.totalSpent.toFixed(2)}</p>
                   </div>
                 </div>
@@ -655,7 +658,7 @@ export default function UserList() {
 
               {/* Zahlungsmethode */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">Zahlungsmethode</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">{t('admin.users.paymentMethod', 'Payment Method')}</h4>
                 <div className="p-4 bg-slate-900/50 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center`}>
@@ -666,7 +669,7 @@ export default function UserList() {
                         {selectedUser.paymentMethod.type.toUpperCase()} •••• {selectedUser.paymentMethod.last4}
                       </p>
                       <p className="text-sm text-slate-400">
-                        Gültig bis {selectedUser.paymentMethod.expiryMonth}/{selectedUser.paymentMethod.expiryYear}
+                        {t('admin.users.validThrough', 'Valid through')} {selectedUser.paymentMethod.expiryMonth}/{selectedUser.paymentMethod.expiryYear}
                       </p>
                     </div>
                   </div>
@@ -679,7 +682,7 @@ export default function UserList() {
 
               {/* Rechnungsadresse */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">Rechnungsadresse</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">{t('admin.users.billingAddress', 'Billing Address')}</h4>
                 <div className="p-4 bg-slate-900/50 rounded-xl">
                   <p className="text-white font-medium mb-2">{selectedUser.billingAddress.name}</p>
                   <p className="text-slate-400 text-sm">{selectedUser.billingAddress.street}</p>
@@ -692,7 +695,7 @@ export default function UserList() {
 
               {/* Transaktionshistorie */}
               <div>
-                <h4 className="text-lg font-semibold text-white mb-4">Transaktionshistorie</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">{t('admin.users.transactionHistory', 'Transaction History')}</h4>
                 <div className="space-y-2">
                   {selectedUser.transactions.map((transaction) => (
                     <div
@@ -702,7 +705,7 @@ export default function UserList() {
                       <div className="flex-1">
                         <p className="text-white font-medium">{transaction.description}</p>
                         <div className="flex items-center gap-3 mt-1 text-sm text-slate-400">
-                          <span>{new Date(transaction.date).toLocaleDateString('de-CH')}</span>
+                          <span>{new Date(transaction.date).toLocaleDateString()}</span>
                           <span>•</span>
                           <span className="text-xs">{transaction.stripeId}</span>
                         </div>
@@ -719,25 +722,25 @@ export default function UserList() {
               </div>
             </div>
 
+
             <div className="p-6 border-t border-slate-700">
               <button
                 onClick={() => setShowUserDetailModal(false)}
                 className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors cursor-pointer whitespace-nowrap"
               >
-                Schließen
+                {t('admin.actions.close', 'Close')}
               </button>
             </div>
           </div>
         </div>
       )}
-
       {/* Subscription Management Modal */}
       {showSubscriptionModal && selectedUser && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md">
             <div className="p-6 border-b border-slate-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-white">Abo verwalten</h3>
+                <h3 className="text-xl font-semibold text-white">{t('admin.users.manageSubscription', 'Manage subscription')}</h3>
                 <button
                   onClick={() => setShowSubscriptionModal(false)}
                   className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
@@ -754,7 +757,7 @@ export default function UserList() {
                 </div>
                 <div>
                   <p className="text-white font-medium">{selectedUser.name}</p>
-                  <p className="text-sm text-slate-400">{selectedUser.plan} Paket</p>
+                  <p className="text-sm text-slate-400">{selectedUser.plan} {t('admin.users.planLabel', 'Plan')}</p>
                 </div>
               </div>
 
@@ -764,15 +767,15 @@ export default function UserList() {
                   <div className="flex items-start gap-3">
                     <i className="ri-information-line text-orange-400 text-xl"></i>
                     <div className="text-sm">
-                      <p className="text-orange-400 font-medium mb-1">Abo bereits gekündigt</p>
+                      <p className="text-orange-400 font-medium mb-1">{t('admin.users.alreadyCancelled', 'Subscription already cancelled')}</p>
                       <p className="text-slate-300">
-                        Gekündigt am: {selectedUser.cancelledAt ? new Date(selectedUser.cancelledAt).toLocaleDateString('de-CH') : '-'}
+                        {t('admin.users.cancelledOn', 'Cancelled:')} {selectedUser.cancelledAt ? new Date(selectedUser.cancelledAt).toLocaleDateString() : '-'}
                       </p>
                       <p className="text-slate-300">
-                        Gültig bis: {selectedUser.cancelledEffectiveDate ? new Date(selectedUser.cancelledEffectiveDate).toLocaleDateString('de-CH') : '-'}
+                        {t('admin.users.validUntil', 'Valid until (end of month):')} {selectedUser.cancelledEffectiveDate ? new Date(selectedUser.cancelledEffectiveDate).toLocaleDateString() : '-'}
                       </p>
                       <p className="text-slate-300">
-                        Grund: {selectedUser.cancellationReason || '-'}
+                        {t('admin.users.cancellationReason', 'Reason:')} {selectedUser.cancellationReason || '-'}
                       </p>
                     </div>
                   </div>
@@ -781,7 +784,7 @@ export default function UserList() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-3">
-                  Aktion auswählen
+                  {t('admin.users.selectAction', 'Select action')}
                 </label>
                 <div className="space-y-2">
                   {selectedUser.subscriptionStatus === 'cancelled' ? (
@@ -797,9 +800,9 @@ export default function UserList() {
                         <i className={`ri-refresh-line text-xl ${subscriptionAction === 'reactivate' ? 'text-emerald-400' : 'text-slate-400'}`}></i>
                         <div>
                           <p className={`font-medium ${subscriptionAction === 'reactivate' ? 'text-emerald-400' : 'text-white'}`}>
-                            Abo reaktivieren
+                            {t('admin.users.reactivateSub', 'Reactivate subscription')}
                           </p>
-                          <p className="text-xs text-slate-400">Kündigung rückgängig machen</p>
+                          <p className="text-xs text-slate-400">{t('admin.users.reactivateDesc', 'Undo cancellation')}</p>
                         </div>
                       </div>
                     </button>
@@ -817,9 +820,9 @@ export default function UserList() {
                           <i className={`ri-close-circle-line text-xl ${subscriptionAction === 'cancel' ? 'text-red-400' : 'text-slate-400'}`}></i>
                           <div>
                             <p className={`font-medium ${subscriptionAction === 'cancel' ? 'text-red-400' : 'text-white'}`}>
-                              Abo kündigen
+                              {t('admin.users.cancelSub', 'Cancel subscription')}
                             </p>
-                            <p className="text-xs text-slate-400">Kündigung zum Monatsende</p>
+                            <p className="text-xs text-slate-400">{t('admin.users.cancelSubDesc', 'Cancellation at end of month')}</p>
                           </div>
                         </div>
                       </button>
@@ -836,9 +839,9 @@ export default function UserList() {
                           <i className={`ri-pause-circle-line text-xl ${subscriptionAction === 'pause' ? 'text-amber-400' : 'text-slate-400'}`}></i>
                           <div>
                             <p className={`font-medium ${subscriptionAction === 'pause' ? 'text-amber-400' : 'text-white'}`}>
-                              Abo pausieren
+                              {t('admin.users.pauseSub', 'Pause subscription')}
                             </p>
-                            <p className="text-xs text-slate-400">Temporäre Pause</p>
+                            <p className="text-xs text-slate-400">{t('admin.users.pauseSubDesc', 'Temporary pause')}</p>
                           </div>
                         </div>
                       </button>
@@ -855,9 +858,9 @@ export default function UserList() {
                           <i className={`ri-refresh-line text-xl ${subscriptionAction === 'change' ? 'text-emerald-400' : 'text-slate-400'}`}></i>
                           <div>
                             <p className={`font-medium ${subscriptionAction === 'change' ? 'text-emerald-400' : 'text-white'}`}>
-                              Paket ändern
+                              {t('admin.users.changePlan', 'Change plan')}
                             </p>
-                            <p className="text-xs text-slate-400">Zu anderem Paket wechseln</p>
+                            <p className="text-xs text-slate-400">{t('admin.users.changePlanDesc', 'Switch to another plan')}</p>
                           </div>
                         </div>
                       </button>
@@ -870,20 +873,19 @@ export default function UserList() {
               {subscriptionAction === 'cancel' && selectedUser.subscriptionStatus !== 'cancelled' && (
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-3">
-                    Kündigungsgrund (optional)
+                    {t('admin.users.cancellationReasonOpt', 'Cancellation reason (optional)')}
                   </label>
                   <textarea
                     value={cancellationReason}
                     onChange={(e) => setCancellationReason(e.target.value)}
-                    placeholder="Warum wird das Abo gekündigt?"
+                    placeholder={t('admin.users.cancellationPlaceholder', 'Why is the subscription being cancelled?')}
                     className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                     rows={3}
                   />
                   <div className="mt-3 p-3 bg-slate-900/50 rounded-lg">
                     <p className="text-xs text-slate-400">
                       <i className="ri-information-line mr-1"></i>
-                      Das Abo wird zum <strong className="text-white">{new Date(getEndOfMonth()).toLocaleDateString('de-CH')}</strong> (Monatsende) beendet. 
-                      Bis dahin hat der Benutzer vollen Zugang. Keine Rückerstattung.
+                      {t('admin.users.cancelInfo1', 'The subscription will end on')} <strong className="text-white">{new Date(getEndOfMonth()).toLocaleDateString()}</strong> {t('admin.users.cancelInfo2', '(end of month). Until then the user has full access. No refund.')}
                     </p>
                   </div>
                 </div>
@@ -892,7 +894,7 @@ export default function UserList() {
               {subscriptionAction === 'change' && (
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-3">
-                    Neues Paket
+                    {t('admin.users.newPlan', 'New plan')}
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {['Starter', 'Pro', 'Builder'].map((plan) => (
@@ -923,7 +925,7 @@ export default function UserList() {
                 onClick={() => setShowSubscriptionModal(false)}
                 className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors cursor-pointer whitespace-nowrap"
               >
-                Abbrechen
+                {t('admin.actions.cancel', 'Cancel')}
               </button>
               <button
                 onClick={confirmSubscriptionAction}
@@ -935,7 +937,7 @@ export default function UserList() {
                     : 'bg-emerald-500 hover:bg-emerald-600'
                 }`}
               >
-                Bestätigen
+                {t('admin.actions.confirm', 'Confirm')}
               </button>
             </div>
           </div>
@@ -944,11 +946,11 @@ export default function UserList() {
 
       {/* Total Users */}
       <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
-        <span>Gesamt: {filteredUsers.length} Benutzer</span>
+        <span>{t('admin.users.total', 'Total:')} {filteredUsers.length} {t('admin.users.usersLabel', 'users')}</span>
         <div className="flex gap-4">
-          <span>{users.filter(u => u.isBlocked).length} blockiert</span>
-          <span>{users.filter(u => u.isFree).length} gratis</span>
-          <span className="text-orange-400">{cancelledCount} gekündigt</span>
+          <span>{users.filter(u => u.isBlocked).length} {t('admin.users.blocked', 'blocked')}</span>
+          <span>{users.filter(u => u.isFree).length} {t('admin.users.free', 'free')}</span>
+          <span className="text-orange-400">{cancelledCount} {t('admin.subscription.cancelled', 'cancelled')}</span>
         </div>
       </div>
 
@@ -974,7 +976,7 @@ export default function UserList() {
           <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden">
             <div className="p-6 border-b border-slate-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-white">Gratis-Konto gewähren</h3>
+                <h3 className="text-xl font-semibold text-white">{t('admin.users.grantFree', 'Grant free account')}</h3>
                 <button
                   onClick={() => setShowFreeModal(false)}
                   className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
@@ -999,7 +1001,7 @@ export default function UserList() {
               {/* Plan Selection */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-3">
-                  Paket auswählen
+                  {t('admin.users.selectPlan', 'Select plan')}
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {['Starter', 'Pro', 'Builder'].map((plan) => (
@@ -1026,7 +1028,7 @@ export default function UserList() {
               {/* Duration Selection */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-3">
-                  Dauer (Monate)
+                  {t('admin.users.durationMonths', 'Duration (months)')}
                 </label>
                 <div className="flex gap-2">
                   {[1, 3, 6, 12].map((months) => (
@@ -1049,10 +1051,10 @@ export default function UserList() {
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                 <div className="flex items-center gap-2 text-emerald-400 mb-2">
                   <i className="ri-gift-line"></i>
-                  <span className="font-medium">Zusammenfassung</span>
+                  <span className="font-medium">{t('admin.downgrade.summary', 'Summary')}</span>
                 </div>
                 <p className="text-sm text-slate-300">
-                  {selectedUser.name} erhält <strong className="text-white">{freeMonths} Monat(e)</strong> kostenloses <strong className="text-white">{freePlan}</strong>-Paket mit <strong className="text-white">{freePlan === 'Builder' ? '50.000' : freePlan === 'Pro' ? '10.000' : '2.500'}</strong> Credits.
+                  {selectedUser.name} {t('admin.users.freeSummary', 'receives')} <strong className="text-white">{freeMonths} {t('admin.users.months', 'month(s)')}</strong> {t('admin.users.freePlan', 'free')} <strong className="text-white">{freePlan}</strong> {t('admin.users.planLabel', 'Plan')} {t('admin.users.withCredits', 'with')} <strong className="text-white">{freePlan === 'Builder' ? '50,000' : freePlan === 'Pro' ? '10,000' : '2,500'}</strong> {t('admin.users.credits', 'Credits')}.
                 </p>
               </div>
             </div>
@@ -1062,14 +1064,14 @@ export default function UserList() {
                 onClick={() => setShowFreeModal(false)}
                 className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors cursor-pointer whitespace-nowrap"
               >
-                Abbrechen
+                {t('admin.actions.cancel', 'Cancel')}
               </button>
               <button
                 onClick={confirmFreeAccount}
                 className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 <i className="ri-gift-line"></i>
-                Gratis gewähren
+                {t('admin.users.grantFreeBtn', 'Grant free')}
               </button>
             </div>
           </div>
@@ -1083,7 +1085,7 @@ export default function UserList() {
             <div className="p-6 border-b border-slate-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold text-white">
-                  {selectedUser.isBlocked ? 'Benutzer entsperren' : 'Benutzer blockieren'}
+                  {selectedUser.isBlocked ? t('admin.users.unblockUser', 'Unblock user') : t('admin.users.blockUser', 'Block user')}
                 </h3>
                 <button
                   onClick={() => setShowBlockModal(false)}
@@ -1116,9 +1118,9 @@ export default function UserList() {
                   <div className="flex items-start gap-3">
                     <i className="ri-information-line text-emerald-400 text-xl mt-0.5"></i>
                     <div>
-                      <p className="text-emerald-400 font-medium mb-1">Entsperren bestätigen</p>
+                      <p className="text-emerald-400 font-medium mb-1">{t('admin.users.confirmUnblock', 'Confirm unblock')}</p>
                       <p className="text-sm text-slate-300">
-                        Der Benutzer kann sich wieder anmelden und alle Funktionen nutzen.
+                        {t('admin.users.unblockDesc', 'The user can log in again and use all features.')}
                       </p>
                     </div>
                   </div>
@@ -1128,9 +1130,9 @@ export default function UserList() {
                   <div className="flex items-start gap-3">
                     <i className="ri-error-warning-line text-red-400 text-xl mt-0.5"></i>
                     <div>
-                      <p className="text-red-400 font-medium mb-1">Warnung</p>
+                      <p className="text-red-400 font-medium mb-1">{t('admin.users.warning', 'Warning')}</p>
                       <p className="text-sm text-slate-300">
-                        Der Benutzer wird sofort ausgeloggt und kann sich nicht mehr anmelden. Alle laufenden Sitzungen werden beendet.
+                        {t('admin.users.blockDesc', 'The user will be immediately logged out and cannot log in again. All active sessions will be terminated.')}
                       </p>
                     </div>
                   </div>
@@ -1140,37 +1142,37 @@ export default function UserList() {
               {/* Effects List */}
               <div className="space-y-2">
                 <p className="text-sm font-medium text-slate-300">
-                  {selectedUser.isBlocked ? 'Nach dem Entsperren:' : 'Nach dem Blockieren:'}
+                  {selectedUser.isBlocked ? t('admin.users.afterUnblock', 'After unblocking:') : t('admin.users.afterBlock', 'After blocking:')}
                 </p>
                 <ul className="space-y-2 text-sm text-slate-400">
                   {selectedUser.isBlocked ? (
                     <>
                       <li className="flex items-center gap-2">
                         <i className="ri-check-line text-emerald-400"></i>
-                        Zugang zum Konto wiederhergestellt
+                        {t('admin.users.accessRestored', 'Account access restored')}
                       </li>
                       <li className="flex items-center gap-2">
                         <i className="ri-check-line text-emerald-400"></i>
-                        Alle Funktionen wieder verfügbar
+                        {t('admin.users.allFeaturesAvail', 'All features available again')}
                       </li>
                       <li className="flex items-center gap-2">
                         <i className="ri-check-line text-emerald-400"></i>
-                        Credits und Verlauf bleiben erhalten
+                        {t('admin.users.creditsPreserved', 'Credits and history preserved')}
                       </li>
                     </>
                   ) : (
                     <>
                       <li className="flex items-center gap-2">
                         <i className="ri-close-line text-red-400"></i>
-                        Kein Zugang zum Konto
+                        {t('admin.users.noAccountAccess', 'No account access')}
                       </li>
                       <li className="flex items-center gap-2">
                         <i className="ri-close-line text-red-400"></i>
-                        Keine neuen Analysen möglich
+                        {t('admin.users.noNewAnalyses', 'No new analyses possible')}
                       </li>
                       <li className="flex items-center gap-2">
                         <i className="ri-check-line text-emerald-400"></i>
-                        Credits und Verlauf bleiben gespeichert
+                        {t('admin.users.creditsStored', 'Credits and history remain stored')}
                       </li>
                     </>
                   )}
@@ -1183,7 +1185,7 @@ export default function UserList() {
                 onClick={() => setShowBlockModal(false)}
                 className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors cursor-pointer whitespace-nowrap"
               >
-                Abbrechen
+                {t('admin.actions.cancel', 'Cancel')}
               </button>
               <button
                 onClick={confirmBlockUser}
@@ -1194,7 +1196,7 @@ export default function UserList() {
                 }`}
               >
                 <i className={selectedUser.isBlocked ? 'ri-lock-unlock-line' : 'ri-forbid-line'}></i>
-                {selectedUser.isBlocked ? 'Entsperren' : 'Blockieren'}
+                {selectedUser.isBlocked ? t('admin.users.unblock', 'Unblock') : t('admin.users.block', 'Block')}
               </button>
             </div>
           </div>

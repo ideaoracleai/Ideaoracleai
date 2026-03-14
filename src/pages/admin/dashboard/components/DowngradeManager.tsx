@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import DowngradeModal from './DowngradeModal';
 import { getAllUsers } from '../../../../supabase/database';
 
@@ -81,6 +82,7 @@ const PLAN_PRICES: Record<string, number> = {
 };
 
 export default function DowngradeManager() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<DowngradeRequest[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -115,11 +117,11 @@ export default function DowngradeManager() {
         {
           id: 'DR-001',
           userId: 'user-1',
-          userName: 'Max Müller',
+          userName: 'Max Miller',
           userEmail: 'max@example.com',
           currentPlan: 'Builder',
           requestedPlan: 'Pro',
-          reason: 'Zu teuer für aktuelle Nutzung',
+          reason: 'Too expensive for current usage',
           date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'pending'
         },
@@ -130,7 +132,7 @@ export default function DowngradeManager() {
           userEmail: 'anna@example.com',
           currentPlan: 'Pro',
           requestedPlan: 'Starter',
-          reason: 'Nutze die Features nicht mehr',
+          reason: 'No longer using the features',
           date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'pending'
         },
@@ -141,7 +143,7 @@ export default function DowngradeManager() {
           userEmail: 'thomas@example.com',
           currentPlan: 'Builder',
           requestedPlan: 'Starter',
-          reason: 'Projekt abgeschlossen',
+          reason: 'Project completed',
           date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'approved'
         },
@@ -152,7 +154,7 @@ export default function DowngradeManager() {
           userEmail: 'lisa@example.com',
           currentPlan: 'Pro',
           requestedPlan: 'Starter',
-          reason: 'Budget-Einschränkungen',
+          reason: 'Budget constraints',
           date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'approved'
         },
@@ -163,7 +165,7 @@ export default function DowngradeManager() {
           userEmail: 'michael@example.com',
           currentPlan: 'Builder',
           requestedPlan: 'Pro',
-          reason: 'Weniger Features benötigt',
+          reason: 'Fewer features needed',
           date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'rejected'
         },
@@ -174,7 +176,7 @@ export default function DowngradeManager() {
           userEmail: 'sarah@example.com',
           currentPlan: 'Pro',
           requestedPlan: 'Starter',
-          reason: 'Temporäre Pause',
+          reason: 'Temporary pause',
           date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'approved'
         },
@@ -185,7 +187,7 @@ export default function DowngradeManager() {
           userEmail: 'daniel@example.com',
           currentPlan: 'Builder',
           requestedPlan: 'Starter',
-          reason: 'Wechsel zu anderem Tool',
+          reason: 'Switching to another tool',
           date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'approved'
         },
@@ -196,7 +198,7 @@ export default function DowngradeManager() {
           userEmail: 'julia@example.com',
           currentPlan: 'Pro',
           requestedPlan: 'Starter',
-          reason: 'Saisonales Geschäft',
+          reason: 'Seasonal business',
           date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
           status: 'rejected'
         }
@@ -235,8 +237,8 @@ export default function DowngradeManager() {
       const demoRules: DowngradeRule[] = [
         {
           id: 'rule-1',
-          name: 'Inaktive Builder-Nutzer',
-          description: 'Downgrade für Builder-Nutzer die 30+ Tage inaktiv sind',
+          name: 'Inactive Builder Users',
+          description: 'Downgrade for Builder users who have been inactive for 30+ days',
           enabled: true,
           conditions: [
             { type: 'inactivity', operator: 'greater_than', value: 30, unit: 'days' }
@@ -252,8 +254,8 @@ export default function DowngradeManager() {
         },
         {
           id: 'rule-2',
-          name: 'Geringe Credit-Nutzung',
-          description: 'Downgrade wenn weniger als 10% der Credits genutzt werden',
+          name: 'Low Credit Usage',
+          description: 'Downgrade when less than 10% of credits are used',
           enabled: true,
           conditions: [
             { type: 'credit_usage', operator: 'less_than', value: 10, unit: 'percent' }
@@ -269,8 +271,8 @@ export default function DowngradeManager() {
         },
         {
           id: 'rule-3',
-          name: 'Seltene Logins',
-          description: 'Downgrade bei weniger als 2 Logins pro Monat',
+          name: 'Rare Logins',
+          description: 'Downgrade when fewer than 2 logins per month',
           enabled: false,
           conditions: [
             { type: 'login_frequency', operator: 'less_than', value: 2, unit: 'per_month' }
@@ -421,7 +423,7 @@ export default function DowngradeManager() {
     // Show success message
     const successDiv = document.createElement('div');
     successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-    successDiv.innerHTML = '<i class="ri-check-line mr-2"></i>Einstellungen gespeichert';
+    successDiv.innerHTML = '<i class="ri-check-line mr-2"></i>Settings saved';
     document.body.appendChild(successDiv);
     setTimeout(() => successDiv.remove(), 3000);
   };
@@ -486,7 +488,7 @@ export default function DowngradeManager() {
     // Success message
     const successDiv = document.createElement('div');
     successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-    successDiv.innerHTML = '<i class="ri-check-line mr-2"></i>Regel gespeichert';
+    successDiv.innerHTML = '<i class="ri-check-line mr-2"></i>Rule saved';
     document.body.appendChild(successDiv);
     setTimeout(() => successDiv.remove(), 3000);
   };
@@ -519,11 +521,11 @@ export default function DowngradeManager() {
 
   const getConditionTypeLabel = (type: string) => {
     switch (type) {
-      case 'inactivity': return 'Inaktivität';
-      case 'credit_usage': return 'Credit-Nutzung';
-      case 'login_frequency': return 'Login-Häufigkeit';
-      case 'feature_usage': return 'Feature-Nutzung';
-      case 'support_tickets': return 'Support-Tickets';
+      case 'inactivity': return t('admin.condition.inactivity', 'Inactivity');
+      case 'credit_usage': return t('admin.condition.creditUsage', 'Credit Usage');
+      case 'login_frequency': return t('admin.condition.loginFrequency', 'Login Frequency');
+      case 'feature_usage': return t('admin.condition.featureUsage', 'Feature Usage');
+      case 'support_tickets': return t('admin.condition.supportTickets', 'Support Tickets');
       default: return type;
     }
   };
@@ -541,20 +543,20 @@ export default function DowngradeManager() {
 
   const getOperatorLabel = (operator: string) => {
     switch (operator) {
-      case 'less_than': return 'weniger als';
-      case 'greater_than': return 'mehr als';
-      case 'equals': return 'genau';
-      case 'between': return 'zwischen';
+      case 'less_than': return t('admin.operator.lessThan', 'less than');
+      case 'greater_than': return t('admin.operator.greaterThan', 'more than');
+      case 'equals': return t('admin.operator.equals', 'exactly');
+      case 'between': return t('admin.operator.between', 'between');
       default: return operator;
     }
   };
 
   const getUnitLabel = (unit?: string) => {
     switch (unit) {
-      case 'days': return 'Tage';
+      case 'days': return t('admin.unit.days', 'days');
       case 'percent': return '%';
-      case 'per_month': return 'pro Monat';
-      case 'count': return 'Anzahl';
+      case 'per_month': return t('admin.unit.perMonth', 'per month');
+      case 'count': return t('admin.unit.count', 'count');
       default: return unit || '';
     }
   };
@@ -575,9 +577,9 @@ export default function DowngradeManager() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending': return 'Ausstehend';
-      case 'approved': return 'Genehmigt';
-      case 'rejected': return 'Abgelehnt';
+      case 'pending': return t('admin.status.pending', 'Pending');
+      case 'approved': return t('admin.status.approved', 'Approved');
+      case 'rejected': return t('admin.status.rejected', 'Rejected');
       default: return status;
     }
   };
@@ -624,7 +626,7 @@ export default function DowngradeManager() {
     
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = date.toLocaleDateString('de-CH', { month: 'short', year: '2-digit' });
+      const monthName = date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
       const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
       const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
       
@@ -651,12 +653,12 @@ export default function DowngradeManager() {
   const exportReport = (format: 'csv' | 'json') => {
     const data = filteredByDate.map(r => ({
       ID: r.id,
-      Benutzer: r.userName,
+      User: r.userName,
       Email: r.userEmail,
-      'Aktuelles Paket': r.currentPlan,
-      'Gewünschtes Paket': r.requestedPlan,
-      Grund: r.reason,
-      Datum: new Date(r.date).toLocaleDateString('de-CH'),
+      'Current Plan': r.currentPlan,
+      'Requested Plan': r.requestedPlan,
+      Reason: r.reason,
+      Date: new Date(r.date).toLocaleDateString(),
       Status: getStatusText(r.status)
     }));
 
@@ -703,7 +705,7 @@ export default function DowngradeManager() {
           }`}
         >
           <i className="ri-list-check mr-2"></i>
-          Anfragen
+          {t('admin.downgrade.sectionRequests', 'Requests')}
         </button>
         <button
           onClick={() => setActiveSection('stats')}
@@ -712,7 +714,7 @@ export default function DowngradeManager() {
           }`}
         >
           <i className="ri-pie-chart-line mr-2"></i>
-          Statistiken
+          {t('admin.downgrade.sectionStats', 'Statistics')}
         </button>
         <button
           onClick={() => setActiveSection('reports')}
@@ -730,7 +732,7 @@ export default function DowngradeManager() {
           }`}
         >
           <i className="ri-robot-line mr-2"></i>
-          Regeln
+          {t('admin.downgrade.sectionRules', 'Rules')}
         </button>
       </div>
 
@@ -743,7 +745,7 @@ export default function DowngradeManager() {
               {requests.filter(r => r.status === 'pending').length}
             </span>
           </div>
-          <p className="text-sm text-slate-400">Ausstehende Anfragen</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.pendingRequests', 'Pending Requests')}</p>
         </div>
 
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
@@ -753,7 +755,7 @@ export default function DowngradeManager() {
               {requests.filter(r => r.status === 'approved').length}
             </span>
           </div>
-          <p className="text-sm text-slate-400">Genehmigte Anfragen</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.approvedRequests', 'Approved Requests')}</p>
         </div>
 
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
@@ -763,7 +765,7 @@ export default function DowngradeManager() {
               {requests.filter(r => r.status === 'rejected').length}
             </span>
           </div>
-          <p className="text-sm text-slate-400">Abgelehnte Anfragen</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.rejectedRequests', 'Rejected Requests')}</p>
         </div>
 
         {/* NEUE KARTE: Rückerstattungen */}
@@ -774,11 +776,11 @@ export default function DowngradeManager() {
               CHF {totalRefundAmount.toFixed(2)}
             </span>
           </div>
-          <p className="text-sm text-slate-400">Rückerstattungen</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.refunds', 'Refunds')}</p>
           {pendingRefundAmount > 0 && (
             <p className="text-xs text-amber-400 mt-1">
               <i className="ri-time-line mr-1"></i>
-              CHF {pendingRefundAmount.toFixed(2)} ausstehend
+              CHF {pendingRefundAmount.toFixed(2)} {t('admin.downgrade.pending', 'pending')}
             </p>
           )}
         </div>
@@ -788,7 +790,7 @@ export default function DowngradeManager() {
             <i className="ri-robot-line text-[#C9A961] text-2xl"></i>
             <span className="text-2xl font-bold text-white">{rules.filter(r => r.enabled).length}</span>
           </div>
-          <p className="text-sm text-slate-400">Aktive Regeln</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.activeRules', 'Active Rules')}</p>
         </div>
       </div>
 
@@ -800,10 +802,10 @@ export default function DowngradeManager() {
             <div>
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <i className="ri-robot-line text-[#C9A961]"></i>
-                Automatische Downgrade-Regeln
+                {t('admin.downgrade.autoRules', 'Automatic Downgrade Rules')}
               </h3>
               <p className="text-sm text-slate-400 mt-1">
-                Erstelle Regeln, die automatisch Downgrades basierend auf Nutzungsverhalten auslösen
+                {t('admin.downgrade.autoRulesDesc', 'Create rules that automatically trigger downgrades based on usage behavior')}
               </p>
             </div>
             <button
@@ -811,7 +813,7 @@ export default function DowngradeManager() {
               className="px-5 py-2.5 bg-[#C9A961] hover:bg-[#A08748] text-[#0F1419] rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer font-medium"
             >
               <i className="ri-add-line"></i>
-              Neue Regel
+              {t('admin.downgrade.newRule', 'New Rule')}
             </button>
           </div>
 
@@ -824,7 +826,7 @@ export default function DowngradeManager() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{rules.length}</p>
-                  <p className="text-sm text-slate-400">Gesamt Regeln</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.totalRules', 'Total Rules')}</p>
                 </div>
               </div>
             </div>
@@ -835,7 +837,7 @@ export default function DowngradeManager() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{rules.filter(r => r.enabled).length}</p>
-                  <p className="text-sm text-slate-400">Aktive Regeln</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.activeRules', 'Active Rules')}</p>
                 </div>
               </div>
             </div>
@@ -846,7 +848,7 @@ export default function DowngradeManager() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{rules.reduce((sum, r) => sum + r.triggeredCount, 0)}</p>
-                  <p className="text-sm text-slate-400">Ausgelöste Aktionen</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.triggeredActions', 'Triggered Actions')}</p>
                 </div>
               </div>
             </div>
@@ -874,7 +876,7 @@ export default function DowngradeManager() {
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                           rule.enabled ? 'bg-green-500/10 text-green-400' : 'bg-slate-700 text-slate-400'
                         }`}>
-                          {rule.enabled ? 'Aktiv' : 'Inaktiv'}
+                          {rule.enabled ? t('admin.status.active', 'Active') : t('admin.status.inactive', 'Inactive')}
                         </span>
                       </div>
                       <p className="text-sm text-slate-400 mt-1">{rule.description}</p>
@@ -898,7 +900,7 @@ export default function DowngradeManager() {
 
                 {/* Conditions */}
                 <div className="mb-4">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Bedingungen (UND-Verknüpfung)</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('admin.downgrade.conditionsAnd', 'Conditions (AND linked)')}</p>
                   <div className="flex flex-wrap gap-2">
                     {rule.conditions.map((condition, idx) => (
                       <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/50 rounded-lg border border-slate-700">
@@ -913,7 +915,7 @@ export default function DowngradeManager() {
 
                 {/* Action */}
                 <div className="mb-4">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Aktion</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">{t('admin.downgrade.action', 'Action')}</p>
                   <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
                     <span className="px-2 py-1 bg-[#C9A961]/10 text-[#C9A961] rounded text-sm font-medium">
                       {rule.action.fromPlan}
@@ -925,12 +927,12 @@ export default function DowngradeManager() {
                     <span className="text-slate-500 mx-2">|</span>
                     <span className="text-sm text-slate-400">
                       <i className="ri-notification-line mr-1"></i>
-                      {rule.action.notifyUser ? 'Benachrichtigung' : 'Keine Benachrichtigung'}
+                      {rule.action.notifyUser ? t('admin.downgrade.notification', 'Notification') : t('admin.downgrade.noNotification', 'No Notification')}
                     </span>
                     <span className="text-slate-500 mx-2">|</span>
                     <span className="text-sm text-slate-400">
                       <i className="ri-time-line mr-1"></i>
-                      {rule.action.gracePeriodDays} Tage Frist
+                      {rule.action.gracePeriodDays} {t('admin.downgrade.daysPeriod', 'days grace period')}
                     </span>
                   </div>
                 </div>
@@ -940,11 +942,11 @@ export default function DowngradeManager() {
                   <div className="flex items-center gap-4 text-sm text-slate-500">
                     <span>
                       <i className="ri-calendar-line mr-1"></i>
-                      Erstellt: {new Date(rule.createdAt).toLocaleDateString('de-CH')}
+                      {t('admin.downgrade.created', 'Created:')} {new Date(rule.createdAt).toLocaleDateString()}
                     </span>
                     <span>
                       <i className="ri-flashlight-line mr-1"></i>
-                      {rule.triggeredCount}x ausgelöst
+                      {rule.triggeredCount}x {t('admin.downgrade.triggered', 'triggered')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -953,14 +955,14 @@ export default function DowngradeManager() {
                       className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all flex items-center gap-1.5 text-sm whitespace-nowrap cursor-pointer"
                     >
                       <i className="ri-edit-line"></i>
-                      Bearbeiten
+                      {t('admin.actions.edit', 'Edit')}
                     </button>
                     <button
                       onClick={() => deleteRule(rule.id)}
                       className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all flex items-center gap-1.5 text-sm whitespace-nowrap cursor-pointer"
                     >
                       <i className="ri-delete-bin-line"></i>
-                      Löschen
+                      {t('admin.actions.delete', 'Delete')}
                     </button>
                   </div>
                 </div>
@@ -970,13 +972,13 @@ export default function DowngradeManager() {
             {rules.length === 0 && (
               <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
                 <i className="ri-robot-line text-slate-600 text-5xl mb-4"></i>
-                <p className="text-slate-400 mb-4">Noch keine Regeln erstellt</p>
+                <p className="text-slate-400 mb-4">{t('admin.downgrade.noRules', 'No rules created yet')}</p>
                 <button
                   onClick={createNewRule}
                   className="px-5 py-2.5 bg-[#C9A961] hover:bg-[#A08748] text-[#0F1419] rounded-lg transition-all inline-flex items-center gap-2 whitespace-nowrap cursor-pointer font-medium"
                 >
                   <i className="ri-add-line"></i>
-                  Erste Regel erstellen
+                  {t('admin.downgrade.createFirstRule', 'Create first rule')}
                 </button>
               </div>
             )}
@@ -989,7 +991,7 @@ export default function DowngradeManager() {
                 <div className="p-6 border-b border-slate-700">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-white">
-                      {rules.find(r => r.id === editingRule.id) ? 'Regel bearbeiten' : 'Neue Regel erstellen'}
+                      {rules.find(r => r.id === editingRule.id) ? t('admin.downgrade.editRule', 'Edit Rule') : t('admin.downgrade.createRule', 'Create New Rule')}
                     </h3>
                     <button
                       onClick={() => { setShowRuleEditor(false); setEditingRule(null); }}
@@ -1004,7 +1006,7 @@ export default function DowngradeManager() {
                   {/* Basic Info */}
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Regelname *</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.downgrade.ruleName', 'Rule name')} *</label>
                       <input
                         type="text"
                         value={editingRule.name}
@@ -1014,7 +1016,7 @@ export default function DowngradeManager() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Beschreibung</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.downgrade.description', 'Description')}</label>
                       <textarea
                         value={editingRule.description}
                         onChange={(e) => setEditingRule({ ...editingRule, description: e.target.value })}
@@ -1028,13 +1030,13 @@ export default function DowngradeManager() {
                   {/* Conditions */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <label className="block text-sm font-medium text-slate-300">Bedingungen (alle müssen erfüllt sein)</label>
+                      <label className="block text-sm font-medium text-slate-300">{t('admin.downgrade.allConditions', 'Conditions (all must be met)')}</label>
                       <button
                         onClick={addCondition}
                         className="text-sm text-[#C9A961] hover:text-[#A08748] flex items-center gap-1 cursor-pointer"
                       >
                         <i className="ri-add-line"></i>
-                        Bedingung hinzufügen
+                        {t('admin.downgrade.addCondition', 'Add condition')}
                       </button>
                     </div>
                     <div className="space-y-3">
@@ -1043,7 +1045,7 @@ export default function DowngradeManager() {
                           <div className="flex items-start gap-3">
                             <div className="flex-1 grid grid-cols-3 gap-3">
                               <div>
-                                <label className="block text-xs text-slate-500 mb-1">Typ</label>
+                                <label className="block text-xs text-slate-500 mb-1">{t('admin.downgrade.type', 'Type')}</label>
                                 <select
                                   value={condition.type}
                                   onChange={(e) => updateCondition(index, { 
@@ -1054,11 +1056,11 @@ export default function DowngradeManager() {
                                   })}
                                   className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-[#C9A961] cursor-pointer"
                                 >
-                                  <option value="inactivity">Inaktivität</option>
-                                  <option value="credit_usage">Credit-Nutzung</option>
-                                  <option value="login_frequency">Login-Häufigkeit</option>
-                                  <option value="feature_usage">Feature-Nutzung</option>
-                                  <option value="support_tickets">Support-Tickets</option>
+                                  <option value="inactivity">{t('admin.condition.inactivity', 'Inactivity')}</option>
+                                  <option value="credit_usage">{t('admin.condition.creditUsage', 'Credit Usage')}</option>
+                                  <option value="login_frequency">{t('admin.condition.loginFrequency', 'Login Frequency')}</option>
+                                  <option value="feature_usage">{t('admin.condition.featureUsage', 'Feature Usage')}</option>
+                                  <option value="support_tickets">{t('admin.condition.supportTickets', 'Support Tickets')}</option>
                                 </select>
                               </div>
                               <div>
@@ -1068,13 +1070,13 @@ export default function DowngradeManager() {
                                   onChange={(e) => updateCondition(index, { operator: e.target.value as RuleCondition['operator'] })}
                                   className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-[#C9A961] cursor-pointer"
                                 >
-                                  <option value="less_than">Weniger als</option>
-                                  <option value="greater_than">Mehr als</option>
-                                  <option value="equals">Genau</option>
+                                  <option value="less_than">{t('admin.operator.lessThan', 'Less than')}</option>
+                                  <option value="greater_than">{t('admin.operator.greaterThan', 'More than')}</option>
+                                  <option value="equals">{t('admin.operator.equals', 'Exactly')}</option>
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-xs text-slate-500 mb-1">Wert ({getUnitLabel(condition.unit)})</label>
+                                <label className="block text-xs text-slate-500 mb-1">{t('admin.downgrade.value', 'Value')} ({getUnitLabel(condition.unit)})</label>
                                 <input
                                   type="number"
                                   value={condition.value}
@@ -1099,11 +1101,11 @@ export default function DowngradeManager() {
 
                   {/* Action */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-3">Aktion</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-3">{t('admin.downgrade.action', 'Action')}</label>
                     <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700 space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs text-slate-500 mb-1">Von Paket</label>
+                          <label className="block text-xs text-slate-500 mb-1">{t('admin.downgrade.fromPlan', 'From plan')}</label>
                           <select
                             value={editingRule.action.fromPlan}
                             onChange={(e) => setEditingRule({
@@ -1118,7 +1120,7 @@ export default function DowngradeManager() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs text-slate-500 mb-1">Zu Paket</label>
+                          <label className="block text-xs text-slate-500 mb-1">{t('admin.downgrade.toPlan', 'To plan')}</label>
                           <select
                             value={editingRule.action.toPlan}
                             onChange={(e) => setEditingRule({
@@ -1135,7 +1137,7 @@ export default function DowngradeManager() {
                       </div>
 
                       <div>
-                        <label className="block text-sm text-white mb-1">Gnadenfrist (Tage)</label>
+                        <label className="block text-sm text-white mb-1">{t('admin.downgrade.gracePeriod', 'Grace period (days)')}</label>
                         <input
                           type="number"
                           value={editingRule.action.gracePeriodDays}
@@ -1147,13 +1149,13 @@ export default function DowngradeManager() {
                           max={90}
                           className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-[#C9A961]"
                         />
-                        <p className="text-xs text-slate-500 mt-1">Zeit, die der Nutzer hat, um zu reagieren bevor das Downgrade durchgeführt wird</p>
+                        <p className="text-xs text-slate-500 mt-1">{t('admin.downgrade.gracePeriodDesc', 'Time the user has to react before the downgrade is executed')}</p>
                       </div>
 
                       <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
                         <div>
-                          <p className="text-sm text-white">Nutzer benachrichtigen</p>
-                          <p className="text-xs text-slate-500">E-Mail-Benachrichtigung vor dem Downgrade senden</p>
+                          <p className="text-sm text-white">{t('admin.downgrade.notifyUser', 'Notify user')}</p>
+                          <p className="text-xs text-slate-500">{t('admin.downgrade.notifyUserDesc', 'Send email notification before downgrade')}</p>
                         </div>
                         <button
                           onClick={() => setEditingRule({
@@ -1180,7 +1182,7 @@ export default function DowngradeManager() {
                     onClick={() => { setShowRuleEditor(false); setEditingRule(null); }}
                     className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all whitespace-nowrap cursor-pointer"
                   >
-                    Abbrechen
+                    {t('admin.actions.cancel', 'Cancel')}
                   </button>
                   <button
                     onClick={saveRule}
@@ -1188,7 +1190,7 @@ export default function DowngradeManager() {
                     className="px-5 py-2.5 bg-[#C9A961] hover:bg-[#A08748] text-[#0F1419] rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <i className="ri-save-line"></i>
-                    Regel speichern
+                    {t('admin.downgrade.saveRule', 'Save rule')}
                   </button>
                 </div>
               </div>
@@ -1204,7 +1206,7 @@ export default function DowngradeManager() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <i className="ri-pie-chart-line text-[#C9A961]"></i>
-              Downgrade-Statistiken
+              {t('admin.downgrade.statistics', 'Downgrade Statistics')}
             </h3>
             <div className="flex gap-2">
               {(['7d', '30d', '90d', '1y'] as const).map((range) => (
@@ -1217,7 +1219,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  {range === '7d' ? '7 Tage' : range === '30d' ? '30 Tage' : range === '90d' ? '90 Tage' : '1 Jahr'}
+                  {range === '7d' ? t('admin.range.7d', '7 days') : range === '30d' ? t('admin.range.30d', '30 days') : range === '90d' ? t('admin.range.90d', '90 days') : t('admin.range.1y', '1 year')}
                 </button>
               ))}
             </div>
@@ -1231,7 +1233,7 @@ export default function DowngradeManager() {
                   <i className="ri-percent-line text-green-400 text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Genehmigungsrate</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.approvalRate', 'Approval rate')}</p>
                   <p className="text-2xl font-bold text-white">{approvalRate}%</p>
                 </div>
               </div>
@@ -1249,11 +1251,11 @@ export default function DowngradeManager() {
                   <i className="ri-timer-line text-amber-400 text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Ø Bearbeitungszeit</p>
-                  <p className="text-2xl font-bold text-white">{avgProcessingTime} Tage</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.avgProcessingTime', 'Avg. processing time')}</p>
+                  <p className="text-2xl font-bold text-white">{avgProcessingTime} {t('admin.unit.days', 'days')}</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500">Durchschnittliche Zeit bis zur Entscheidung</p>
+              <p className="text-xs text-slate-500">{t('admin.downgrade.avgTimeDesc', 'Average time to decision')}</p>
             </div>
 
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
@@ -1262,7 +1264,7 @@ export default function DowngradeManager() {
                   <i className="ri-line-chart-line text-[#C9A961] text-xl"></i>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-400">Trend (vs. Vormonat)</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.trend', 'Trend (vs. prev. month)')}</p>
                   <p className="text-2xl font-bold text-white flex items-center gap-2">
                     {monthlyStats.length >= 2 && monthlyStats[monthlyStats.length - 1].total > monthlyStats[monthlyStats.length - 2].total ? (
                       <>
@@ -1280,7 +1282,7 @@ export default function DowngradeManager() {
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500">Weniger Downgrades = besser</p>
+              <p className="text-xs text-slate-500">{t('admin.downgrade.trendDesc', 'Fewer downgrades = better')}</p>
             </div>
           </div>
 
@@ -1290,30 +1292,30 @@ export default function DowngradeManager() {
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <i className="ri-bar-chart-2-line text-[#C9A961]"></i>
-                Monatlicher Verlauf
+                {t('admin.downgrade.monthlyTrend', 'Monthly Trend')}
               </h4>
               <div className="space-y-3">
                 {monthlyStats.map((stat, index) => (
                   <div key={index} className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">{stat.month}</span>
-                      <span className="text-white font-medium">{stat.total} Anfragen</span>
+                      <span className="text-white font-medium">{stat.total} {t('admin.downgrade.requests', 'Requests')}</span>
                     </div>
                     <div className="flex gap-1 h-6">
                       <div 
                         className="bg-green-500 rounded-l transition-all"
                         style={{ width: `${(stat.approved / maxMonthlyTotal) * 100}%` }}
-                        title={`Genehmigt: ${stat.approved}`}
+                        title={`${t('admin.status.approved', 'Approved')}: ${stat.approved}`}
                       />
                       <div 
                         className="bg-red-500 transition-all"
                         style={{ width: `${(stat.rejected / maxMonthlyTotal) * 100}%` }}
-                        title={`Abgelehnt: ${stat.rejected}`}
+                        title={`${t('admin.status.rejected', 'Rejected')}: ${stat.rejected}`}
                       />
                       <div 
                         className="bg-amber-500 rounded-r transition-all"
                         style={{ width: `${(stat.pending / maxMonthlyTotal) * 100}%` }}
-                        title={`Ausstehend: ${stat.pending}`}
+                        title={`${t('admin.status.pending', 'Pending')}: ${stat.pending}`}
                       />
                     </div>
                   </div>
@@ -1322,15 +1324,15 @@ export default function DowngradeManager() {
               <div className="flex gap-4 mt-4 pt-4 border-t border-slate-700">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span className="text-xs text-slate-400">Genehmigt</span>
+                  <span className="text-xs text-slate-400">{t('admin.status.approved', 'Approved')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span className="text-xs text-slate-400">Abgelehnt</span>
+                  <span className="text-xs text-slate-400">{t('admin.status.rejected', 'Rejected')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-amber-500 rounded"></div>
-                  <span className="text-xs text-slate-400">Ausstehend</span>
+                  <span className="text-xs text-slate-400">{t('admin.status.pending', 'Pending')}</span>
                 </div>
               </div>
             </div>
@@ -1339,7 +1341,7 @@ export default function DowngradeManager() {
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
               <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <i className="ri-exchange-line text-[#C9A961]"></i>
-                Paket-Übergänge
+                {t('admin.downgrade.planTransitions', 'Plan Transitions')}
               </h4>
               <div className="space-y-3">
                 {getPlanTransitions().map(([transition, count], index) => (
@@ -1357,17 +1359,15 @@ export default function DowngradeManager() {
                   </div>
                 ))}
                 {getPlanTransitions().length === 0 && (
-                  <p className="text-slate-500 text-center py-4">Keine Daten verfügbar</p>
+                  <p className="text-slate-500 text-center py-4">{t('admin.noData', 'No data available')}</p>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Top Reasons */}
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
               <i className="ri-question-line text-[#C9A961]"></i>
-              Häufigste Downgrade-Gründe
+              {t('admin.downgrade.topReasons', 'Most common downgrade reasons')}
             </h4>
             <div className="space-y-3">
               {getReasonStats().map(([reason, count], index) => {
@@ -1375,8 +1375,8 @@ export default function DowngradeManager() {
                 return (
                   <div key={index} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-300">{reason}</span>
-                      <span className="text-slate-400">{count} ({percentage}%)</span>
+                      <span className="text-slate-400">{reason}</span>
+                      <span className="text-white font-medium">{count} ({percentage}%)</span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2">
                       <div 
@@ -1388,7 +1388,7 @@ export default function DowngradeManager() {
                 );
               })}
               {getReasonStats().length === 0 && (
-                <p className="text-slate-500 text-center py-4">Keine Daten verfügbar</p>
+                <p className="text-slate-500 text-center py-4">{t('admin.noData', 'No data available')}</p>
               )}
             </div>
           </div>
@@ -1397,7 +1397,7 @@ export default function DowngradeManager() {
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
               <i className="ri-refund-2-line text-red-400"></i>
-              Rückerstattungs-Verlauf
+              {t('admin.downgrade.refundHistory', 'Refund History')}
             </h4>
             {refunds.length > 0 ? (
               <div className="space-y-3">
@@ -1418,10 +1418,10 @@ export default function DowngradeManager() {
                       <p className="text-lg font-bold text-red-400">-CHF {refund.amount.toFixed(2)}</p>
                       <p className="text-xs text-slate-500">
                         {refund.calculationType === 'prorata' 
-                          ? `Pro-rata (${refund.daysRemaining}/${refund.totalDays} Tage)`
+                          ? `Pro-rata (${refund.daysRemaining}/${refund.totalDays} ${t('admin.unit.days', 'days')})`
                           : refund.calculationType === 'full' 
-                            ? 'Volle Rückerstattung'
-                            : 'Keine Rückerstattung'
+                            ? t('admin.downgrade.fullRefund', 'Full refund')
+                            : t('admin.downgrade.noRefund', 'No refund')
                         }
                       </p>
                     </div>
@@ -1431,7 +1431,7 @@ export default function DowngradeManager() {
             ) : (
               <div className="text-center py-8">
                 <i className="ri-refund-2-line text-slate-600 text-4xl mb-3"></i>
-                <p className="text-slate-400">Noch keine Rückerstattungen</p>
+                <p className="text-slate-400">{t('admin.downgrade.noRefunds', 'No refunds yet')}</p>
               </div>
             )}
           </div>
@@ -1450,7 +1450,7 @@ export default function DowngradeManager() {
                 </div>
                 <div>
                   <p className="font-medium text-white">CSV Export</p>
-                  <p className="text-xs text-slate-400">Für Excel, Google Sheets</p>
+                  <p className="text-xs text-slate-400">{t('admin.downgrade.csvDesc', 'For Excel, Google Sheets')}</p>
                 </div>
               </div>
               <button
@@ -1458,7 +1458,7 @@ export default function DowngradeManager() {
                 className="w-full px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-download-line"></i>
-                Als CSV herunterladen
+                {t('admin.downgrade.downloadCSV', 'Download as CSV')}
               </button>
             </div>
 
@@ -1469,7 +1469,7 @@ export default function DowngradeManager() {
                 </div>
                 <div>
                   <p className="font-medium text-white">JSON Export</p>
-                  <p className="text-xs text-slate-400">Für Entwickler, APIs</p>
+                  <p className="text-xs text-slate-400">{t('admin.downgrade.jsonDesc', 'For developers, APIs')}</p>
                 </div>
               </div>
               <button
@@ -1477,7 +1477,7 @@ export default function DowngradeManager() {
                 className="w-full px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-download-line"></i>
-                Als JSON herunterladen
+                {t('admin.downgrade.downloadJSON', 'Download as JSON')}
               </button>
             </div>
           </div>
@@ -1485,7 +1485,7 @@ export default function DowngradeManager() {
           <div className="p-4 bg-slate-900/50 rounded-lg">
             <p className="text-sm text-slate-400 mb-2">
               <i className="ri-information-line mr-1"></i>
-              Der Export enthält {filteredByDate.length} Einträge aus dem gewählten Zeitraum ({dateRange === '7d' ? '7 Tage' : dateRange === '30d' ? '30 Tage' : dateRange === '90d' ? '90 Tage' : '1 Jahr'}).
+              {t('admin.downgrade.exportInfo', 'The export contains')} {filteredByDate.length} {t('admin.downgrade.entries', 'entries from the selected period')} ({dateRange === '7d' ? t('admin.range.7d', '7 days') : dateRange === '30d' ? t('admin.range.30d', '30 days') : dateRange === '90d' ? t('admin.range.90d', '90 days') : t('admin.range.1y', '1 year')}).
             </p>
             <div className="flex gap-2 flex-wrap">
               {(['7d', '30d', '90d', '1y'] as const).map((range) => (
@@ -1498,7 +1498,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  {range === '7d' ? '7 Tage' : range === '30d' ? '30 Tage' : range === '90d' ? '90 Tage' : '1 Jahr'}
+                  {range === '7d' ? t('admin.range.7d', '7 days') : range === '30d' ? t('admin.range.30d', '30 days') : range === '90d' ? t('admin.range.90d', '90 days') : t('admin.range.1y', '1 year')}
                 </button>
               ))}
             </div>
@@ -1508,58 +1508,58 @@ export default function DowngradeManager() {
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <i className="ri-file-list-3-line text-[#C9A961]"></i>
-              Zusammenfassung
+              {t('admin.downgrade.summary', 'Summary')}
             </h3>
             
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
               <div className="text-center p-4 bg-slate-900/50 rounded-lg">
                 <p className="text-3xl font-bold text-white">{filteredByDate.length}</p>
-                <p className="text-sm text-slate-400">Gesamt</p>
+                <p className="text-sm text-slate-400">{t('admin.downgrade.total', 'Total')}</p>
               </div>
               <div className="text-center p-4 bg-slate-900/50 rounded-lg">
                 <p className="text-3xl font-bold text-green-400">{filteredByDate.filter(r => r.status === 'approved').length}</p>
-                <p className="text-sm text-slate-400">Genehmigt</p>
+                <p className="text-sm text-slate-400">{t('admin.status.approved', 'Approved')}</p>
               </div>
               <div className="text-center p-4 bg-slate-900/50 rounded-lg">
                 <p className="text-3xl font-bold text-red-400">{filteredByDate.filter(r => r.status === 'rejected').length}</p>
-                <p className="text-sm text-slate-400">Abgelehnt</p>
+                <p className="text-sm text-slate-400">{t('admin.status.rejected', 'Rejected')}</p>
               </div>
               <div className="text-center p-4 bg-slate-900/50 rounded-lg">
                 <p className="text-3xl font-bold text-amber-400">{filteredByDate.filter(r => r.status === 'pending').length}</p>
-                <p className="text-sm text-slate-400">Ausstehend</p>
+                <p className="text-sm text-slate-400">{t('admin.status.pending', 'Pending')}</p>
               </div>
               <div className="text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
                 <p className="text-3xl font-bold text-red-400">CHF {totalRefundAmount.toFixed(2)}</p>
-                <p className="text-sm text-slate-400">Rückerstattungen</p>
+                <p className="text-sm text-slate-400">{t('admin.downgrade.refunds', 'Refunds')}</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
-                <span className="text-slate-400">Genehmigungsrate</span>
+                <span className="text-slate-400">{t('admin.downgrade.approvalRate', 'Approval rate')}</span>
                 <span className="text-white font-bold">{approvalRate}%</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
-                <span className="text-slate-400">Häufigster Übergang</span>
+                <span className="text-slate-400">{t('admin.downgrade.mostCommonTransition', 'Most common transition')}</span>
                 <span className="text-white font-bold">{getPlanTransitions()[0]?.[0] || '-'}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
-                <span className="text-slate-400">Häufigster Grund</span>
+                <span className="text-slate-400">{t('admin.downgrade.mostCommonReason', 'Most common reason')}</span>
                 <span className="text-white font-bold text-right max-w-[200px] truncate">{getReasonStats()[0]?.[0] || '-'}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
-                <span className="text-slate-400">Ø Bearbeitungszeit</span>
-                <span className="text-white font-bold">{avgProcessingTime} Tage</span>
+                <span className="text-slate-400">{t('admin.downgrade.avgProcessingTime', 'Avg. processing time')}</span>
+                <span className="text-white font-bold">{avgProcessingTime} {t('admin.unit.days', 'days')}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-red-500/5 rounded-lg border border-red-500/20">
                 <span className="text-slate-400 flex items-center gap-2">
                   <i className="ri-refund-2-line text-red-400"></i>
-                  Gesamte Rückerstattungen
+                  {t('admin.downgrade.totalRefunds', 'Total Refunds')}
                 </span>
                 <span className="text-red-400 font-bold">-CHF {totalRefundAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
-                <span className="text-slate-400">Ausstehende Rückerstattungen</span>
+                <span className="text-slate-400">{t('admin.downgrade.pendingRefunds', 'Pending Refunds')}</span>
                 <span className="text-amber-400 font-bold">CHF {pendingRefundAmount.toFixed(2)}</span>
               </div>
             </div>
@@ -1574,15 +1574,15 @@ export default function DowngradeManager() {
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <i className="ri-settings-3-line text-[#C9A961]"></i>
-              Downgrade-Einstellungen
+              {t('admin.downgrade.settings', 'Downgrade Settings')}
             </h3>
 
             <div className="space-y-4">
               {/* Auto-Approve */}
               <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
                 <div>
-                  <p className="font-medium text-white">Automatische Genehmigung</p>
-                  <p className="text-sm text-slate-400">Downgrade-Anfragen automatisch genehmigen</p>
+                  <p className="font-medium text-white">{t('admin.downgrade.autoApprove', 'Automatic Approval')}</p>
+                  <p className="text-sm text-slate-400">{t('admin.downgrade.autoApproveDesc', 'Automatically approve downgrade requests')}</p>
                 </div>
                 <button
                   onClick={() => setAutoApprove(!autoApprove)}
@@ -1600,7 +1600,7 @@ export default function DowngradeManager() {
 
               {/* Refund Policy */}
               <div className="p-4 bg-slate-900/50 rounded-lg">
-                <p className="font-medium text-white mb-3">Rückerstattungsrichtlinie</p>
+                <p className="font-medium text-white mb-3">{t('admin.downgrade.refundPolicy', 'Refund Policy')}</p>
                 <div className="space-y-2">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -1611,8 +1611,8 @@ export default function DowngradeManager() {
                       className="w-4 h-4 text-[#C9A961] cursor-pointer"
                     />
                     <div>
-                      <p className="text-white text-sm">Pro-rata Rückerstattung</p>
-                      <p className="text-xs text-slate-400">Anteilige Rückerstattung basierend auf verbleibenden Tagen</p>
+                      <p className="text-white text-sm">{t('admin.downgrade.prorata', 'Pro-rata refund')}</p>
+                      <p className="text-xs text-slate-400">{t('admin.downgrade.prorataDesc', 'Proportional refund based on remaining days')}</p>
                     </div>
                   </label>
 
@@ -1625,8 +1625,8 @@ export default function DowngradeManager() {
                       className="w-4 h-4 text-[#C9A961] cursor-pointer"
                     />
                     <div>
-                      <p className="text-white text-sm">Volle Rückerstattung</p>
-                      <p className="text-xs text-slate-400">Komplette Rückerstattung des Preisunterschieds</p>
+                      <p className="text-white text-sm">{t('admin.downgrade.fullRefund', 'Full refund')}</p>
+                      <p className="text-xs text-slate-400">{t('admin.downgrade.fullRefundDesc', 'Complete refund of the price difference')}</p>
                     </div>
                   </label>
 
@@ -1639,8 +1639,8 @@ export default function DowngradeManager() {
                       className="w-4 h-4 text-[#C9A961] cursor-pointer"
                     />
                     <div>
-                      <p className="text-white text-sm">Keine Rückerstattung</p>
-                      <p className="text-xs text-slate-400">Downgrade ohne Rückerstattung</p>
+                      <p className="text-white text-sm">{t('admin.downgrade.noRefund', 'No refund')}</p>
+                      <p className="text-xs text-slate-400">{t('admin.downgrade.noRefundDesc', 'Downgrade without refund')}</p>
                     </div>
                   </label>
                 </div>
@@ -1650,7 +1650,7 @@ export default function DowngradeManager() {
               <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
                 <h4 className="text-white font-medium mb-3 flex items-center gap-2">
                   <i className="ri-calculator-line text-[#C9A961]"></i>
-                  Rückerstattungs-Rechner (Beispiel)
+                  {t('admin.downgrade.refundCalc', 'Refund Calculator (Example)')}
                 </h4>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
@@ -1661,7 +1661,7 @@ export default function DowngradeManager() {
                        `~CHF ${((70 / 30) * 15).toFixed(2)}`}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {refundPolicy === 'prorata' && '(bei 15 Tagen Rest)'}
+                      {refundPolicy === 'prorata' && t('admin.downgrade.daysRemaining15', '(with 15 days remaining)')}
                     </p>
                   </div>
                   <div>
@@ -1672,7 +1672,7 @@ export default function DowngradeManager() {
                        `~CHF ${((99 / 30) * 15).toFixed(2)}`}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {refundPolicy === 'prorata' && '(bei 15 Tagen Rest)'}
+                      {refundPolicy === 'prorata' && t('admin.downgrade.daysRemaining15', '(with 15 days remaining)')}
                     </p>
                   </div>
                   <div>
@@ -1683,7 +1683,7 @@ export default function DowngradeManager() {
                        `~CHF ${((29 / 30) * 15).toFixed(2)}`}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {refundPolicy === 'prorata' && '(bei 15 Tagen Rest)'}
+                      {refundPolicy === 'prorata' && t('admin.downgrade.daysRemaining15', '(with 15 days remaining)')}
                     </p>
                   </div>
                 </div>
@@ -1694,7 +1694,7 @@ export default function DowngradeManager() {
                 className="w-full px-6 py-3 bg-[#C9A961] hover:bg-[#A08748] text-white rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-save-line"></i>
-                Einstellungen speichern
+                {t('admin.actions.saveSettings', 'Save settings')}
               </button>
             </div>
           </div>
@@ -1705,7 +1705,7 @@ export default function DowngradeManager() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <i className="ri-list-check text-[#C9A961]"></i>
-                  Downgrade-Anfragen
+                  {t('admin.downgrade.requestsTitle', 'Downgrade Requests')}
                 </h3>
               </div>
 
@@ -1719,7 +1719,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  Alle ({requests.length})
+                  {t('admin.filter.all', 'All')} ({requests.length})
                 </button>
                 <button
                   onClick={() => setFilter('pending')}
@@ -1729,7 +1729,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  Ausstehend ({requests.filter(r => r.status === 'pending').length})
+                  {t('admin.status.pending', 'Pending')} ({requests.filter(r => r.status === 'pending').length})
                 </button>
                 <button
                   onClick={() => setFilter('approved')}
@@ -1739,7 +1739,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  Genehmigt ({requests.filter(r => r.status === 'approved').length})
+                  {t('admin.status.approved', 'Approved')} ({requests.filter(r => r.status === 'approved').length})
                 </button>
                 <button
                   onClick={() => setFilter('rejected')}
@@ -1749,7 +1749,7 @@ export default function DowngradeManager() {
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
-                  Abgelehnt ({requests.filter(r => r.status === 'rejected').length})
+                  {t('admin.status.rejected', 'Rejected')} ({requests.filter(r => r.status === 'rejected').length})
                 </button>
               </div>
             </div>
@@ -1758,14 +1758,14 @@ export default function DowngradeManager() {
               <table className="w-full">
                 <thead className="bg-slate-900/50">
                   <tr>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Benutzer</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Aktuell</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Gewünscht</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Rückerstattung</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Grund</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Datum</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Status</th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-400">Aktionen</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.user', 'User')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.current', 'Current')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.requested', 'Requested')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.refund', 'Refund')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.reason', 'Reason')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.date', 'Date')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.status', 'Status')}</th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-400">{t('admin.table.actions', 'Actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1796,11 +1796,11 @@ export default function DowngradeManager() {
                                 {refundCalc.amount > 0 ? `-CHF ${refundCalc.amount.toFixed(2)}` : 'CHF 0.00'}
                               </p>
                               <p className="text-xs text-slate-500">
-                                {refundPolicy === 'prorata' ? 'Pro-rata' : refundPolicy === 'full' ? 'Voll' : 'Keine'}
+                                {refundPolicy === 'prorata' ? 'Pro-rata' : refundPolicy === 'full' ? t('admin.downgrade.full', 'Full') : t('admin.downgrade.none', 'None')}
                               </p>
                             </div>
                           ) : request.status === 'approved' ? (
-                            <span className="text-green-400 text-sm">Erstattet</span>
+                            <span className="text-green-400 text-sm">{t('admin.downgrade.refunded', 'Refunded')}</span>
                           ) : (
                             <span className="text-slate-500 text-sm">-</span>
                           )}
@@ -1810,7 +1810,7 @@ export default function DowngradeManager() {
                         </td>
                         <td className="p-4">
                           <p className="text-sm text-slate-400">
-                            {new Date(request.date).toLocaleDateString('de-CH')}
+                            {new Date(request.date).toLocaleDateString()}
                           </p>
                         </td>
                         <td className="p-4">
@@ -1824,14 +1824,14 @@ export default function DowngradeManager() {
                               <button
                                 onClick={() => handleApprove(request)}
                                 className="w-8 h-8 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-all cursor-pointer"
-                                title={`Genehmigen (Rückerstattung: CHF ${refundCalc.amount.toFixed(2)})`}
+                                title={`${t('admin.actions.approve', 'Approve')} (${t('admin.downgrade.refund', 'Refund')}: CHF ${refundCalc.amount.toFixed(2)})`}
                               >
                                 <i className="ri-check-line"></i>
                               </button>
                               <button
                                 onClick={() => handleReject(request.id)}
                                 className="w-8 h-8 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all cursor-pointer"
-                                title="Ablehnen"
+                                title={t('admin.actions.reject', 'Reject')}
                               >
                                 <i className="ri-close-line"></i>
                               </button>
@@ -1847,7 +1847,7 @@ export default function DowngradeManager() {
               {filteredRequests.length === 0 && (
                 <div className="p-12 text-center">
                   <i className="ri-inbox-line text-slate-600 text-5xl mb-4"></i>
-                  <p className="text-slate-400">Keine Anfragen gefunden</p>
+                  <p className="text-slate-400">{t('admin.downgrade.noRequestsFound', 'No requests found')}</p>
                 </div>
               )}
             </div>

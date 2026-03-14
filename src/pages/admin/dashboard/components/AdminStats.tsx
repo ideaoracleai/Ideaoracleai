@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getAdminStats, adminGetAllCoupons } from '../../../../supabase/database';
 
 interface Stats {
@@ -127,7 +128,7 @@ export default function AdminStats() {
           .filter(c => (c.usedCount ?? 0) > 0)
           .sort((a, b) => (b.usedCount ?? 0) - (a.usedCount ?? 0))
           .slice(0, 5)
-          .map(c => ({ code: c.code, usedCount: c.usedCount ?? 0, type: c.category === 'registration' ? 'Registrierung' : 'Test-Zugang' }));
+          .map(c => ({ code: c.code, usedCount: c.usedCount ?? 0, type: c.category === 'registration' ? 'Registration' : 'Trial Access' }));
         setCouponStats({
           totalRegistrationCoupons: regCoupons.length,
           totalTrialCoupons: trialCoupons.length,
@@ -147,6 +148,8 @@ export default function AdminStats() {
     loadCouponStats();
   }, []);
 
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
@@ -162,7 +165,7 @@ export default function AdminStats() {
             </span>
           </div>
           <p className="text-3xl font-bold text-white mb-1">{stats.totalUsers}</p>
-          <p className="text-sm text-slate-400">Gesamte Benutzer</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.totalUsers', 'Total Users')}</p>
         </div>
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -176,7 +179,7 @@ export default function AdminStats() {
             </span>
           </div>
           <p className="text-3xl font-bold text-white mb-1">CHF {stats.monthlyRevenue}</p>
-          <p className="text-sm text-slate-400">Monatlicher Umsatz</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.monthlyRevenue', 'Monthly Revenue')}</p>
         </div>
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -190,7 +193,7 @@ export default function AdminStats() {
             </span>
           </div>
           <p className="text-3xl font-bold text-white mb-1">{stats.activeSubscriptions}</p>
-          <p className="text-sm text-slate-400">Aktive Abos</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.activeSubscriptions', 'Active Subscriptions')}</p>
         </div>
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -198,10 +201,10 @@ export default function AdminStats() {
             <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
               <i className="ri-line-chart-line text-purple-400 text-xl"></i>
             </div>
-            <span className="text-xs text-slate-400">Durchschnitt</span>
+            <span className="text-xs text-slate-400">{t('admin.stats.average', 'Average')}</span>
           </div>
           <p className="text-3xl font-bold text-white mb-1">CHF {stats.averageRevenuePerUser.toFixed(0)}</p>
-          <p className="text-sm text-slate-400">Umsatz pro User</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.revenuePerUser', 'Revenue per User')}</p>
         </div>
       </div>
 
@@ -214,7 +217,7 @@ export default function AdminStats() {
             </div>
           </div>
           <p className="text-3xl font-bold text-white mb-1">CHF {stats.totalRevenue}</p>
-          <p className="text-sm text-slate-400">Brutto-Umsatz</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.grossRevenue', 'Gross Revenue')}</p>
         </div>
 
         {/* NEUE KARTE: Rückerstattungen */}
@@ -226,12 +229,12 @@ export default function AdminStats() {
             {stats.pendingRefunds > 0 && (
               <span className="text-xs text-amber-400 flex items-center gap-1">
                 <i className="ri-time-line"></i>
-                CHF {stats.pendingRefunds.toFixed(2)} ausstehend
+                CHF {stats.pendingRefunds.toFixed(2)} {t('admin.downgrade.pending', 'pending')}
               </span>
             )}
           </div>
           <p className="text-3xl font-bold text-red-400 mb-1">-CHF {stats.totalRefunds.toFixed(2)}</p>
-          <p className="text-sm text-slate-400">Rückerstattungen ({stats.refundCount})</p>
+          <p className="text-sm text-slate-400">{t('admin.downgrade.refunds', 'Refunds')} ({stats.refundCount})</p>
         </div>
 
         {/* NEUE KARTE: Netto-Umsatz */}
@@ -240,10 +243,10 @@ export default function AdminStats() {
             <div className="w-12 h-12 bg-[#C9A961]/10 rounded-lg flex items-center justify-center">
               <i className="ri-wallet-3-line text-[#C9A961] text-xl"></i>
             </div>
-            <span className="text-xs text-[#C9A961] font-medium">NETTO</span>
+            <span className="text-xs text-[#C9A961] font-medium">{t('admin.stats.net', 'NET')}</span>
           </div>
           <p className="text-3xl font-bold text-[#C9A961] mb-1">CHF {stats.netRevenue.toFixed(2)}</p>
-          <p className="text-sm text-slate-400">Netto-Umsatz</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.netRevenue', 'Net Revenue')}</p>
         </div>
 
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -253,19 +256,19 @@ export default function AdminStats() {
             </div>
           </div>
           <p className="text-3xl font-bold text-white mb-1">{stats.churnRate.toFixed(1)}%</p>
-          <p className="text-sm text-slate-400">Kündigungsrate</p>
+          <p className="text-sm text-slate-400">{t('admin.stats.churnRate', 'Churn Rate')}</p>
         </div>
       </div>
 
       {/* Plan Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">Paket-Verteilung</h3>
+          <h3 className="text-lg font-bold text-white mb-6">{t('admin.stats.planDistribution', 'Plan Distribution')}</h3>
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-300">Starter</span>
-                <span className="text-sm font-medium text-white">{stats.planDistribution.starter} Benutzer</span>
+                <span className="text-sm font-medium text-white">{stats.planDistribution.starter} {t('admin.stats.users', 'users')}</span>
               </div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
@@ -278,7 +281,7 @@ export default function AdminStats() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-300">Pro</span>
-                <span className="text-sm font-medium text-white">{stats.planDistribution.pro} Benutzer</span>
+                <span className="text-sm font-medium text-white">{stats.planDistribution.pro} {t('admin.stats.users', 'users')}</span>
               </div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
@@ -291,7 +294,7 @@ export default function AdminStats() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-300">Builder</span>
-                <span className="text-sm font-medium text-white">{stats.planDistribution.builder} Benutzer</span>
+                <span className="text-sm font-medium text-white">{stats.planDistribution.builder} {t('admin.stats.users', 'users')}</span>
               </div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
@@ -305,7 +308,7 @@ export default function AdminStats() {
 
         {/* Revenue by Plan */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">Umsatz nach Paket</h3>
+          <h3 className="text-lg font-bold text-white mb-6">{t('admin.stats.revenueByPlan', 'Revenue by Plan')}</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
               <div className="flex items-center gap-3">
@@ -314,7 +317,7 @@ export default function AdminStats() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Starter</p>
-                  <p className="text-xs text-slate-400">{stats.planDistribution.starter} Benutzer</p>
+                  <p className="text-xs text-slate-400">{stats.planDistribution.starter} {t('admin.stats.users', 'users')}</p>
                 </div>
               </div>
               <p className="text-lg font-bold text-white">CHF {stats.revenueByPlan.starter}</p>
@@ -327,7 +330,7 @@ export default function AdminStats() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Pro</p>
-                  <p className="text-xs text-slate-400">{stats.planDistribution.pro} Benutzer</p>
+                  <p className="text-xs text-slate-400">{stats.planDistribution.pro} {t('admin.stats.users', 'users')}</p>
                 </div>
               </div>
               <p className="text-lg font-bold text-white">CHF {stats.revenueByPlan.pro}</p>
@@ -340,7 +343,7 @@ export default function AdminStats() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">Builder</p>
-                  <p className="text-xs text-slate-400">{stats.planDistribution.builder} Benutzer</p>
+                  <p className="text-xs text-slate-400">{stats.planDistribution.builder} {t('admin.stats.users', 'users')}</p>
                 </div>
               </div>
               <p className="text-lg font-bold text-white">CHF {stats.revenueByPlan.builder}</p>
@@ -351,15 +354,15 @@ export default function AdminStats() {
 
       {/* Recent Activity */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-        <h3 className="text-lg font-bold text-white mb-6">Letzte Aktivitäten</h3>
+        <h3 className="text-lg font-bold text-white mb-6">{t('admin.stats.recentActivity', 'Recent Activity')}</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-4 p-3 bg-slate-900/50 rounded-lg">
             <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
               <i className="ri-arrow-up-line text-green-400"></i>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">Thomas Weber hat auf Builder upgegradet</p>
-              <p className="text-xs text-slate-400">vor 2 Stunden</p>
+              <p className="text-sm font-medium text-white">{t('admin.stats.activity1', 'Thomas Weber upgraded to Builder')}</p>
+              <p className="text-xs text-slate-400">{t('admin.stats.hoursAgo2', '2 hours ago')}</p>
             </div>
             <span className="text-sm font-medium text-green-400">+CHF 70</span>
           </div>
@@ -369,8 +372,8 @@ export default function AdminStats() {
               <i className="ri-user-add-line text-blue-400"></i>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">Neuer Benutzer registriert</p>
-              <p className="text-xs text-slate-400">vor 5 Stunden</p>
+              <p className="text-sm font-medium text-white">{t('admin.stats.activity2', 'New user registered')}</p>
+              <p className="text-xs text-slate-400">{t('admin.stats.hoursAgo5', '5 hours ago')}</p>
             </div>
           </div>
 
@@ -379,8 +382,8 @@ export default function AdminStats() {
               <i className="ri-arrow-up-line text-green-400"></i>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">Anna Schmidt hat auf Pro upgegradet</p>
-              <p className="text-xs text-slate-400">vor 1 Tag</p>
+              <p className="text-sm font-medium text-white">{t('admin.stats.activity3', 'Anna Schmidt upgraded to Pro')}</p>
+              <p className="text-xs text-slate-400">{t('admin.stats.dayAgo1', '1 day ago')}</p>
             </div>
             <span className="text-sm font-medium text-green-400">+CHF 29</span>
           </div>
@@ -391,7 +394,7 @@ export default function AdminStats() {
       <div className="mt-8">
         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
           <i className="ri-coupon-3-line text-amber-400"></i>
-          Gutschein-Statistiken
+          {t('admin.stats.couponStats', 'Coupon Statistics')}
         </h3>
         
         {/* Coupon Overview Cards */}
@@ -403,7 +406,7 @@ export default function AdminStats() {
               </div>
             </div>
             <p className="text-3xl font-bold text-white mb-1">{couponStats.totalRedemptions}</p>
-            <p className="text-sm text-slate-400">Gesamte Einlösungen</p>
+            <p className="text-sm text-slate-400">{t('admin.stats.totalRedemptions', 'Total Redemptions')}</p>
           </div>
 
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -413,7 +416,7 @@ export default function AdminStats() {
               </div>
             </div>
             <p className="text-3xl font-bold text-white mb-1">{couponStats.activeCoupons}</p>
-            <p className="text-sm text-slate-400">Aktive Gutscheine</p>
+            <p className="text-sm text-slate-400">{t('admin.stats.activeCoupons', 'Active Coupons')}</p>
           </div>
 
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -423,7 +426,7 @@ export default function AdminStats() {
               </div>
             </div>
             <p className="text-3xl font-bold text-white mb-1">{couponStats.registrationRedemptions}</p>
-            <p className="text-sm text-slate-400">Registrierungs-Einlösungen</p>
+            <p className="text-sm text-slate-400">{t('admin.stats.registrationRedemptions', 'Registration Redemptions')}</p>
           </div>
 
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
@@ -433,7 +436,7 @@ export default function AdminStats() {
               </div>
             </div>
             <p className="text-3xl font-bold text-white mb-1">{couponStats.trialRedemptions}</p>
-            <p className="text-sm text-slate-400">Test-Zugangs-Einlösungen</p>
+            <p className="text-sm text-slate-400">{t('admin.stats.trialRedemptions', 'Trial Redemptions')}</p>
           </div>
         </div>
 
@@ -441,13 +444,13 @@ export default function AdminStats() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Coupon Distribution */}
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-            <h4 className="text-lg font-bold text-white mb-6">Gutschein-Verteilung</h4>
+            <h4 className="text-lg font-bold text-white mb-6">{t('admin.stats.couponDistribution', 'Coupon Distribution')}</h4>
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-300 flex items-center gap-2">
                     <i className="ri-vip-crown-line text-teal-400"></i>
-                    Registrierungs-Gutscheine
+                    {t('admin.stats.registrationCoupons', 'Registration Coupons')}
                   </span>
                   <span className="text-sm font-medium text-white">{couponStats.totalRegistrationCoupons}</span>
                 </div>
@@ -463,7 +466,7 @@ export default function AdminStats() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-300 flex items-center gap-2">
                     <i className="ri-time-line text-orange-400"></i>
-                    Test-Zugangs-Gutscheine
+                    {t('admin.stats.trialCoupons', 'Trial Coupons')}
                   </span>
                   <span className="text-sm font-medium text-white">{couponStats.totalTrialCoupons}</span>
                 </div>
@@ -479,14 +482,14 @@ export default function AdminStats() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-slate-300 flex items-center gap-2">
                     <i className="ri-checkbox-circle-line text-green-400"></i>
-                    Aktiv
+                    {t('admin.status.active', 'Active')}
                   </span>
                   <span className="text-sm font-medium text-green-400">{couponStats.activeCoupons}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-300 flex items-center gap-2">
                     <i className="ri-close-circle-line text-red-400"></i>
-                    Abgelaufen/Inaktiv
+                    {t('admin.stats.expiredInactive', 'Expired/Inactive')}
                   </span>
                   <span className="text-sm font-medium text-red-400">{couponStats.expiredCoupons}</span>
                 </div>
@@ -496,7 +499,7 @@ export default function AdminStats() {
 
           {/* Top Coupons */}
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-            <h4 className="text-lg font-bold text-white mb-6">Top Gutscheine nach Einlösungen</h4>
+            <h4 className="text-lg font-bold text-white mb-6">{t('admin.stats.topCoupons', 'Top Coupons by Redemptions')}</h4>
             {couponStats.topCoupons.length > 0 ? (
               <div className="space-y-3">
                 {couponStats.topCoupons.map((coupon, index) => (
@@ -517,7 +520,7 @@ export default function AdminStats() {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-white">{coupon.usedCount}</p>
-                      <p className="text-xs text-slate-400">Einlösungen</p>
+                      <p className="text-xs text-slate-400">{t('admin.stats.redemptions', 'redemptions')}</p>
                     </div>
                   </div>
                 ))}
@@ -527,7 +530,7 @@ export default function AdminStats() {
                 <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i className="ri-coupon-3-line text-slate-500 text-2xl"></i>
                 </div>
-                <p className="text-slate-400">Noch keine Gutscheine eingelöst</p>
+                <p className="text-slate-400">{t('admin.stats.noCouponsRedeemed', 'No coupons redeemed yet')}</p>
               </div>
             )}
           </div>

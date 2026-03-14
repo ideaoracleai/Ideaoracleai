@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminGetCreditHistory } from '../../../../supabase/database';
 
 interface Transaction {
@@ -21,6 +22,7 @@ interface Transaction {
 }
 
 export default function TransactionLog() {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<'all' | 'upgrade' | 'downgrade'>('all');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<'all' | 'visa' | 'mastercard' | 'amex'>('all');
@@ -83,7 +85,7 @@ export default function TransactionLog() {
         {
           id: 'TXN-1705847789',
           userId: '4',
-          userName: 'Lisa Müller',
+          userName: 'Lisa Miller',
           userEmail: 'startup@example.com',
           type: 'upgrade',
           fromPlan: 'Starter',
@@ -225,7 +227,7 @@ export default function TransactionLog() {
               : 'bg-slate-800/50 text-slate-400 hover:text-white border border-slate-700'
           }`}
         >
-          Alle Transaktionen
+          {t('admin.transactions.all', 'All Transactions')}
         </button>
         <button
           onClick={() => setFilter('upgrade')}
@@ -260,7 +262,7 @@ export default function TransactionLog() {
               : 'bg-slate-800/50 text-slate-400 hover:text-white border border-slate-700'
           }`}
         >
-          Alle Karten
+          {t('admin.transactions.allCards', 'All Cards')}
         </button>
         <button
           onClick={() => setPaymentMethodFilter('visa')}
@@ -302,7 +304,7 @@ export default function TransactionLog() {
         {filteredTransactions.length === 0 ? (
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-12 text-center">
             <i className="ri-file-list-line text-slate-600 text-5xl mb-4"></i>
-            <p className="text-slate-400">Keine Transaktionen gefunden</p>
+            <p className="text-slate-400">{t('admin.transactions.notFound', 'No transactions found')}</p>
           </div>
         ) : (
           filteredTransactions.map((transaction) => (
@@ -377,7 +379,7 @@ export default function TransactionLog() {
       {/* Total Count */}
       {filteredTransactions.length > 0 && (
         <div className="mt-4 text-sm text-slate-400">
-          Gesamt: {filteredTransactions.length} Transaktionen
+          {t('admin.transactions.totalLabel', 'Total')}: {filteredTransactions.length} {t('admin.transactions.transactions', 'transactions')}
         </div>
       )}
     </div>

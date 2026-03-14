@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface User {
   id: string;
@@ -24,6 +25,7 @@ const PLANS = [
 ];
 
 export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeModalProps) {
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState('');
   const [refundAmount, setRefundAmount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -101,13 +103,13 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
           <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="ri-check-line text-green-400 text-3xl"></i>
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Downgrade erfolgreich!</h3>
+          <h3 className="text-2xl font-bold text-white mb-2">{t('admin.downgrade.successTitle', 'Downgrade successful!')}</h3>
           <p className="text-slate-400 mb-4">
-            Der Benutzer wurde erfolgreich herabgestuft und die Rückerstattung wurde verarbeitet.
+            {t('admin.downgrade.successDesc', 'The user has been successfully downgraded and the refund has been processed.')}
           </p>
           <div className="flex items-center justify-center gap-2 text-green-400">
             <i className="ri-loader-4-line animate-spin"></i>
-            <span className="text-sm">Wird geschlossen...</span>
+            <span className="text-sm">{t('admin.downgrade.closing', 'Closing...')}</span>
           </div>
         </div>
       </div>
@@ -120,7 +122,7 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
         {/* Header */}
         <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white">Benutzer herabstufen</h2>
+            <h2 className="text-2xl font-bold text-white">{t('admin.downgrade.title', 'Downgrade User')}</h2>
             <p className="text-slate-400 text-sm mt-1">
               {user.name} ({user.email})
             </p>
@@ -137,14 +139,14 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
         <div className="p-6 space-y-6">
           {/* Current Plan Info */}
           <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
-            <p className="text-sm text-slate-400 mb-2">Aktuelles Paket</p>
+            <p className="text-sm text-slate-400 mb-2">{t('admin.downgrade.currentPlan', 'Current Plan')}</p>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-lg font-bold text-white">{user.plan}</p>
                 <p className="text-sm text-slate-400">{user.credits.toLocaleString('de-CH')} Credits</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-400">Ausgaben</p>
+                <p className="text-sm text-slate-400">{t('admin.downgrade.spending', 'Spending')}</p>
                 <p className="text-lg font-bold text-white">CHF {user.totalSpent.toFixed(2)}</p>
               </div>
             </div>
@@ -152,7 +154,7 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
 
           {/* Available Plans */}
           <div>
-            <p className="text-sm font-medium text-slate-300 mb-3">Verfügbare Pakete für Downgrade</p>
+            <p className="text-sm font-medium text-slate-300 mb-3">{t('admin.downgrade.availablePlans', 'Available Plans for Downgrade')}</p>
             <div className="space-y-3">
               {availablePlans.map((plan) => (
                 <button
@@ -171,7 +173,7 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-white">CHF {plan.price}</p>
-                      <p className="text-xs text-slate-400">pro Monat</p>
+                      <p className="text-xs text-slate-400">{t('admin.downgrade.perMonth', 'per month')}</p>
                     </div>
                   </div>
                 </button>
@@ -185,22 +187,22 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
               <div className="flex items-start gap-3">
                 <i className="ri-information-line text-blue-400 text-xl mt-0.5"></i>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-400 mb-2">Rückerstattungsberechnung</p>
+                  <p className="text-sm font-medium text-blue-400 mb-2">{t('admin.downgrade.refundCalc', 'Refund Calculation')}</p>
                   <div className="space-y-1 text-sm text-slate-300">
                     <div className="flex justify-between">
-                      <span>Aktuelles Paket:</span>
+                      <span>{t('admin.downgrade.currentPlanLabel', 'Current Plan')}:</span>
                       <span className="font-medium">{user.plan}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Neues Paket:</span>
+                      <span>{t('admin.downgrade.newPlan', 'New Plan')}:</span>
                       <span className="font-medium">{selectedPlan}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Verbleibende Tage:</span>
-                      <span className="font-medium">15 von 30 Tagen</span>
+                      <span>{t('admin.downgrade.remainingDays', 'Remaining Days')}:</span>
+                      <span className="font-medium">{t('admin.downgrade.daysOf', '15 of 30 days')}</span>
                     </div>
                     <div className="border-t border-blue-500/20 pt-2 mt-2 flex justify-between">
-                      <span className="font-medium">Pro-rata Rückerstattung:</span>
+                      <span className="font-medium">{t('admin.downgrade.proRataRefund', 'Pro-rata Refund')}:</span>
                       <span className="font-bold text-blue-400">CHF {refundAmount.toFixed(2)}</span>
                     </div>
                   </div>
@@ -214,9 +216,9 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
             <div className="flex items-start gap-3">
               <i className="ri-error-warning-line text-red-400 text-xl mt-0.5"></i>
               <div>
-                <p className="text-sm font-medium text-red-400 mb-1">Wichtiger Hinweis</p>
+                <p className="text-sm font-medium text-red-400 mb-1">{t('admin.downgrade.importantNote', 'Important Note')}</p>
                 <p className="text-sm text-slate-300">
-                  Der Downgrade wird sofort durchgeführt. Der Benutzer verliert Zugriff auf Premium-Features und überschüssige Credits werden entfernt.
+                  {t('admin.downgrade.warningDesc', 'The downgrade will be executed immediately. The user will lose access to premium features and excess credits will be removed.')}
                 </p>
               </div>
             </div>
@@ -229,7 +231,7 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
             onClick={onClose}
             className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all whitespace-nowrap"
           >
-            Abbrechen
+            {t('admin.actions.cancel', 'Cancel')}
           </button>
           <button
             onClick={handleDowngrade}
@@ -239,12 +241,12 @@ export default function DowngradeModal({ user, onClose, onSuccess }: DowngradeMo
             {loading ? (
               <>
                 <i className="ri-loader-4-line animate-spin"></i>
-                <span>Wird verarbeitet...</span>
+                <span>{t('admin.downgrade.processing', 'Processing...')}</span>
               </>
             ) : (
               <>
                 <i className="ri-arrow-down-line"></i>
-                <span>Downgrade durchführen</span>
+                <span>{t('admin.downgrade.execute', 'Execute Downgrade')}</span>
               </>
             )}
           </button>
