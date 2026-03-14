@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { creditHistory as initialCreditHistory } from '../../../mocks/dashboardData';
 import { useSubscription } from '../../../hooks/useSubscription';
+import { useAuth } from '../../../supabase';
+import { getCreditHistory } from '../../../supabase/database';
+import type { CreditHistoryRecord } from '../../../supabase/types';
 
 interface CreditUsageProps {
   fullView?: boolean;
@@ -60,11 +62,17 @@ interface Transaction {
 
 export default function CreditUsage({ fullView = false }: CreditUsageProps) {
   const { t } = useTranslation();
+  const { firebaseUser } = useAuth();
   
   // Zentraler Subscription Hook
   const { subscription, changePlan, usagePercentage } = useSubscription();
   
-  const [creditHistory] = useState(initialCreditHistory);
+  const [creditHistory, setCreditHistory] = useState<CreditHistoryRecord[]>([]);
+
+  useEffect(() => {
+    if (!firebaseUser?.id) return;
+    getCreditHistory(firebaseUser.id, 50).then(setCreditHistory).catch(() => {});
+  }, [firebaseUser?.id]);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
