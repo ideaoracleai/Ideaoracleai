@@ -1,23 +1,50 @@
+import { useState, useEffect } from 'react';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../supabase';
+import { getIdeaHistory } from '../../../supabase/database';
+import type { IdeaRecord } from '../../../supabase/types';
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
 
 const Overview = () => {
   const { t } = useTranslation();
+  const { firebaseUser } = useAuth();
   const { subscription } = useSubscription();
+  const [ideas, setIdeas] = useState<IdeaRecord[]>([]);
+
+  useEffect(() => {
+    if (!firebaseUser?.id) return;
+    getIdeaHistory(firebaseUser.id, 100).then(setIdeas).catch(() => {});
+  }, [firebaseUser?.id]);
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const analysesToday = ideas.filter(i => new Date(i.createdAt).getTime() >= todayStart).length;
+  const totalIdeas = ideas.length;
+  const goodCount = ideas.filter(i => i.rating === 'good').length;
+  const successRate = totalIdeas > 0 ? Math.round((goodCount / totalIdeas) * 100) : 0;
 
   const stats = [
     {
       icon: 'ri-lightbulb-flash-line',
       label: t('overview.analysesToday', 'Analyses today'),
-      value: '12',
+      value: analysesToday.toString(),
       color: 'from-emerald-500 to-teal-500',
       bgColor: 'bg-emerald-500/10',
       textColor: 'text-emerald-400'
     },
     {
-      icon: 'ri-time-line',
-      label: t('overview.avgResponseTime', 'Avg. response time'),
-      value: '2.3s',
+      icon: 'ri-file-list-3-line',
+      label: t('overview.totalAnalyses', 'Total analyses'),
+      value: totalIdeas.toString(),
       color: 'from-amber-500 to-orange-500',
       bgColor: 'bg-amber-500/10',
       textColor: 'text-amber-400'
@@ -25,7 +52,7 @@ const Overview = () => {
     {
       icon: 'ri-star-line',
       label: t('overview.successRate', 'Success rate'),
-      value: '94%',
+      value: `${successRate}%`,
       color: 'from-[#C9A961] to-[#A08748]',
       bgColor: 'bg-[#C9A961]/10',
       textColor: 'text-[#C9A961]'
@@ -33,51 +60,28 @@ const Overview = () => {
     {
       icon: 'ri-trophy-line',
       label: t('overview.topRatings', 'Top ratings'),
-      value: '8',
+      value: goodCount.toString(),
       color: 'from-rose-500 to-pink-500',
       bgColor: 'bg-rose-500/10',
       textColor: 'text-rose-400'
     }
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'analysis',
-      title: t('overview.activity.analysisComplete', 'Niche analysis completed'),
-      description: t('overview.activity.analysisDesc', 'E-commerce for sustainable fashion'),
-      time: t('overview.activity.hours2', '2 hours ago'),
-      icon: 'ri-check-double-line',
-      color: 'text-emerald-400 bg-emerald-400/10'
-    },
-    {
-      id: 2,
-      type: 'credit',
-      title: t('overview.activity.creditsUsed', 'Credits used'),
-      description: t('overview.activity.creditsDesc', '50 credits for detailed analysis'),
-      time: t('overview.activity.hours3', '3 hours ago'),
-      icon: 'ri-coin-line',
-      color: 'text-amber-400 bg-amber-400/10'
-    },
-    {
-      id: 3,
-      type: 'idea',
-      title: t('overview.activity.ideaSaved', 'New idea saved'),
-      description: t('overview.activity.ideaDesc', 'AI-powered fitness app'),
-      time: t('overview.activity.hours5', '5 hours ago'),
-      icon: 'ri-lightbulb-line',
-      color: 'text-blue-400 bg-blue-400/10'
-    },
-    {
-      id: 4,
-      type: 'export',
-      title: t('overview.activity.reportExported', 'Report exported'),
-      description: t('overview.activity.reportDesc', 'PDF export successful'),
-      time: t('overview.activity.day1', '1 day ago'),
-      icon: 'ri-file-download-line',
-      color: 'text-purple-400 bg-purple-400/10'
-    }
-  ];
+  const recentActivity = ideas.slice(0, 4).map((idea, i) => {
+    const rs = idea.rating === 'good'
+      ? { icon: 'ri-thumb-up-line', color: 'text-emerald-400 bg-emerald-400/10' }
+      : idea.rating === 'medium'
+        ? { icon: 'ri-subtract-line', color: 'text-amber-400 bg-amber-400/10' }
+        : { icon: 'ri-thumb-down-line', color: 'text-red-400 bg-red-400/10' };
+    return {
+      id: i,
+      title: idea.title,
+      description: `${idea.creditsUsed} Credits`,
+      time: timeAgo(idea.createdAt),
+      icon: rs.icon,
+      color: rs.color,
+    };
+  });
 
   const quickLinks = [
     {

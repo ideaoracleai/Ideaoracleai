@@ -1,12 +1,28 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { stats } from '../../../mocks/dashboardData';
 import { useSubscription } from '../../../hooks/useSubscription';
+import { useAuth } from '../../../supabase';
+import { getIdeaHistory } from '../../../supabase/database';
 
 export default function StatsCards() {
   const { t } = useTranslation();
-
-  // Zentraler Subscription Hook
+  const { firebaseUser } = useAuth();
   const { subscription } = useSubscription();
+  const [totalAnalyses, setTotalAnalyses] = useState(0);
+  const [goodRatings, setGoodRatings] = useState(0);
+
+  useEffect(() => {
+    if (!firebaseUser?.id) return;
+    getIdeaHistory(firebaseUser.id, 500).then(ideas => {
+      setTotalAnalyses(ideas.length);
+      setGoodRatings(ideas.filter(i => i.rating === 'good').length);
+    }).catch(() => {});
+  }, [firebaseUser?.id]);
+
+  // Days until next monthly reset
+  const now = new Date();
+  const nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const resetDays = Math.max(1, Math.ceil((nextReset.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
   const statCards = [
     {
@@ -20,7 +36,7 @@ export default function StatsCards() {
     {
       icon: 'ri-file-list-3-line',
       label: t('dashboard.stats.totalAnalyses'),
-      value: stats.totalAnalyses.toString(),
+      value: totalAnalyses.toString(),
       subtext: t('dashboard.stats.totalAnalyses'),
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10',
@@ -28,15 +44,15 @@ export default function StatsCards() {
     {
       icon: 'ri-thumb-up-line',
       label: t('dashboard.stats.goodRatings'),
-      value: stats.goodRatings.toString(),
-      subtext: `${Math.round((stats.goodRatings / stats.totalAnalyses) * 100)}%`,
+      value: goodRatings.toString(),
+      subtext: totalAnalyses > 0 ? `${Math.round((goodRatings / totalAnalyses) * 100)}%` : '0%',
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10',
     },
     {
       icon: 'ri-calendar-line',
       label: t('dashboard.stats.nextReset'),
-      value: '4',
+      value: resetDays.toString(),
       subtext: t('dashboard.stats.days'),
       color: 'text-gray-400',
       bgColor: 'bg-gray-500/10',
