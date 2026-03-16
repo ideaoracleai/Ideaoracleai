@@ -48,6 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen to Supabase auth state changes
     useEffect(() => {
+        // Safety timeout - ensure loading never stays true forever
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 5000);
+
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             const user = session?.user ?? null;
@@ -73,11 +78,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     }
                     setUserDoc(doc);
                     applyUserLanguage(doc); // ← apply saved language on login
+                    clearTimeout(timeout);
                     setIsLoading(false);
-                }).catch(() => setIsLoading(false));
+                }).catch((err) => {
+                    console.error('Error loading user document:', err);
+                    clearTimeout(timeout);
+                    setIsLoading(false);
+                });
             } else {
+                clearTimeout(timeout);
                 setIsLoading(false);
             }
+        }).catch((err) => {
+            console.error('Error getting session:', err);
+            clearTimeout(timeout);
+            setIsLoading(false);
         });
 
         // Subscribe to auth changes
@@ -113,7 +128,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            clearTimeout(timeout);
+            subscription.unsubscribe();
+        };
     }, []);
 
     // Real-time subscription to user document changes
