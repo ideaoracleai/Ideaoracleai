@@ -264,13 +264,13 @@ export default function AuthPage() {
 
       if (!coupon || !coupon.isActive || coupon.usedCount >= coupon.maxUses || (coupon.expiresAt && new Date(coupon.expiresAt) < new Date())) {
         setValidatedCoupon(null);
-        setCouponError('Ungültiger oder abgelaufener Code');
+        setCouponError(t('auth.errors.invalidCode', 'Invalid or expired code'));
         return;
       }
 
-      if (coupon.category === 'trial') {
+      if (coupon.category !== 'trial') {
         setValidatedCoupon(null);
-        setCouponError('Dieser Code ist nur für den Test-Zugang gültig. Bitte auf der Startseite einlösen.');
+        setCouponError(t('auth.errors.registrationCodeOnly', 'This code is for registration only'));
         return;
       }
 
@@ -285,7 +285,7 @@ export default function AuthPage() {
       setFormData(prev => ({ ...prev, selectedPlan: coupon.plan as PlanType }));
       setCouponError('');
     } catch {
-      setCouponError('Fehler beim Prüfen des Codes. Bitte erneut versuchen.');
+      setCouponError(t('auth.errors.verificationFailed', 'Error verifying code. Please try again.'));
     } finally {
       setCouponLoading(false);
     }
@@ -1153,12 +1153,12 @@ export default function AuthPage() {
                   </div>
                 )}
 
-                {/* Coupon Code Field (Register only) */}
+                {/* Trial Code Field (Register only) */}
                 {mode === 'register' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      <i className="ri-coupon-3-line mr-1.5 text-[#C9A961]"></i>
-                      Gutschein-Code (optional)
+                      <i className="ri-gift-line mr-1.5 text-[#C9A961]"></i>
+                      {t('auth.fields.testCode', 'Login and test for free')}
                     </label>
                     {validatedCoupon ? (
                       <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
@@ -1168,16 +1168,13 @@ export default function AuthPage() {
                               <i className="ri-check-line text-green-400 text-xl"></i>
                             </div>
                             <div>
-                              <p className="text-green-400 font-semibold text-sm">Code eingelöst!</p>
+                              <p className="text-green-400 font-semibold text-sm">{t('auth.testCode.activated', 'Test code activated!')}</p>
                               <p className="text-gray-400 text-xs">
-                                <span className="text-white font-medium">
-                                  {validatedCoupon.plan === 'starter' ? 'Starter' : validatedCoupon.plan === 'pro' ? 'Pro' : 'Builder'}
-                                </span>
                                 {validatedCoupon.duration > 0 && (
-                                  <> für {validatedCoupon.duration} {validatedCoupon.durationUnit === 'days' ? (validatedCoupon.duration === 1 ? 'Tag' : 'Tage') : (validatedCoupon.duration === 1 ? 'Monat' : 'Monate')} gratis</>
+                                  <>{validatedCoupon.duration} {validatedCoupon.durationUnit === 'days' ? t('auth.testCode.days', 'days') : t('auth.testCode.months', 'months')} {t('auth.testCode.freeAccess', 'free access')}</>
                                 )}
                                 {validatedCoupon.credits > 0 && (
-                                  <> • {validatedCoupon.credits} Credits</>
+                                  <> • {validatedCoupon.credits} {t('auth.testCode.credits', 'credits')}</>
                                 )}
                               </p>
                             </div>
@@ -1206,11 +1203,11 @@ export default function AuthPage() {
                             type="text"
                             value={formData.couponCode}
                             onChange={(e) => {
-                              setForgotEmail(e.target.value);
-                              setErrors({});
+                              setFormData(prev => ({ ...prev, couponCode: e.target.value.toUpperCase() }));
+                              setCouponError('');
                             }}
-                            className={`w-full bg-[#1A1F26] border ${errors.email ? 'border-red-500' : 'border-[#3D3428]/30'} rounded-lg py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#C9A961] transition-colors`}
-                            placeholder={t('auth.placeholders.email')}
+                            className={`w-full bg-[#1A1F26] border ${couponError ? 'border-red-500' : 'border-[#3D3428]/30'} rounded-lg py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#C9A961] transition-colors uppercase`}
+                            placeholder={t('auth.placeholders.testCode', 'Enter test code')}
                           />
                         </div>
                         <button
@@ -1224,7 +1221,7 @@ export default function AuthPage() {
                           ) : (
                             <>
                               <i className="ri-check-line"></i>
-                              Prüfen
+                              {t('auth.actions.verify', 'Verify')}
                             </>
                           )}
                         </button>
