@@ -847,6 +847,36 @@ export const common = {
   'admin.downgrade.pending': 'pending',
   'admin.downgrade.refunds': 'Refunds',
 
+  // Admin Transactions
+  'admin.transactions.all': 'All Transactions',
+  'admin.transactions.allCards': 'All Cards',
+  'admin.transactions.notFound': 'No transactions found',
+  'admin.transactions.totalLabel': 'Total',
+  'admin.transactions.transactions': 'transactions',
+
+  // Admin Tips
+  'admin.tips.title': 'Tip of the Day',
+  'admin.tips.subtitle': 'Create and manage tips shown to all users',
+  'admin.tips.active': 'Active',
+  'admin.tips.currentlyShown': 'This tip is currently shown to all users',
+  'admin.tips.createNew': 'Create New Tip',
+  'admin.tips.generating': 'Generating...',
+  'admin.tips.generateAI': 'Generate AI Tip',
+  'admin.tips.titleLabel': 'Title',
+  'admin.tips.titlePlaceholder': 'e.g. Tip of the Day',
+  'admin.tips.category': 'Category',
+  'admin.tips.categoryTip': 'Tip',
+  'admin.tips.categoryFeature': 'New Feature',
+  'admin.tips.categoryProductivity': 'Productivity',
+  'admin.tips.categoryUpdate': 'Update',
+  'admin.tips.content': 'Content',
+  'admin.tips.contentPlaceholder': 'Write your tip for users here...',
+  'admin.tips.addTip': 'Add Tip',
+  'admin.tips.allTips': 'All Tips',
+  'admin.tips.noTips': 'No tips created yet',
+  'admin.tips.noTipsHint': 'Click "Generate AI Tip" to get started',
+  'admin.actions.done': 'Done',
+
 };
 
 export default common;
