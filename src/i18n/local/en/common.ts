@@ -809,6 +809,44 @@ export const common = {
   'admin.coupons.trialDuration': 'Trial Duration',
   'admin.coupons.typePlaceholder': 'e.g. Early Bird, Partner, Influencer',
 
+  // Admin Stats
+  'admin.stats.totalUsers': 'Total Users',
+  'admin.stats.monthlyRevenue': 'Monthly Revenue',
+  'admin.stats.activeSubscriptions': 'Active Subscriptions',
+  'admin.stats.average': 'Average',
+  'admin.stats.revenuePerUser': 'Revenue per User',
+  'admin.stats.grossRevenue': 'Gross Revenue',
+  'admin.stats.net': 'NET',
+  'admin.stats.netRevenue': 'Net Revenue',
+  'admin.stats.churnRate': 'Churn Rate',
+  'admin.stats.planDistribution': 'Plan Distribution',
+  'admin.stats.users': 'users',
+  'admin.stats.revenueByPlan': 'Revenue by Plan',
+  'admin.stats.recentActivity': 'Recent Activity',
+  'admin.stats.activity1': 'Thomas Weber upgraded to Builder',
+  'admin.stats.activity2': 'New user registered',
+  'admin.stats.activity3': 'Anna Schmidt upgraded to Pro',
+  'admin.stats.hoursAgo2': '2 hours ago',
+  'admin.stats.hoursAgo5': '5 hours ago',
+  'admin.stats.dayAgo1': '1 day ago',
+  'admin.stats.couponStats': 'Coupon Statistics',
+  'admin.stats.totalRedemptions': 'Total Redemptions',
+  'admin.stats.activeCoupons': 'Active Coupons',
+  'admin.stats.registrationRedemptions': 'Registration Redemptions',
+  'admin.stats.trialRedemptions': 'Trial Redemptions',
+  'admin.stats.couponDistribution': 'Coupon Distribution',
+  'admin.stats.registrationCoupons': 'Registration Coupons',
+  'admin.stats.trialCoupons': 'Trial Coupons',
+  'admin.stats.expiredInactive': 'Expired/Inactive',
+  'admin.stats.topCoupons': 'Top Coupons by Redemptions',
+  'admin.stats.redemptions': 'redemptions',
+  'admin.stats.noCouponsRedeemed': 'No coupons redeemed yet',
+  'admin.status.active': 'Active',
+
+  // Admin Downgrades
+  'admin.downgrade.pending': 'pending',
+  'admin.downgrade.refunds': 'Refunds',
+
 };
 
 export default common;
