@@ -20,7 +20,7 @@ interface SectionConfig {
 
 const DEFAULT_SECTIONS: SectionConfig[] = [
   { id: 'hero', label: 'Hero', visible: true },
-  { id: 'features', label: 'Features', visible: true },
+  { id: 'features', label: 'Features', visible: false },
   { id: 'howItWorks', label: 'How It Works', visible: true },
   { id: 'testimonials', label: 'Testimonials', visible: false },
   { id: 'aboutUs', label: 'About Us', visible: false },
