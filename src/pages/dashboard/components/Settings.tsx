@@ -21,7 +21,7 @@ export default function Settings({ onBack, onNavigateSubscription }: SettingsPro
     phone: ''
   });
   const [preferences, setPreferences] = useState({
-    language: i18n.language || 'de',
+    language: i18n.language.split('-')[0] || 'en',
     timezone: 'Europe/Zurich',
     currency: 'CHF'
   });

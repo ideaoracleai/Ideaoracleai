@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../supabase';
 import { getIdeaHistory, deleteIdeaRecord } from '../../../supabase/database';
 import type { IdeaRecord } from '../../../supabase/types';
@@ -9,14 +10,15 @@ interface IdeaHistoryProps {
 
 function getRatingStyles(rating: string) {
   switch (rating) {
-    case 'good': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', icon: 'ri-thumb-up-fill', label: 'Gut' };
-    case 'medium': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', icon: 'ri-subtract-fill', label: 'Mittel' };
-    case 'bad': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', icon: 'ri-thumb-down-fill', label: 'Schlecht' };
-    default: return { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30', icon: 'ri-question-fill', label: 'Unbekannt' };
+    case 'good': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', icon: 'ri-thumb-up-fill', ratingKey: 'rating.good' };
+    case 'medium': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30', icon: 'ri-subtract-fill', ratingKey: 'rating.medium' };
+    case 'bad': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', icon: 'ri-thumb-down-fill', ratingKey: 'rating.bad' };
+    default: return { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30', icon: 'ri-question-fill', ratingKey: 'rating.medium' };
   }
 }
 
 export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
+  const { t, i18n } = useTranslation();
   const { firebaseUser } = useAuth();
   const [ideas, setIdeas] = useState<IdeaRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
     if (!firebaseUser?.id) { setIsLoading(false); return; }
     getIdeaHistory(firebaseUser.id, 100)
       .then(setIdeas)
-      .catch(() => showToastMessage('Fehler beim Laden', 'error'))
+      .catch(() => showToastMessage(t('history.errorLoading'), 'error'))
       .finally(() => setIsLoading(false));
   }, [firebaseUser?.id]);
 
@@ -47,9 +49,9 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
     try {
       await deleteIdeaRecord(firebaseUser.id, selectedIdea.id);
       setIdeas(prev => prev.filter(i => i.id !== selectedIdea.id));
-      showToastMessage('Analyse erfolgreich gelÃ¶scht', 'success');
+      showToastMessage(t('history.deleteSuccess'), 'success');
     } catch {
-      showToastMessage('Fehler beim LÃ¶schen', 'error');
+      showToastMessage(t('history.deleteError'), 'error');
     } finally {
       setShowDeleteModal(false);
       setSelectedIdea(null);
@@ -65,11 +67,12 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
     document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     setShowDownloadMenu(null);
-    showToastMessage('JSON exportiert', 'success');
+    showToastMessage(t('history.jsonExported'), 'success');
   };
 
   const handleExportTXT = (idea: IdeaRecord) => {
-    const content = `IDEEN-ANALYSE\n${'='.repeat(50)}\n\nTitel: ${idea.title}\nBewertung: ${getRatingStyles(idea.rating).label}\nDatum: ${new Date(idea.createdAt).toLocaleString('de-DE')}\nCredits: ${idea.creditsUsed}\n\n${'â”€'.repeat(50)}\nAnalyse\n${'â”€'.repeat(50)}\n\n${idea.content}\n`;
+    const rs = getRatingStyles(idea.rating);
+    const content = `${t('history.analysisHeader')}\n${'='.repeat(50)}\n\n${t('history.titleLabel')}: ${idea.title}\n${t('history.ratingLabel')}: ${t(rs.ratingKey)}\n${t('history.dateLabel')}: ${new Date(idea.createdAt).toLocaleString(i18n.language)}\n${t('history.creditsLabel')}: ${idea.creditsUsed}\n\n${'-'.repeat(50)}\n${t('history.analysisSection')}\n${'-'.repeat(50)}\n\n${idea.content}\n`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -78,7 +81,7 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
     document.body.appendChild(a); a.click();
     setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
     setShowDownloadMenu(null);
-    showToastMessage('TXT exportiert', 'success');
+    showToastMessage(t('history.txtExported'), 'success');
   };
 
   const filteredIdeas = ideas.filter(idea => {
@@ -107,9 +110,9 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
       <div className="p-5 border-b border-[#3D3428]/30">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-white">Ideen-Verlauf</h2>
+            <h2 className="text-lg font-bold text-white">{t('history.title')}</h2>
             <p className="text-sm text-gray-500 mt-1">
-              {fullView ? `${filteredIdeas.length} Analysen` : 'Deine letzten Analysen'}
+              {fullView ? t('history.countLabel', { count: filteredIdeas.length }) : t('history.recentLabel')}
             </p>
           </div>
           {fullView && filteredIdeas.length > 0 && (
@@ -118,15 +121,15 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
                 const blob = new Blob([JSON.stringify(filteredIdeas, null, 2)], { type: 'application/json;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url; a.download = `alle-ideen-${Date.now()}.json`;
+                a.href = url; a.download = `ideas-${Date.now()}.json`;
                 document.body.appendChild(a); a.click();
                 setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-                showToastMessage(`${filteredIdeas.length} Ideen exportiert`, 'success');
+                showToastMessage(t('history.allExported', { count: filteredIdeas.length }), 'success');
               }}
               className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#C9A961] to-[#A08748] text-[#0F1419] rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#C9A961]/20 transition-all cursor-pointer whitespace-nowrap"
             >
               <i className="ri-download-2-line"></i>
-              Alle exportieren
+              {t('history.exportAll')}
             </button>
           )}
         </div>
@@ -140,7 +143,7 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Suche nach Titeln oder Tags..."
+                placeholder={t('history.searchPlaceholder')}
                 className="w-full pl-9 pr-3 py-2 bg-[#0F1419] border border-[#3D3428]/30 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#C9A961]/30"
               />
             </div>
@@ -149,10 +152,10 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
               onChange={e => setFilterRating(e.target.value)}
               className="px-3 py-2 bg-[#0F1419] border border-[#3D3428]/30 rounded-lg text-sm text-white focus:outline-none focus:border-[#C9A961]/30 cursor-pointer"
             >
-              <option value="all">Alle Bewertungen</option>
-              <option value="good">Gut</option>
-              <option value="medium">Mittel</option>
-              <option value="bad">Schlecht</option>
+              <option value="all">{t('history.filterAll')}</option>
+              <option value="good">{t('rating.good')}</option>
+              <option value="medium">{t('rating.medium')}</option>
+              <option value="bad">{t('rating.bad')}</option>
             </select>
           </div>
         )}
@@ -163,15 +166,15 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
         {isLoading ? (
           <div className="py-12 flex flex-col items-center gap-3 text-gray-500">
             <i className="ri-loader-4-line text-2xl animate-spin text-[#C9A961]"></i>
-            <p className="text-sm">Analysen werden geladen...</p>
+            <p className="text-sm">{t('history.loading')}</p>
           </div>
         ) : displayedIdeas.length === 0 ? (
           <div className="py-12 flex flex-col items-center gap-3 text-gray-500">
             <div className="w-14 h-14 bg-[#0F1419] rounded-xl flex items-center justify-center">
               <i className="ri-lightbulb-line text-2xl text-gray-600"></i>
             </div>
-            <p className="text-sm font-medium">{searchQuery || filterRating !== 'all' ? 'Keine Ergebnisse gefunden' : 'Noch keine Analysen vorhanden'}</p>
-            <p className="text-xs text-gray-600">{!searchQuery && filterRating === 'all' ? 'Starte eine Analyse im KI-Assistenten' : ''}</p>
+            <p className="text-sm font-medium">{searchQuery || filterRating !== 'all' ? t('history.noResults') : t('history.empty')}</p>
+            <p className="text-xs text-gray-600">{!searchQuery && filterRating === 'all' ? t('history.emptyHint') : ''}</p>
           </div>
         ) : (
           displayedIdeas.map(idea => {
@@ -225,10 +228,10 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
 
                     {/* Meta row */}
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${rs.bg} ${rs.text}`}>{rs.label}</span>
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${rs.bg} ${rs.text}`}>{t(rs.ratingKey)}</span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         <i className="ri-calendar-line text-[10px]"></i>
-                        {new Date(idea.createdAt).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(idea.createdAt).toLocaleDateString(i18n.language, { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                       <span className="text-xs text-gray-500 flex items-center gap-1">
                         <i className="ri-coins-line text-[10px]"></i>
@@ -265,8 +268,8 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
               <div className="flex-1 min-w-0 pr-4">
                 <h3 className="text-lg font-bold text-white truncate">{selectedIdea.title}</h3>
                 <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                  {(() => { const rs = getRatingStyles(selectedIdea.rating); return <span className={`text-xs font-semibold px-2 py-0.5 rounded ${rs.bg} ${rs.text}`}>{rs.label}</span>; })()}
-                  <span className="text-xs text-gray-500">{new Date(selectedIdea.createdAt).toLocaleString('de-DE')}</span>
+                  {(() => { const rs = getRatingStyles(selectedIdea.rating); return <span className={`text-xs font-semibold px-2 py-0.5 rounded ${rs.bg} ${rs.text}`}>{t(rs.ratingKey)}</span>; })()}
+                  <span className="text-xs text-gray-500">{new Date(selectedIdea.createdAt).toLocaleString(i18n.language)}</span>
                   <span className="text-xs text-gray-500">{selectedIdea.creditsUsed} Credits</span>
                 </div>
               </div>
@@ -292,7 +295,7 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
                 <i className="ri-file-text-line"></i> TXT
               </button>
               <button onClick={() => { setShowDetailModal(false); setSelectedIdea(selectedIdea); setShowDeleteModal(true); }} className="px-3 py-2 text-xs text-red-400 hover:text-white hover:bg-red-500/10 rounded-lg transition-all cursor-pointer flex items-center gap-1.5">
-                <i className="ri-delete-bin-line"></i> LÃ¶schen
+                <i className="ri-delete-bin-line"></i> {t('history.delete')}
               </button>
             </div>
           </div>
@@ -308,16 +311,16 @@ export default function IdeaHistory({ fullView = false }: IdeaHistoryProps) {
                 <i className="ri-error-warning-line text-red-400 text-xl"></i>
               </div>
               <div>
-                <h3 className="text-base font-semibold text-white mb-1">Analyse lÃ¶schen?</h3>
-                <p className="text-sm text-gray-400">â€ž{selectedIdea.title}" wird dauerhaft gelÃ¶scht.</p>
+                <h3 className="text-base font-semibold text-white mb-1">{t('history.deleteModalTitle')}</h3>
+                <p className="text-sm text-gray-400">{t('history.deleteModalDesc', { title: selectedIdea.title })}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <button onClick={() => { setShowDeleteModal(false); setSelectedIdea(null); }} className="flex-1 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-[#0F1419] rounded-lg transition-all cursor-pointer whitespace-nowrap">
-                Abbrechen
+                {t('history.cancel')}
               </button>
               <button onClick={handleDelete} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-2">
-                <i className="ri-delete-bin-line"></i> LÃ¶schen
+                <i className="ri-delete-bin-line"></i> {t('history.delete')}
               </button>
             </div>
           </div>

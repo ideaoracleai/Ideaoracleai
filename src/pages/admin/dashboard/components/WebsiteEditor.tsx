@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import HeroEditor from './editors/HeroEditor';
 import NavbarEditor from './editors/NavbarEditor';
 import FeaturesEditor from './editors/FeaturesEditor';
@@ -26,33 +27,31 @@ type TabId = 'navbar' | 'hero' | 'features' | 'howitworks' | 'testimonials' | 'a
 
 export default function WebsiteEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('hero');
+  const { t } = useTranslation();
 
   const tabs: { id: TabId; label: string; icon: string; group: string }[] = [
-    // Seitenstruktur
-    { id: 'navbar', label: 'Navigation', icon: 'ri-menu-line', group: 'Seitenstruktur' },
-    { id: 'hero', label: 'Hero', icon: 'ri-home-line', group: 'Seitenstruktur' },
-    { id: 'features', label: 'Features', icon: 'ri-star-line', group: 'Seitenstruktur' },
-    { id: 'howitworks', label: 'So funktioniert\'s', icon: 'ri-list-ordered', group: 'Seitenstruktur' },
-    { id: 'testimonials', label: 'Testimonials', icon: 'ri-chat-quote-line', group: 'Seitenstruktur' },
-    { id: 'about', label: 'Über uns', icon: 'ri-information-line', group: 'Seitenstruktur' },
-    { id: 'pricing', label: 'Preise', icon: 'ri-price-tag-3-line', group: 'Seitenstruktur' },
-    { id: 'faq', label: 'FAQ', icon: 'ri-question-line', group: 'Seitenstruktur' },
-    { id: 'cta', label: 'CTA', icon: 'ri-megaphone-line', group: 'Seitenstruktur' },
-    { id: 'footer', label: 'Footer', icon: 'ri-layout-bottom-line', group: 'Seitenstruktur' },
-    // Design & Layout
-    { id: 'design', label: 'Design', icon: 'ri-palette-line', group: 'Design & Layout' },
-    { id: 'sections', label: 'Sektionen', icon: 'ri-layout-grid-line', group: 'Design & Layout' },
-    { id: 'media', label: 'Medien', icon: 'ri-image-line', group: 'Design & Layout' },
-    { id: 'customcode', label: 'Custom Code', icon: 'ri-code-line', group: 'Design & Layout' },
-    // Einstellungen
-    { id: 'chatwidget', label: 'Talk with Us', icon: 'ri-chat-voice-line', group: 'Einstellungen' },
-    { id: 'invoice', label: 'Rechnungen', icon: 'ri-file-list-3-line', group: 'Einstellungen' },
-    { id: 'socials', label: 'Social Media', icon: 'ri-share-line', group: 'Einstellungen' },
-    { id: 'legal', label: 'Rechtliches', icon: 'ri-file-text-line', group: 'Einstellungen' },
-    { id: 'seo', label: 'SEO Basis', icon: 'ri-search-line', group: 'Einstellungen' },
-    { id: 'advancedseo', label: 'SEO Erweitert', icon: 'ri-search-2-line', group: 'Einstellungen' },
-    { id: 'versions', label: 'Versionen', icon: 'ri-history-line', group: 'Einstellungen' },
-    { id: 'importexport', label: 'Import/Export', icon: 'ri-download-upload-line', group: 'Einstellungen' }
+    { id: 'navbar', label: t('admin.websiteEditor.tab.navbar', 'Navigation'), icon: 'ri-menu-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'hero', label: 'Hero', icon: 'ri-home-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'features', label: 'Features', icon: 'ri-star-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'howitworks', label: t('admin.websiteEditor.tab.howitworks', 'How It Works'), icon: 'ri-list-ordered', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'testimonials', label: 'Testimonials', icon: 'ri-chat-quote-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'about', label: t('admin.websiteEditor.tab.about', 'About Us'), icon: 'ri-information-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'pricing', label: t('admin.websiteEditor.tab.pricing', 'Pricing'), icon: 'ri-price-tag-3-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'faq', label: 'FAQ', icon: 'ri-question-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'cta', label: 'CTA', icon: 'ri-megaphone-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'footer', label: 'Footer', icon: 'ri-layout-bottom-line', group: t('admin.websiteEditor.group.structure', 'Page Structure') },
+    { id: 'design', label: 'Design', icon: 'ri-palette-line', group: t('admin.websiteEditor.group.design', 'Design & Layout') },
+    { id: 'sections', label: t('admin.websiteEditor.tab.sections', 'Sections'), icon: 'ri-layout-grid-line', group: t('admin.websiteEditor.group.design', 'Design & Layout') },
+    { id: 'media', label: t('admin.websiteEditor.tab.media', 'Media'), icon: 'ri-image-line', group: t('admin.websiteEditor.group.design', 'Design & Layout') },
+    { id: 'customcode', label: 'Custom Code', icon: 'ri-code-line', group: t('admin.websiteEditor.group.design', 'Design & Layout') },
+    { id: 'chatwidget', label: t('admin.websiteEditor.tab.chatwidget', 'Talk with Us'), icon: 'ri-chat-voice-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'invoice', label: t('admin.websiteEditor.tab.invoice', 'Invoices'), icon: 'ri-file-list-3-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'socials', label: 'Social Media', icon: 'ri-share-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'legal', label: t('admin.websiteEditor.tab.legal', 'Legal'), icon: 'ri-file-text-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'seo', label: t('admin.websiteEditor.tab.seo', 'SEO Basic'), icon: 'ri-search-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'advancedseo', label: t('admin.websiteEditor.tab.advancedseo', 'SEO Advanced'), icon: 'ri-search-2-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'versions', label: t('admin.websiteEditor.tab.versions', 'Versions'), icon: 'ri-history-line', group: t('admin.websiteEditor.group.settings', 'Settings') },
+    { id: 'importexport', label: 'Import/Export', icon: 'ri-download-upload-line', group: t('admin.websiteEditor.group.settings', 'Settings') }
   ];
 
   const groups = [...new Set(tabs.map(t => t.group))];
@@ -67,8 +66,8 @@ export default function WebsiteEditor() {
               <i className="ri-palette-line text-[#C9A961] text-xl"></i>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Website-Editor</h2>
-              <p className="text-slate-400 text-xs">Alle Bereiche der Startseite bearbeiten</p>
+              <h2 className="text-lg font-bold text-white">{t('admin.websiteEditor.title', 'Website Editor')}</h2>
+              <p className="text-slate-400 text-xs">{t('admin.websiteEditor.subtitle', 'Edit all sections of the homepage')}</p>
             </div>
           </div>
           <a
@@ -76,7 +75,7 @@ export default function WebsiteEditor() {
             target="_blank"
             className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-2"
           >
-            <i className="ri-external-link-line"></i> Vorschau öffnen
+            <i className="ri-external-link-line"></i> {t('admin.websiteEditor.openPreview', 'Open Preview')}
           </a>
         </div>
       </div>

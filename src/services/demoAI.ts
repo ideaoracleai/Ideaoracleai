@@ -74,9 +74,12 @@ export async function generateDemoResponse(
 ): Promise<AIResponse> {
   const language = i18n.language.split('-')[0]; // 'en-US' -> 'en'
 
+  // Limit history to last 8 messages to prevent token overflow on long conversations
+  const recentHistory = conversationHistory.slice(-8);
+
   // Build messages array
   const messages = [
-    ...conversationHistory.map(m => ({
+    ...recentHistory.map(m => ({
       role: m.role,
       content: m.content,
     })),
@@ -94,20 +97,31 @@ export async function generateDemoResponse(
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData?.session?.access_token || supabaseAnonKey;
 
-    const response = await fetch(`${supabaseUrl}/functions/v1/chat-ai`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        'apikey': supabaseAnonKey,
-      },
-      body: JSON.stringify({
-        messages,
-        language,
-        images,
-        aiSettings, // ← NEW: admin settings flow to the edge function
-      }),
-    });
+    // Longer timeout for Thinking model (blueprints), shorter for standard/fast
+    const isThinkingModel = aiSettings?.model === 'ideaoracle-thinking';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), isThinkingModel ? 60000 : 30000);
+
+    let response: Response;
+    try {
+      response = await fetch(`${supabaseUrl}/functions/v1/chat-ai`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey': supabaseAnonKey,
+        },
+        body: JSON.stringify({
+          messages,
+          language,
+          images,
+          aiSettings,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       const errText = await response.text();

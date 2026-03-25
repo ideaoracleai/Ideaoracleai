@@ -723,7 +723,7 @@ export default function DowngradeManager() {
           }`}
         >
           <i className="ri-file-chart-line mr-2"></i>
-          Reports
+          {t('admin.downgrade.sectionReports', 'Reports')}
         </button>
         <button
           onClick={() => setActiveSection('rules')}
@@ -1608,7 +1608,7 @@ export default function DowngradeManager() {
                       name="refundPolicy"
                       checked={refundPolicy === 'prorata'}
                       onChange={() => setRefundPolicy('prorata')}
-                      className="w-4 h-4 text-[#C9A961] cursor-pointer"
+                      className="w-4 h-4 accent-[#C9A961] cursor-pointer"
                     />
                     <div>
                       <p className="text-white text-sm">{t('admin.downgrade.prorata', 'Pro-rata refund')}</p>
@@ -1622,7 +1622,7 @@ export default function DowngradeManager() {
                       name="refundPolicy"
                       checked={refundPolicy === 'full'}
                       onChange={() => setRefundPolicy('full')}
-                      className="w-4 h-4 text-[#C9A961] cursor-pointer"
+                      className="w-4 h-4 accent-[#C9A961] cursor-pointer"
                     />
                     <div>
                       <p className="text-white text-sm">{t('admin.downgrade.fullRefund', 'Full refund')}</p>
@@ -1636,7 +1636,7 @@ export default function DowngradeManager() {
                       name="refundPolicy"
                       checked={refundPolicy === 'none'}
                       onChange={() => setRefundPolicy('none')}
-                      className="w-4 h-4 text-[#C9A961] cursor-pointer"
+                      className="w-4 h-4 accent-[#C9A961] cursor-pointer"
                     />
                     <div>
                       <p className="text-white text-sm">{t('admin.downgrade.noRefund', 'No refund')}</p>

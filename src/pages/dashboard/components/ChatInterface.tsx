@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import mermaid from 'mermaid';
 import { generateDemoResponse, getRatingEmoji, getRatingLabel } from '../../../services/demoAI';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { useAuth } from '../../../supabase';
@@ -114,7 +115,135 @@ function TypewriterMarkdown({ content, speed = 120, onDone }: { content: string;
   return <MarkdownBody text={visibleText} />;
 }
 
-/* ── Shared markdown renderer with styled components + GFM (tables) ── */
+/* ── Mermaid Diagram Component ── */
+// Initialize mermaid with dark theme
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    darkMode: true,
+    primaryColor: '#C9A961',
+    primaryTextColor: '#ffffff',
+    primaryBorderColor: '#C9A961',
+    lineColor: '#C9A961',
+    secondaryColor: '#1a2030',
+    tertiaryColor: '#0F1419',
+    background: '#0F1419',
+    mainBkg: '#1a2030',
+    secondBkg: '#0F1419',
+    nodeBorder: '#C9A961',
+    clusterBkg: '#1a2030',
+    clusterBorder: '#3D3428',
+    titleColor: '#C9A961',
+    edgeLabelBackground: '#1a2030',
+    nodeTextColor: '#ffffff',
+    actorTextColor: '#ffffff',
+    actorBorder: '#C9A961',
+    actorBkg: '#1a2030',
+    actorLineColor: '#C9A961',
+    signalColor: '#C9A961',
+    signalTextColor: '#ffffff',
+    labelBoxBkgColor: '#1a2030',
+    labelBoxBorderColor: '#C9A961',
+    labelTextColor: '#ffffff',
+    loopTextColor: '#C9A961',
+    noteBorderColor: '#C9A961',
+    noteBkgColor: '#1a2030',
+    noteTextColor: '#ffffff',
+    sectionBkgColor: '#1a2030',
+    sectionBkgColor2: '#0F1419',
+    altSectionBkgColor: '#0F1419',
+    taskBorderColor: '#C9A961',
+    taskBkgColor: '#1a2030',
+    taskTextColor: '#ffffff',
+    taskTextDarkColor: '#ffffff',
+    activeTaskBorderColor: '#C9A961',
+    activeTaskBkgColor: '#C9A961',
+    gridColor: '#3D3428',
+    doneTaskBkgColor: '#C9A961',
+    doneTaskBorderColor: '#A08748',
+    critBorderColor: '#ef4444',
+    critBkgColor: '#7f1d1d',
+    todayLineColor: '#C9A961',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: '14px',
+  },
+  flowchart: { 
+    useMaxWidth: true, 
+    htmlLabels: true, 
+    curve: 'basis',
+    padding: 15,
+  },
+  sequence: { useMaxWidth: true },
+  gantt: { useMaxWidth: true },
+  pie: { useMaxWidth: true },
+});
+
+function MermaidDiagram({ code }: { code: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [svgContent, setSvgContent] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const renderDiagram = async () => {
+      try {
+        const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const { svg } = await mermaid.render(id, code.trim());
+        if (!cancelled) {
+          setSvgContent(svg);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+        if (!cancelled) {
+          setError(String(err));
+        }
+      }
+    };
+    renderDiagram();
+    return () => { cancelled = true; };
+  }, [code]);
+
+  if (error) {
+    return (
+      <div className="my-3 p-4 rounded-lg border border-red-500/30 bg-red-500/10">
+        <div className="text-red-400 text-xs mb-2 flex items-center gap-1.5">
+          <i className="ri-error-warning-line" />
+          Diagram render error
+        </div>
+        <pre className="text-gray-400 text-xs whitespace-pre-wrap font-mono overflow-x-auto">{code}</pre>
+      </div>
+    );
+  }
+
+  if (!svgContent) {
+    return (
+      <div className="my-3 p-6 rounded-lg border border-[#3D3428]/40 bg-[#1a2030]/50 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <div className="w-4 h-4 border-2 border-[#C9A961] border-t-transparent rounded-full animate-spin" />
+          Rendering diagram...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-4 rounded-xl border border-[#3D3428]/50 bg-gradient-to-br from-[#0F1419] to-[#1a2030] p-4 overflow-x-auto shadow-lg shadow-black/20">
+      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#3D3428]/30">
+        <i className="ri-flow-chart text-[#C9A961]" />
+        <span className="text-xs font-medium text-[#C9A961] uppercase tracking-wider">Blueprint Diagram</span>
+      </div>
+      <div 
+        ref={containerRef}
+        className="mermaid-container flex justify-center [&_svg]:max-w-full [&_svg]:h-auto"
+        dangerouslySetInnerHTML={{ __html: svgContent }} 
+      />
+    </div>
+  );
+}
+
+/* ── Shared markdown renderer with styled components + GFM (tables) + Mermaid ── */
 function MarkdownBody({ text }: { text: string }) {
   return (
     <div className="prose-ai">
@@ -147,7 +276,36 @@ function MarkdownBody({ text }: { text: string }) {
           tr: ({ children }) => <tr className="hover:bg-[#0F1419]/50 transition-colors">{children}</tr>,
           th: ({ children }) => <th className="px-4 py-2.5 text-left text-[#C9A961] font-semibold text-xs uppercase tracking-wider">{children}</th>,
           td: ({ children }) => <td className="px-4 py-2.5 text-gray-300">{children}</td>,
-          code: ({ children }) => <code className="bg-[#0F1419] text-[#C9A961] px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>,
+          // Updated code component to handle mermaid blocks
+          code: ({ children, className, ...props }) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const lang = match?.[1];
+            const codeString = String(children).replace(/\n$/, '');
+
+            // Render mermaid diagrams
+            if (lang === 'mermaid') {
+              return <MermaidDiagram code={codeString} />;
+            }
+
+            // Block code (with language class)
+            if (lang) {
+              return (
+                <div className="my-3 rounded-lg border border-[#3D3428]/40 overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-[#0F1419] border-b border-[#3D3428]/30">
+                    <span className="text-[10px] font-mono text-[#C9A961]/70 uppercase">{lang}</span>
+                  </div>
+                  <pre className="p-3 bg-[#0a0e13] overflow-x-auto">
+                    <code className="text-gray-300 text-xs font-mono">{codeString}</code>
+                  </pre>
+                </div>
+              );
+            }
+
+            // Inline code
+            return <code className="bg-[#0F1419] text-[#C9A961] px-1.5 py-0.5 rounded text-xs font-mono" {...props}>{children}</code>;
+          },
+          // Pre wrapper: prevent double wrapping when code block is inside <pre>
+          pre: ({ children }) => <>{children}</>,
           blockquote: ({ children }) => <blockquote className="border-l-2 border-[#C9A961] pl-4 my-3 text-gray-400 italic">{children}</blockquote>,
           a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#C9A961] underline hover:text-amber-300 transition-colors">{children}</a>,
         }}
@@ -284,11 +442,20 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Ref to always hold the latest sessions state (avoids stale closure reads)
+  const sessionsRef = useRef<Session[]>(sessions);
+  // Ref-based guard to prevent double sends (more reliable than state)
+  const sendingRef = useRef(false);
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   const ALLOWED_DOC_TYPES = ['application/pdf', 'text/plain', 'text/csv'];
   const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
+
+  // Keep sessionsRef in sync with state
+  useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
 
   // Convert and compress image to base64 (max 800px, JPEG 70% quality)
   const fileToBase64 = (file: File): Promise<string> => {
@@ -712,17 +879,22 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     }
 
     if (!inputValue.trim() && attachments.length === 0) return;
-    if (isTyping) return;
+    
+    // Use ref-based guard (synchronous, not affected by React state batching)
+    if (sendingRef.current) return;
+    sendingRef.current = true;
 
     // Credits prüfen und abziehen BEVOR die Nachricht gesendet wird
     if (!hasEnoughCredits(CREDITS_PER_QUESTION)) {
       setShowNoCreditsModal(true);
+      sendingRef.current = false;
       return;
     }
 
     // Credits abziehen
     if (!deductCredits(CREDITS_PER_QUESTION)) {
       setShowNoCreditsModal(true);
+      sendingRef.current = false;
       return;
     }
 
@@ -738,7 +910,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         updatedAt: new Date(),
         isFavorite: false
       };
-      setSessions([newSession, ...sessions]);
+      // Use functional updater to avoid stale state
+      setSessions(prev => [newSession, ...prev]);
       sessionId = newSession.id;
       setCurrentSessionId(sessionId);
     }
@@ -756,7 +929,21 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     setInputValue('');
     setAttachments([]);
 
-    // Add user message immediately
+    // Capture the conversation history BEFORE adding the user message
+    // Read from the REF which always has the latest state
+    const currentSessionSnapshot = sessionsRef.current.find(s => s.id === sessionId);
+    const conversationHistory = (currentSessionSnapshot?.messages || []).map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+
+    console.log('[Chat] Sending message:', {
+      sessionId,
+      userInput: userInput.substring(0, 50),
+      historyLength: conversationHistory.length,
+    });
+
+    // Add user message immediately (functional updater)
     setSessions(prevSessions => prevSessions.map(session => {
       if (session.id === sessionId) {
         const updatedMessages = [...session.messages, userMessage];
@@ -778,23 +965,10 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
     setIsTyping(true);
 
     try {
-      // Get conversation history for context
-      const currentSessionData = sessions.find(s => s.id === sessionId);
-      const conversationHistory = currentSessionData?.messages.map(m => ({
-        role: m.role,
-        content: m.content
-      })) || [];
-
       // Generate AI response — include image data if present
       const imageAttachments = currentAttachments
         .filter(a => a.type.startsWith('image/') && a.base64)
         .map(a => a.base64 as string);
-
-      console.log('Sending to AI:', {
-        textLength: (userInput || '').length,
-        imageCount: imageAttachments.length,
-        firstImagePrefix: imageAttachments[0]?.substring(0, 50)
-      });
 
       const aiResponse = await generateDemoResponse(
         userInput || 'Analyze this image in detail. What do you see? Provide business insights.',
@@ -802,7 +976,13 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
         imageAttachments.length > 0 ? imageAttachments : undefined
       );
 
-      // Add AI message
+      console.log('[Chat] AI responded:', {
+        contentLength: aiResponse.content.length,
+        rating: aiResponse.rating,
+        model: aiResponse.model,
+      });
+
+      // Add AI message using functional updater to get the LATEST state
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -823,25 +1003,29 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       }));
 
       // Save analysis to Supabase ideas table (fire-and-forget)
+      // Read from ref instead of abusing setSessions for side effects
       if (firebaseUser?.id) {
-        const sessionTitle = sessions.find(s => s.id === sessionId)?.title || userInput.substring(0, 80);
-        saveIdeaRecord(firebaseUser.id, {
-          title: sessionTitle,
-          content: aiResponse.content,
-          rating: aiResponse.rating,
-          creditsUsed: CREDITS_PER_QUESTION,
-          tags: [],
-          conversationHistory: [
-            ...conversationHistory.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-            { role: 'user' as const, content: userInput },
-            { role: 'assistant' as const, content: aiResponse.content },
-          ],
-        }).catch(() => {}); // silent fail — don't block UX
+        try {
+          const latestSession = sessionsRef.current.find(s => s.id === sessionId);
+          const sessionTitle = latestSession?.title || userInput.substring(0, 80);
+          saveIdeaRecord(firebaseUser.id, {
+            title: sessionTitle,
+            content: aiResponse.content,
+            rating: aiResponse.rating,
+            creditsUsed: CREDITS_PER_QUESTION,
+            tags: [],
+            conversationHistory: [
+              ...conversationHistory,
+              { role: 'user' as const, content: userInput },
+              { role: 'assistant' as const, content: aiResponse.content },
+            ],
+          }).catch(() => {}); // silent fail — don't block UX
+        } catch { /* ignore save errors */ }
       }
     } catch (error) {
-      console.error('AI response failed:', error);
+      console.error('[Chat] AI response failed:', error);
 
-      // Add error message
+      // Add error message using functional updater
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -862,6 +1046,8 @@ export default function ChatInterface({ onBack }: ChatInterfaceProps) {
       }));
     } finally {
       setIsTyping(false);
+      sendingRef.current = false;
+      console.log('[Chat] Send complete, ready for next message');
     }
   };
 

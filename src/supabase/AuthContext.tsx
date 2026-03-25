@@ -33,7 +33,10 @@ const AuthContext = createContext<AuthContextType>({
 
 // ─── Helper: apply user's saved language preference ──────────────────────────
 function applyUserLanguage(doc: UserDocument | null) {
-    const SUPPORTED = ['en', 'de'];
+    const SUPPORTED = [
+        'en', 'de', 'es', 'fr', 'pt', 'it', 'nl', 'sq', 'ar', 'tr',
+        'ru', 'pl', 'sv', 'no', 'hi', 'zh', 'ja', 'ko', 'id', 'vi', 'th'
+    ];
     const lang = doc?.language;
     if (lang && SUPPORTED.includes(lang) && i18n.language !== lang) {
         i18n.changeLanguage(lang);

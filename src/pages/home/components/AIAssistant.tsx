@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../../../components/feature/LanguageSelector';
+import { generateDemoResponse } from '../../../services/demoAI';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -46,15 +47,26 @@ export default function AIAssistant() {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    // Call real AI edge function
+    try {
+      const history = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+      const aiResponse = await generateDemoResponse(inputValue, history);
+      const aiMessage: Message = {
+        role: 'assistant',
+        content: aiResponse.content
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    } catch {
       const aiMessage: Message = {
         role: 'assistant',
         content: t('aiAssistant.demoResponse')
       };
       setMessages(prev => [...prev, aiMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

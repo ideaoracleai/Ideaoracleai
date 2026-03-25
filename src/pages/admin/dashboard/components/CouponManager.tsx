@@ -415,7 +415,7 @@ export default function CouponManager() {
 
       {/* Registration Coupons Table */}
       {activeTab === 'registration' && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -521,7 +521,7 @@ export default function CouponManager() {
 
       {/* Trial Coupons Table */}
       {activeTab === 'trial' && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
